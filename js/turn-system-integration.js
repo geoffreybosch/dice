@@ -16,10 +16,20 @@ let pendingPoints = 0; // Points earned this turn but not yet banked
 let currentTurnPoints = []; // Array of point awards this turn for display
 
 // Core Turn System Functions
-function initializeTurnSystem(players, isMultiplayer = false) {
+function initializeTurnSystem(players, isMultiplayer = false, preserveCurrentTurn = false) {
     turnSystemPlayerList = [...players];
-    currentPlayerIndex = 0;
-    currentPlayerTurn = turnSystemPlayerList[0] || null;
+    
+    // Only reset the turn if we're not preserving it or if no current turn is set
+    if (!preserveCurrentTurn || !currentPlayerTurn || !turnSystemPlayerList.includes(currentPlayerTurn)) {
+        currentPlayerIndex = 0;
+        currentPlayerTurn = turnSystemPlayerList[0] || null;
+        console.log(`Turn system initialized for ${turnSystemPlayerList.length} players. First turn: ${currentPlayerTurn}`);
+    } else {
+        // Preserve current turn but update the index to match the current player in the new list
+        currentPlayerIndex = turnSystemPlayerList.indexOf(currentPlayerTurn);
+        console.log(`Turn system updated for ${turnSystemPlayerList.length} players. Current turn preserved: ${currentPlayerTurn}`);
+    }
+    
     isMultiplayerMode = isMultiplayer;
     
     // Initialize scoring system
@@ -27,7 +37,6 @@ function initializeTurnSystem(players, isMultiplayer = false) {
     pendingPoints = 0;
     currentTurnPoints = [];
     
-    console.log(`Turn system initialized for ${turnSystemPlayerList.length} players. First turn: ${currentPlayerTurn}`);
     updateTurnDisplay();
     updatePendingPointsDisplay();
 }
@@ -41,7 +50,13 @@ function isPlayerTurn(playerId) {
 }
 
 function nextTurn() {
-    if (turnSystemPlayerList.length === 0) return null;
+    console.log(`🔄 === nextTurn() START ===`);
+    console.log(`🔄 Current state - Player: ${currentPlayerTurn}, Index: ${currentPlayerIndex}, Players: [${turnSystemPlayerList.join(', ')}]`);
+    
+    if (turnSystemPlayerList.length === 0) {
+        console.log(`🔄 No players in list, returning null`);
+        return null;
+    }
     
     // When ending a turn, clear any pending points (they weren't banked)
     if (pendingPoints > 0) {
@@ -49,18 +64,24 @@ function nextTurn() {
         clearPendingPoints();
     }
     
+    const oldPlayerIndex = currentPlayerIndex;
+    const oldPlayer = currentPlayerTurn;
+    
     currentPlayerIndex = (currentPlayerIndex + 1) % turnSystemPlayerList.length;
     currentPlayerTurn = turnSystemPlayerList[currentPlayerIndex];
     
-    console.log(`Turn advanced to: ${currentPlayerTurn}`);
+    console.log(`🔄 Turn advanced from ${oldPlayer} (index ${oldPlayerIndex}) to ${currentPlayerTurn} (index ${currentPlayerIndex})`);
+    
     updateTurnDisplay();
     updatePendingPointsDisplay();
     
     // Apply the new player's material preferences
     if (isMultiplayerMode) {
+        console.log(`🔄 Applying material preferences for ${currentPlayerTurn}`);
         applyPlayerMaterialPreferences(currentPlayerTurn);
     }
     
+    console.log(`🔄 === nextTurn() END ===`);
     return currentPlayerTurn;
 }
 
@@ -390,9 +411,9 @@ function onRoomJoined(roomId, playerId, playerList) {
 function onPlayerJoined(playerId, updatedPlayerList) {
     console.log(`Player joined: ${playerId}`);
     
-    // Update player list and reinitialize turn system
+    // Update player list but preserve the current turn
     if (typeof initializeTurnSystem === 'function') {
-        initializeTurnSystem(updatedPlayerList, true);
+        initializeTurnSystem(updatedPlayerList, true, true); // Third parameter preserves current turn
         updateGameControlsState();
     }
 }
@@ -418,14 +439,17 @@ function onRoomLeft() {
 
 // Message handlers for turn synchronization
 function onTurnChangeReceived(data) {
+    console.log(`📨 === onTurnChangeReceived() START ===`);
+    console.log(`📨 Received data:`, data);
+    
     const { currentPlayer, playerList } = data;
     
-    console.log(`🔄 Received turn change: ${currentPlayer}`);
-    console.log(`My player ID: ${typeof myPlayerId !== 'undefined' ? myPlayerId : 'undefined'}`);
-    console.log(`Previous current player: ${currentPlayerTurn}`);
-    console.log(`Is multiplayer room: ${typeof isInMultiplayerRoom !== 'undefined' ? isInMultiplayerRoom : 'undefined'}`);
+    console.log(`� Turn change: ${currentPlayerTurn} → ${currentPlayer}`);
+    console.log(`📨 My player ID: ${typeof myPlayerId !== 'undefined' ? myPlayerId : 'undefined'}`);
+    console.log(`📨 Is multiplayer room: ${typeof isInMultiplayerRoom !== 'undefined' ? isInMultiplayerRoom : 'undefined'}`);
     
     // Update local turn state without advancing (since it was advanced remotely)
+    const oldPlayer = currentPlayerTurn;
     currentPlayerTurn = currentPlayer;
     console.log(`✅ Updated current player to: ${currentPlayerTurn}`);
     
@@ -472,8 +496,11 @@ function onTurnChangeReceived(data) {
     
     // Apply the new player's material preferences
     if (typeof isInMultiplayerRoom !== 'undefined' && isInMultiplayerRoom && typeof applyPlayerMaterialPreferences === 'function') {
+        console.log(`📨 Applying material preferences for ${currentPlayer}`);
         applyPlayerMaterialPreferences(currentPlayer);
     }
+    
+    console.log(`📨 === onTurnChangeReceived() END ===`);
 }
 
 function onMaterialChangeReceived(data) {
@@ -497,21 +524,31 @@ function onMaterialChangeReceived(data) {
 
 // Enhanced broadcasting functions
 function broadcastTurnChange(nextPlayerId) {
+    console.log(`📡 === broadcastTurnChange() START ===`);
+    console.log(`📡 Broadcasting turn change to: ${nextPlayerId}`);
+    
     const data = {
         type: 'turn_change',
         currentPlayer: nextPlayerId,
         timestamp: Date.now()
     };
     
-    console.log(`Broadcasting turn change to: ${nextPlayerId}`, data);
+    console.log(`📡 Turn change data:`, data);
     
     // Send via WebRTC data channels
     if (typeof sendToAllPeers === 'function') {
-        console.log('sendToAllPeers function is available, attempting to send...');
-        sendToAllPeers(JSON.stringify(data));
+        console.log('📡 sendToAllPeers function is available, attempting to send...');
+        try {
+            sendToAllPeers(JSON.stringify(data));
+            console.log('📡 Turn change broadcast sent successfully');
+        } catch (error) {
+            console.error('📡 Error sending turn change broadcast:', error);
+        }
     } else {
-        console.error('sendToAllPeers function not available!');
+        console.error('📡 sendToAllPeers function not available!');
     }
+    
+    console.log(`📡 === broadcastTurnChange() END ===`);
 }
 
 function broadcastMaterialChange(playerId, diceType, floorType) {

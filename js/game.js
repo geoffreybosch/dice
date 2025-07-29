@@ -164,17 +164,70 @@ function canPlayerAct(playerId = myPlayerId) {
 }
 
 function updateGameControlsState() {
+    console.log('🎮 === updateGameControlsState() START ===');
+    
     const rollButton = document.getElementById('roll-dice');
     const bankPointsButton = document.getElementById('bank-points');
     const materialsButton = document.getElementById('materials-button');
     const diceSelectionControls = document.getElementById('dice-selection-controls');
+    const diceCanvas = document.getElementById('dice-canvas');
+    const diceResultsContainer = document.getElementById('dice-results-container');
     
     const canAct = canPlayerAct();
     const hasPendingPoints = typeof getPendingPoints === 'function' ? getPendingPoints() > 0 : false;
     
+    console.log('🎮 Control state info:', {
+        myPlayerId,
+        isInMultiplayerRoom,
+        canAct,
+        hasPendingPoints,
+        currentTurn: typeof getCurrentTurn === 'function' ? getCurrentTurn() : 'function not available',
+        elementsFound: {
+            rollButton: !!rollButton,
+            bankPointsButton: !!bankPointsButton,
+            materialsButton: !!materialsButton,
+            diceSelectionControls: !!diceSelectionControls,
+            diceCanvas: !!diceCanvas,
+            diceResultsContainer: !!diceResultsContainer
+        }
+    });
+    
+    // Show/hide dice canvas based on turn
+    if (diceCanvas) {
+        const newDisplay = canAct ? 'block' : 'none';
+        console.log(`🎮 Setting dice canvas display: ${diceCanvas.style.display} → ${newDisplay}`);
+        diceCanvas.style.display = newDisplay;
+    }
+    
+    // Always keep dice results container visible for showing other players' results
+    if (diceResultsContainer) {
+        console.log('🎮 Setting dice results container to visible');
+        diceResultsContainer.style.display = 'flex';
+    }
+    
+    // Show waiting message if not your turn and in multiplayer mode
+    if (!canAct && isInMultiplayerRoom) {
+        console.log('🎮 Not player turn and in multiplayer - checking for waiting message');
+        // Only show waiting message if there are no current dice results displayed
+        const hasCurrentResults = currentDiceResults && currentDiceResults.length > 0;
+        console.log(`🎮 Has current results: ${hasCurrentResults}, currentDiceResults:`, currentDiceResults);
+        if (!hasCurrentResults) {
+            console.log('🎮 Showing waiting message');
+            showWaitingForTurnMessage();
+        }
+    }
+    
     // Enable/disable controls based on turn
-    if (rollButton) rollButton.disabled = !canAct;
-    if (materialsButton) materialsButton.disabled = !canAct;
+    if (rollButton) {
+        const newDisabled = !canAct;
+        console.log(`🎮 Setting roll button disabled: ${rollButton.disabled} → ${newDisabled}`);
+        rollButton.disabled = newDisabled;
+    }
+    if (materialsButton) {
+        const newDisabled = !canAct;
+        console.log(`🎮 Setting materials button disabled: ${materialsButton.disabled} → ${newDisabled}`);
+        materialsButton.disabled = newDisabled;
+    }
     
     // Show/hide dice selection controls based on turn AND whether there are dice to select
     if (diceSelectionControls) {
@@ -197,13 +250,17 @@ function updateGameControlsState() {
     
     // Show/hide and enable bank points button
     if (bankPointsButton) {
-        bankPointsButton.disabled = !canAct;
-        bankPointsButton.style.display = (canAct && hasPendingPoints) ? 'inline-block' : 'none';
+        const newDisabled = !canAct;
+        const newDisplay = (canAct && hasPendingPoints) ? 'inline-block' : 'none';
+        console.log(`🎮 Setting bank button - disabled: ${bankPointsButton.disabled} → ${newDisabled}, display: ${bankPointsButton.style.display} → ${newDisplay}`);
+        bankPointsButton.disabled = newDisabled;
+        bankPointsButton.style.display = newDisplay;
         if (hasPendingPoints) {
             bankPointsButton.textContent = `Bank ${getPendingPoints()} Points & End Turn`;
         }
     }
     
+    console.log('🎮 === updateGameControlsState() END ===');
     // Note: Turn display is now handled by updateTurnDisplay() in the player list
     // No need for separate turn indicator element
 }
@@ -372,6 +429,29 @@ function displayOtherPlayerResults(playerId, diceResults) {
     }
     
     // Hide instruction text when showing other player's results
+    updateInstructionTextVisibility(false);
+}
+
+// Function to show waiting message when not your turn
+function showWaitingForTurnMessage() {
+    const diceResultsContainer = document.getElementById('dice-results-container');
+    if (!diceResultsContainer) return;
+    
+    // Clear the container and show waiting message
+    diceResultsContainer.innerHTML = '';
+    
+    const waitingMessage = document.createElement('div');
+    waitingMessage.className = 'w-100 text-center text-muted';
+    waitingMessage.innerHTML = '<em>Waiting for other player to roll...</em>';
+    diceResultsContainer.appendChild(waitingMessage);
+    
+    // Hide dice selection controls when waiting
+    const diceSelectionControls = document.getElementById('dice-selection-controls');
+    if (diceSelectionControls) {
+        diceSelectionControls.style.display = 'none';
+    }
+    
+    // Hide instruction text when waiting
     updateInstructionTextVisibility(false);
 }
 
@@ -1389,6 +1469,52 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    // Add event listener for pass turn test button
+    const passTurnTestButton = document.getElementById('pass-turn-test');
+    if (passTurnTestButton) {
+        passTurnTestButton.addEventListener('click', () => {
+            console.log('🔄 PASS TURN TEST BUTTON CLICKED');
+            console.log('📊 Current game state:', {
+                myPlayerId,
+                isInMultiplayerRoom,
+                canAct: canPlayerAct(),
+                currentTurn: typeof getCurrentTurn === 'function' ? getCurrentTurn() : 'function not available'
+            });
+            
+            if (typeof nextTurn === 'function') {
+                console.log('⏭️ Calling nextTurn()...');
+                const nextPlayer = nextTurn();
+                console.log('✅ nextTurn() returned:', nextPlayer);
+                
+                console.log('🔄 Calling updateGameControlsState()...');
+                updateGameControlsState();
+                
+                console.log('📡 Broadcasting turn change...');
+                if (isInMultiplayerRoom && typeof broadcastTurnChange === 'function') {
+                    broadcastTurnChange(nextPlayer);
+                    console.log('✅ broadcastTurnChange() called with:', nextPlayer);
+                } else {
+                    console.warn('❌ Not in multiplayer room or broadcastTurnChange not available');
+                }
+            } else {
+                console.error('❌ nextTurn function not available');
+            }
+        });
+    }
+    
+    // Add event listener for WebRTC debug button
+    const debugWebRTCButton = document.getElementById('debug-webrtc');
+    if (debugWebRTCButton) {
+        debugWebRTCButton.addEventListener('click', () => {
+            console.log('🔍 WebRTC Debug Button Clicked');
+            if (typeof debugWebRTCConnections === 'function') {
+                debugWebRTCConnections();
+            } else {
+                console.error('❌ debugWebRTCConnections function not available');
+            }
+        });
+    }
 });
 
 // Update dice bodies to use the dice material
@@ -1715,6 +1841,17 @@ function changeBackgroundMaterial(materialType) {
     }
     
     console.log(`Background changed to: ${materialType} (color: #${config.color.toString(16).padStart(6, '0').toUpperCase()})`);
+}
+
+// WebRTC callback function to handle received dice results from other players
+function onDiceResultsReceived(data) {
+    const { playerId, diceResults } = data;
+    console.log(`Received dice results from ${playerId}:`, diceResults);
+    
+    // Only display other players' results if it's not your turn
+    if (playerId !== myPlayerId) {
+        displayOtherPlayerResults(playerId, diceResults);
+    }
 }
 
 // Reinitialize the animation loop

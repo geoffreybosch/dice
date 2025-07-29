@@ -64,11 +64,20 @@ function createPeerConnection(targetId) {
     });
     
     dataChannel.onopen = () => {
-        console.log(`Data channel opened with ${targetId}`);
+        console.log(`🔗 Data channel opened with ${targetId}`);
+        console.log(`🔗 Channel state: ${dataChannel.readyState}`);
+    };
+    
+    dataChannel.onclose = () => {
+        console.log(`🔗 Data channel closed with ${targetId}`);
+    };
+    
+    dataChannel.onerror = (error) => {
+        console.error(`🔗 Data channel error with ${targetId}:`, error);
     };
     
     dataChannel.onmessage = (e) => {
-        console.log('Message from', targetId, e.data);
+        console.log('📩 Message from', targetId, e.data);
         handleReceivedMessage(e.data);
     };
     
@@ -88,8 +97,22 @@ function createPeerConnection(targetId) {
 
     peerConnection.ondatachannel = (event) => {
         const channel = event.channel;
+        console.log(`🔗 Incoming data channel from ${targetId}, state: ${channel.readyState}`);
+        
+        channel.onopen = () => {
+            console.log(`🔗 Incoming data channel opened from ${targetId}`);
+        };
+        
+        channel.onclose = () => {
+            console.log(`🔗 Incoming data channel closed from ${targetId}`);
+        };
+        
+        channel.onerror = (error) => {
+            console.error(`🔗 Incoming data channel error from ${targetId}:`, error);
+        };
+        
         channel.onmessage = (e) => {
-            console.log('Message from', targetId, e.data);
+            console.log('📩 Message from', targetId, e.data);
             handleReceivedMessage(e.data);
         };
         
@@ -102,53 +125,69 @@ function createPeerConnection(targetId) {
 
 // Message handling for WebRTC data channels
 function handleReceivedMessage(messageData) {
+    console.log('📨 === handleReceivedMessage() START ===');
+    console.log('📨 Raw message data:', messageData);
+    
     try {
         const data = JSON.parse(messageData);
-        console.log('📨 Received WebRTC message:', data);
+        console.log('📨 Parsed WebRTC message:', data);
         
         switch (data.type) {
             case 'turn_change':
-                console.log('🔄 Processing turn_change message');
+                console.log('🔄 Processing turn_change message for player:', data.currentPlayer);
                 if (typeof onTurnChangeReceived === 'function') {
+                    console.log('🔄 Calling onTurnChangeReceived...');
                     onTurnChangeReceived({
                         currentPlayer: data.currentPlayer,
                         playerList: Object.keys(peerConnections || {})
                     });
+                    console.log('🔄 onTurnChangeReceived call completed');
                 } else {
                     console.error('❌ onTurnChangeReceived function not available');
                 }
                 break;
             case 'material_change':
+                console.log('🎨 Processing material_change message');
                 if (typeof onMaterialChangeReceived === 'function') {
                     onMaterialChangeReceived({
                         playerId: data.playerId,
                         diceType: data.diceType,
                         floorType: data.floorType
                     });
+                } else {
+                    console.error('❌ onMaterialChangeReceived function not available');
                 }
                 break;
             case 'dice_results':
+                console.log('🎲 Processing dice_results message');
                 if (typeof onDiceResultsReceived === 'function') {
                     onDiceResultsReceived({
                         playerId: data.playerId,
                         diceResults: data.diceResults
                     });
+                } else {
+                    console.error('❌ onDiceResultsReceived function not available');
                 }
                 break;
             default:
-                console.log('Unknown message type:', data.type);
+                console.log('❓ Unknown message type:', data.type);
         }
+        
+        console.log('📨 === handleReceivedMessage() END ===');
     } catch (error) {
-        console.error('Error parsing message:', error, messageData);
+        console.error('❌ Error parsing message:', error, messageData);
+        console.log('📨 === handleReceivedMessage() END (ERROR) ===');
     }
 }
 
 // Send message to all connected peers
 function sendToAllPeers(messageData) {
-    console.log('📡 sendToAllPeers called with:', messageData);
+    console.log('📡 === sendToAllPeers() START ===');
+    console.log('📡 Message to send:', messageData);
     
     if (!peerConnections) {
         console.error('❌ No peer connections available');
+        console.log('📡 === sendToAllPeers() END (NO CONNECTIONS) ===');
         return;
     }
     
@@ -191,8 +230,36 @@ function sendToAllPeers(messageData) {
         }
     }
     
-    console.log(`Total messages sent: ${messagesSent} out of ${Object.keys(peerConnections).length} peers`);
+    console.log(`📊 Total messages sent: ${messagesSent} out of ${Object.keys(peerConnections).length} peers`);
+    console.log('📡 === sendToAllPeers() END ===');
 }
+
+// Debug function to check WebRTC connection status
+function debugWebRTCConnections() {
+    console.log('🔍 === WebRTC Connection Status ===');
+    
+    if (!peerConnections) {
+        console.log('❌ No peer connections object');
+        return;
+    }
+    
+    const peers = Object.keys(peerConnections);
+    console.log(`📊 Total peers: ${peers.length}`);
+    
+    for (const peerId of peers) {
+        const connection = peerConnections[peerId];
+        console.log(`👤 Peer ${peerId}:`);
+        console.log(`  - Connection state: ${connection?.connectionState}`);
+        console.log(`  - ICE connection state: ${connection?.iceConnectionState}`);
+        console.log(`  - Outgoing channel: ${connection?.dataChannel?.readyState || 'none'}`);
+        console.log(`  - Incoming channel: ${connection?.incomingDataChannel?.readyState || 'none'}`);
+    }
+    
+    console.log('🔍 === End WebRTC Status ===');
+}
+
+// Make debug function globally available
+window.debugWebRTCConnections = debugWebRTCConnections;
 
 // Player setup and room management
 const playerNameInput = document.getElementById('player-name');
