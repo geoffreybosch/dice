@@ -1515,6 +1515,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    // Add event listener for signaling debug button
+    const debugSignalingButton = document.getElementById('debug-signaling');
+    if (debugSignalingButton) {
+        debugSignalingButton.addEventListener('click', () => {
+            console.log('📡 Signaling Debug Button Clicked');
+            if (typeof debugSignaling === 'function') {
+                debugSignaling();
+            } else {
+                console.error('❌ debugSignaling function not available');
+            }
+        });
+    }
+    
+    // Add event listener for clear signaling button
+    const clearSignalingButton = document.getElementById('clear-signaling');
+    if (clearSignalingButton) {
+        clearSignalingButton.addEventListener('click', () => {
+            console.log('🧹 Clear Signaling Button Clicked');
+            if (typeof clearStaleSignaling === 'function') {
+                clearStaleSignaling();
+            } else {
+                console.error('❌ clearStaleSignaling function not available');
+            }
+        });
+    }
 });
 
 // Update dice bodies to use the dice material
