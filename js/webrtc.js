@@ -309,12 +309,28 @@ if (joinRoomButton) {
                 for (const id in players) {
                     const li = document.createElement('li');
                     li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    li.textContent = players[id].name;
+                    li.setAttribute('data-player-name', players[id].name);
+                    
+                    // Create player name with turn indicator
+                    const playerNameSpan = document.createElement('span');
+                    playerNameSpan.className = 'player-name-text';
+                    playerNameSpan.textContent = players[id].name;
+                    
+                    const turnIndicator = document.createElement('span');
+                    turnIndicator.className = 'turn-indicator badge bg-success ms-2';
+                    turnIndicator.textContent = '●';
+                    turnIndicator.style.display = 'none';
+                    
+                    const playerNameContainer = document.createElement('div');
+                    playerNameContainer.className = 'd-flex align-items-center';
+                    playerNameContainer.appendChild(playerNameSpan);
+                    playerNameContainer.appendChild(turnIndicator);
                     
                     const scoreBadge = document.createElement('span');
                     scoreBadge.className = 'badge bg-primary rounded-pill';
                     scoreBadge.textContent = players[id].score || 0;
                     
+                    li.appendChild(playerNameContainer);
                     li.appendChild(scoreBadge);
                     webrtcPlayerList.appendChild(li);
                     

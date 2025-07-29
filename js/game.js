@@ -5,6 +5,7 @@ const diceModels = [];
 const savedPreferences = loadMaterialPreferences();
 let currentDiceMaterial = savedPreferences.dice;
 let currentFloorMaterial = savedPreferences.floor;
+let currentBackgroundMaterial = savedPreferences.background || 'white';
 
 // Turn-based system variables
 let myPlayerId = null;
@@ -24,14 +25,14 @@ let availableDiceCount = 6;
 
 // Initialize Three.js scene
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, 800 / 500, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('dice-canvas'), antialias: true });
-renderer.setSize(window.innerWidth * 0.8, window.innerHeight * 0.6);
+renderer.setSize(800, 500);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-// Set the background color of the scene to grey
-renderer.setClearColor(0x808080);
+// Set the background color of the scene to white
+renderer.setClearColor(0xffffff);
 
 // Add lighting to the scene
 const ambientLight = new THREE.AmbientLight(0x404040, 0.4); // Soft white light
@@ -59,8 +60,8 @@ scene.add(directionalLight2);
 let mouseDown = false;
 let mouseX = 0;
 let mouseY = 0;
-let cameraDistance = 10;
-let cameraAngleX = 0;
+let cameraDistance = 15; // Increased distance for top-down view
+let cameraAngleX = Math.PI / 2; // 90 degrees down for top-down view
 let cameraAngleY = 0;
 
 // Get the dice canvas for mouse events
@@ -86,8 +87,8 @@ diceCanvas.addEventListener('mousemove', (event) => {
     cameraAngleY += deltaX * 0.01;
     cameraAngleX += deltaY * 0.01;
     
-    // Limit vertical rotation
-    cameraAngleX = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleX));
+    // Limit vertical rotation to keep camera above the table (top-down bias)
+    cameraAngleX = Math.max(Math.PI/4, Math.min(Math.PI/2, cameraAngleX));
     
     mouseX = event.clientX;
     mouseY = event.clientY;
@@ -128,7 +129,8 @@ diceCanvas.addEventListener('touchmove', (event) => {
     cameraAngleY += deltaX * 0.01;
     cameraAngleX += deltaY * 0.01;
     
-    cameraAngleX = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleX));
+    // Limit vertical rotation to keep camera above the table (top-down bias)
+    cameraAngleX = Math.max(Math.PI/4, Math.min(Math.PI/2, cameraAngleX));
     
     mouseX = event.touches[0].clientX;
     mouseY = event.touches[0].clientY;
@@ -136,18 +138,24 @@ diceCanvas.addEventListener('touchmove', (event) => {
     updateCameraPosition();
 });
 
-// Function to update camera position based on angles and distance
+// Function to update camera position - optimized for top-down view
 function updateCameraPosition() {
+    // For top-down view, position camera directly above the center
     const x = Math.sin(cameraAngleY) * Math.cos(cameraAngleX) * cameraDistance;
-    const y = Math.sin(cameraAngleX) * cameraDistance;
+    const y = Math.abs(Math.sin(cameraAngleX)) * cameraDistance; // Ensure Y is always positive (above)
     const z = Math.cos(cameraAngleY) * Math.cos(cameraAngleX) * cameraDistance;
     
     camera.position.set(x, y, z);
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(0, 0, 0); // Always look at the center of the dice area
 }
 
 // Set initial camera position
 updateCameraPosition();
+
+// Apply saved background material preference
+if (currentBackgroundMaterial !== 'white') {
+    changeBackgroundMaterial(currentBackgroundMaterial);
+}
 
 // Turn-based system functions
 function canPlayerAct(playerId = myPlayerId) {
@@ -157,8 +165,6 @@ function canPlayerAct(playerId = myPlayerId) {
 
 function updateGameControlsState() {
     const rollButton = document.getElementById('roll-dice');
-    const lockButton = document.getElementById('lock-selected-dice');
-    const clearButton = document.getElementById('clear-selection');
     const bankPointsButton = document.getElementById('bank-points');
     const materialsButton = document.getElementById('materials-button');
     const diceSelectionControls = document.getElementById('dice-selection-controls');
@@ -168,16 +174,24 @@ function updateGameControlsState() {
     
     // Enable/disable controls based on turn
     if (rollButton) rollButton.disabled = !canAct;
-    if (lockButton) lockButton.disabled = !canAct;
-    if (clearButton) clearButton.disabled = !canAct;
     if (materialsButton) materialsButton.disabled = !canAct;
     
-    // Show/hide dice selection controls based on turn
+    // Show/hide dice selection controls based on turn AND whether there are dice to select
     if (diceSelectionControls) {
-        if (canAct) {
+        const hasDiceDisplayed = currentDiceResults && currentDiceResults.length > 0;
+        const hasSelectableDice = hasDiceDisplayed && currentDiceResults.some((_, index) => !lockedDiceIndices.includes(index));
+        const shouldShowControls = canAct && hasSelectableDice;
+        
+        if (shouldShowControls) {
             diceSelectionControls.style.display = 'block';
+            // Update selection controls based on current selection state
+            updateSelectionControls();
+            // Show instruction text when controls are visible
+            updateInstructionTextVisibility(true);
         } else {
             diceSelectionControls.style.display = 'none';
+            // Hide instruction text when controls are hidden
+            updateInstructionTextVisibility(false);
         }
     }
     
@@ -190,20 +204,8 @@ function updateGameControlsState() {
         }
     }
     
-    // Update visual feedback
-    const turnIndicator = document.getElementById('turn-indicator');
-    if (turnIndicator && isInMultiplayerRoom) {
-        turnIndicator.style.display = 'block';
-        if (canAct) {
-            turnIndicator.className = 'alert alert-success mb-3';
-            turnIndicator.textContent = 'Your Turn!';
-        } else {
-            turnIndicator.className = 'alert alert-warning mb-3';
-            turnIndicator.textContent = `Waiting for ${getCurrentPlayer()}'s turn...`;
-        }
-    } else if (turnIndicator) {
-        turnIndicator.style.display = 'none';
-    }
+    // Note: Turn display is now handled by updateTurnDisplay() in the player list
+    // No need for separate turn indicator element
 }
 
 // Dice rolling logic
@@ -313,7 +315,13 @@ function displayDiceResults(results) {
         const hasSelectableDice = results.some((_, index) => !lockedDiceIndices.includes(index));
         const canAct = canPlayerAct();
         selectionControls.style.display = (hasSelectableDice && canAct) ? 'block' : 'none';
+        
+        // Show/hide instruction text based on whether there are dice to select
+        updateInstructionTextVisibility(hasSelectableDice && canAct);
     }
+    
+    // Update selection control states based on current selection
+    updateSelectionControls();
 }
 
 // Function to display other players' dice results
@@ -356,6 +364,15 @@ function displayOtherPlayerResults(playerId, diceResults) {
     });
     
     diceResultsContainer.appendChild(diceContainer);
+    
+    // Hide dice selection controls when showing other player's results (not interactive)
+    const diceSelectionControls = document.getElementById('dice-selection-controls');
+    if (diceSelectionControls) {
+        diceSelectionControls.style.display = 'none';
+    }
+    
+    // Hide instruction text when showing other player's results
+    updateInstructionTextVisibility(false);
 }
 
 // Dice selection functions
@@ -382,12 +399,20 @@ function toggleDiceSelection(diceIndex, imageElement) {
 
 function updateSelectionControls() {
     const lockButton = document.getElementById('lock-selected-dice');
+    const clearButton = document.getElementById('clear-selection');
+    
+    const hasSelection = selectedDiceIndices.length > 0;
+    
+    // Update lock button
     if (lockButton) {
-        lockButton.disabled = selectedDiceIndices.length === 0;
+        lockButton.disabled = !hasSelection;
         
-        if (selectedDiceIndices.length === 0) {
+        if (!hasSelection) {
             lockButton.textContent = 'Lock Selected Dice';
+            lockButton.className = 'btn btn-secondary me-2'; // Grey out when disabled
         } else {
+            lockButton.className = 'btn btn-success me-2'; // Green when enabled
+            
             // Calculate potential points for selected dice
             let potentialPoints = 0;
             selectedDiceIndices.forEach(index => {
@@ -405,6 +430,23 @@ function updateSelectionControls() {
                 lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (0 pts)`;
             }
         }
+    }
+    
+    // Update clear button
+    if (clearButton) {
+        clearButton.disabled = !hasSelection;
+        if (!hasSelection) {
+            clearButton.className = 'btn btn-secondary me-2'; // Already grey, but ensure it's the disabled style
+        } else {
+            clearButton.className = 'btn btn-secondary me-2'; // Keep secondary style but enabled
+        }
+    }
+}
+
+function updateInstructionTextVisibility(showInstructions) {
+    const instructionDiv = document.querySelector('#dice-selection-controls .mt-2');
+    if (instructionDiv) {
+        instructionDiv.style.display = showInstructions ? 'block' : 'none';
     }
 }
 
@@ -517,6 +559,18 @@ function endPlayerTurn() {
     // Clear dice display
     diceResultsContainer.innerHTML = '<p class="text-muted">Waiting for next player...</p>';
     
+    // Hide dice selection controls when no dice are displayed
+    const diceSelectionControls = document.getElementById('dice-selection-controls');
+    if (diceSelectionControls) {
+        diceSelectionControls.style.display = 'none';
+    }
+    
+    // Hide instruction text when no dice are displayed
+    updateInstructionTextVisibility(false);
+    
+    // Update selection controls to reflect reset state
+    updateSelectionControls();
+    
     // Advance to next turn
     const nextPlayer = nextTurn();
     updateGameControlsState();
@@ -543,9 +597,10 @@ function initializeMultiplayerMode(roomId, playerId, playerList) {
     
     // Load this player's material preferences
     const preferences = getPlayerMaterialPreferences(myPlayerId);
-    if (preferences.dice !== 'default' || preferences.floor !== 'grass') {
+    if (preferences.dice !== 'default' || preferences.floor !== 'grass' || preferences.background !== 'white') {
         changeDiceMaterial(preferences.dice);
         changeFloorMaterial(preferences.floor);
+        changeBackgroundMaterial(preferences.background || 'white');
     }
     
     updateGameControlsState();
@@ -601,9 +656,14 @@ function resetLockedDice() {
         rollButton.disabled = false;
     }
     
+    // Update selection controls to reflect empty selection
+    updateSelectionControls();
+    
     // Clear dice results display
     if (diceResultsContainer) {
         diceResultsContainer.innerHTML = '';
+        // Hide instruction text when dice display is cleared
+        updateInstructionTextVisibility(false);
     }
     
     // Hide selection controls
@@ -768,7 +828,7 @@ world.addBody(groundBody);
 // Define wall dimensions once
 const wallThickness = 1.0; // Increased thickness for better collision
 const wallHeight = 5; // Updated height for taller walls
-const wallLength = 10;
+const wallLength = 16; // Increased from 10 to 16 for larger play area
 
 // Create dice physics bodies and shapes
 const diceBodies = [];
@@ -958,7 +1018,7 @@ backRightCornerBody.position.set(wallLength / 2 - wallThickness / 2, wallHeight 
 world.addBody(backRightCornerBody);
 
 // Add the camera-side wall back with a transparent material
-const transparentWallMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513, transparent: true, opacity: 0.2 }); // Semi-transparent brown
+const transparentWallMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513, transparent: true, opacity: 0 }); // Semi-transparent brown
 
 const frontWallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallThickness);
 const frontWall = new THREE.Mesh(frontWallGeometry, transparentWallMaterial);
@@ -1038,8 +1098,8 @@ cameraHeightSlider.addEventListener('input', updateCamera);
 cameraDistanceSlider.addEventListener('input', updateCamera);
 cameraAngleSlider.addEventListener('input', updateCamera);
 
-// Initialize camera position
-updateCamera();
+// Don't initialize camera position here - use the mouse-based top-down system instead
+// updateCamera();
 
 // Map dice face-up results to dice values
 function getDiceResult(quaternion) {
@@ -1082,7 +1142,7 @@ let lastDicePositions = [];
 let settlementCheckInterval = null;
 let settlementStartTime = null;
 let isSettled = false;
-const SETTLEMENT_DELAY = 2000; // 2 seconds
+const SETTLEMENT_DELAY = 1000; // 1 second
 
 // Function to check if dice have settled
 function checkDiceSettlement() {
@@ -1591,9 +1651,9 @@ function changeDiceMaterial(materialType) {
     
     // Save preferences - use player-specific storage in multiplayer mode
     if (isInMultiplayerRoom && myPlayerId) {
-        savePlayerMaterialPreferences(myPlayerId, currentDiceMaterial, currentFloorMaterial);
+        savePlayerMaterialPreferences(myPlayerId, currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
     } else {
-        saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial);
+        saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
     }
     
     console.log(`Dice material changed to: ${materialType} (bounce: ${config.restitution}, friction: ${config.friction})`);
@@ -1630,13 +1690,31 @@ function changeFloorMaterial(materialType) {
     
     // Save preferences - use player-specific storage in multiplayer mode
     if (isInMultiplayerRoom && myPlayerId) {
-        savePlayerMaterialPreferences(myPlayerId, currentDiceMaterial, currentFloorMaterial);
+        savePlayerMaterialPreferences(myPlayerId, currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
     } else {
-        saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial);
+        saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
     }
     
     console.log(`Floor material changed to: ${materialType} (bounce: ${config.restitution}, friction: ${config.friction})`);
     console.log(`Wall color updated to complement floor: #${wallColor.toString(16).padStart(6, '0').toUpperCase()}`);
+}
+
+// Function to change background material
+function changeBackgroundMaterial(materialType) {
+    currentBackgroundMaterial = materialType;
+    const config = getBackgroundMaterialProperties(materialType);
+    
+    // Update the renderer's clear color (background)
+    renderer.setClearColor(config.color);
+    
+    // Save preferences - use player-specific storage in multiplayer mode
+    if (isInMultiplayerRoom && myPlayerId) {
+        savePlayerMaterialPreferences(myPlayerId, currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
+    } else {
+        saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
+    }
+    
+    console.log(`Background changed to: ${materialType} (color: #${config.color.toString(16).padStart(6, '0').toUpperCase()})`);
 }
 
 // Reinitialize the animation loop

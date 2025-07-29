@@ -84,3 +84,33 @@ canvas {
         height: 40px !important;
     }
 }
+
+/* Turn indicator styles for player list */
+.turn-indicator {
+    animation: pulse 1.5s infinite;
+    font-size: 0.8em;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.list-group-item-success {
+    background-color: #ffffff !important;
+    border-color: #198754 !important;
+    border-left: 4px solid #198754 !important;
+}
+
+.list-group-item-secondary {
+    background-color: #ffffff !important;
+    border-color: #6c757d !important;
+}
+
+/* Disabled button styles for dice selection controls */
+#dice-selection-controls button:disabled {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}

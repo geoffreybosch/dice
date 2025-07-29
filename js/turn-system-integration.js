@@ -94,27 +94,64 @@ function applyPlayerMaterialPreferences(playerId) {
 }
 
 function updateTurnDisplay() {
-    const turnIndicator = document.getElementById('turn-indicator');
-    if (turnIndicator && currentPlayerTurn) {
-        let displayText = `Current Turn: ${currentPlayerTurn}`;
-        
-        // Add pending points to display if any
-        if (pendingPoints > 0) {
-            displayText += ` (Pending: ${pendingPoints} pts)`;
+    // Update turn indicators in the player list instead of using alert box
+    const playerListContainer = document.getElementById('player-list');
+    if (playerListContainer && currentPlayerTurn) {
+        const playerList = playerListContainer.querySelector('ul');
+        if (playerList) {
+            const listItems = playerList.querySelectorAll('li');
+            listItems.forEach(li => {
+                const playerName = li.getAttribute('data-player-name') || li.querySelector('.player-name-text')?.textContent;
+                const turnIndicator = li.querySelector('.turn-indicator');
+                const listItem = li;
+                
+                if (playerName === currentPlayerTurn) {
+                    // Show turn indicator for current player
+                    if (turnIndicator) {
+                        turnIndicator.style.display = 'inline';
+                    }
+                    // Highlight the current player's list item
+                    listItem.classList.add('list-group-item-success');
+                    listItem.classList.remove('list-group-item-secondary');
+                } else {
+                    // Hide turn indicator for other players
+                    if (turnIndicator) {
+                        turnIndicator.style.display = 'none';
+                    }
+                    // Remove highlight from other players
+                    listItem.classList.remove('list-group-item-success');
+                    listItem.classList.add('list-group-item-secondary');
+                }
+            });
         }
-        
-        turnIndicator.textContent = displayText;
-        turnIndicator.className = 'alert alert-info';
+    }
+    
+    // For single player mode, still show the old alert-style display
+    if (!isMultiplayerMode) {
+        const turnIndicator = document.getElementById('turn-indicator');
+        if (turnIndicator && currentPlayerTurn) {
+            let displayText = `Current Turn: ${currentPlayerTurn}`;
+            
+            // Add pending points to display if any
+            if (pendingPoints > 0) {
+                displayText += ` (Pending: ${pendingPoints} pts)`;
+            }
+            
+            turnIndicator.textContent = displayText;
+            turnIndicator.className = 'alert alert-info';
+            turnIndicator.style.display = 'block';
+        }
     }
 }
 
 // Scoring System Functions
 function initializePlayerScores(players) {
-    // Initialize scores for all players
+    // RESET playerScores to only include current players - this prevents stale data
+    playerScores = {};
+    
+    // Initialize scores for current players only
     players.forEach(playerId => {
-        if (!(playerId in playerScores)) {
-            playerScores[playerId] = 0;
-        }
+        playerScores[playerId] = 0;
     });
     
     // If in multiplayer room, fetch existing scores from Firebase
@@ -124,14 +161,15 @@ function initializePlayerScores(players) {
         roomRef.once('value', (snapshot) => {
             const firebasePlayers = snapshot.val();
             if (firebasePlayers) {
-                // Update local scores with Firebase scores
+                // Update local scores with Firebase scores, but ONLY for current players
                 for (const id in firebasePlayers) {
                     const playerName = firebasePlayers[id].name;
-                    if (playerScores[playerName] !== undefined) {
+                    // Only load scores for players currently in the room
+                    if (players.includes(playerName) && playerScores[playerName] !== undefined) {
                         playerScores[playerName] = firebasePlayers[id].score || 0;
                     }
                 }
-                console.log('Player scores loaded from Firebase:', playerScores);
+                console.log('Player scores loaded from Firebase (current players only):', playerScores);
                 updateScoreDisplay(); // Update the UI with loaded scores
             }
         }).catch((error) => {
@@ -297,10 +335,11 @@ function updateScoreDisplay() {
         if (playerList) {
             const listItems = playerList.querySelectorAll('li');
             listItems.forEach(li => {
-                const playerName = li.textContent.split(' ')[0]; // Get player name (first part before score)
-                const scoreBadge = li.querySelector('.badge');
+                // Get player name from data attribute or text content
+                const playerName = li.getAttribute('data-player-name') || li.querySelector('.player-name-text')?.textContent;
+                const scoreBadge = li.querySelector('.badge.bg-primary');
                 
-                if (scoreBadge && playerScores[playerName] !== undefined) {
+                if (scoreBadge && playerName && playerScores[playerName] !== undefined) {
                     scoreBadge.textContent = playerScores[playerName];
                 }
             });
@@ -397,6 +436,16 @@ function onTurnChangeReceived(data) {
     if (typeof updateGameControlsState === 'function') {
         updateGameControlsState();
         console.log('✅ Called updateGameControlsState');
+        
+        // Log the player list state after update
+        const playerListContainer = document.getElementById('player-list');
+        if (playerListContainer) {
+            const activePlayer = playerListContainer.querySelector('.list-group-item-success .player-name-text');
+            const activeTurnIndicator = playerListContainer.querySelector('.turn-indicator[style*="inline"]');
+            console.log(`🎯 Player list after update: active player="${activePlayer?.textContent || 'none'}", turn indicator visible="${!!activeTurnIndicator}"`);
+        } else {
+            console.warn('❌ Player list container not found');
+        }
     } else {
         console.warn('❌ updateGameControlsState function not available');
     }
@@ -407,6 +456,15 @@ function onTurnChangeReceived(data) {
         const diceResultsContainer = document.getElementById('dice-results-container');
         if (diceResultsContainer) {
             diceResultsContainer.innerHTML = '<p class="text-muted">Click "Roll Dice" to start your turn</p>';
+            // Hide dice selection controls when showing turn start message
+            const diceSelectionControls = document.getElementById('dice-selection-controls');
+            if (diceSelectionControls) {
+                diceSelectionControls.style.display = 'none';
+            }
+            // Hide instruction text when showing turn start message
+            if (typeof updateInstructionTextVisibility === 'function') {
+                updateInstructionTextVisibility(false);
+            }
         }
     } else {
         console.log('⏳ Not my turn yet, waiting...');

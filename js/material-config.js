@@ -204,6 +204,40 @@ const MaterialConfig = {
             floor: "marble",
             description: "Sophisticated glass dice on marble"
         }
+    },
+
+    // Background Material Properties
+    backgroundMaterials: {
+        white: {
+            name: "White",
+            color: 0xffffff,
+            colorRgb: { r: 255, g: 255, b: 255 }
+        },
+        grey: {
+            name: "Grey",
+            color: 0x808080,
+            colorRgb: { r: 128, g: 128, b: 128 }
+        },
+        black: {
+            name: "Black",
+            color: 0x000000,
+            colorRgb: { r: 0, g: 0, b: 0 }
+        },
+        lightblue: {
+            name: "Light Blue",
+            color: 0x87ceeb,
+            colorRgb: { r: 135, g: 206, b: 235 }
+        },
+        cream: {
+            name: "Cream",
+            color: 0xfffff0,
+            colorRgb: { r: 255, g: 255, b: 240 }
+        },
+        darkblue: {
+            name: "Dark Blue",
+            color: 0x1e3a8a,
+            colorRgb: { r: 30, g: 58, b: 138 }
+        }
     }
 };
 
@@ -215,6 +249,11 @@ function getDiceMaterialProperties(materialType) {
 // Helper function to get floor material properties
 function getFloorMaterialProperties(materialType) {
     return MaterialConfig.floorMaterials[materialType] || MaterialConfig.floorMaterials.grass;
+}
+
+// Helper function to get background material properties
+function getBackgroundMaterialProperties(materialType) {
+    return MaterialConfig.backgroundMaterials[materialType] || MaterialConfig.backgroundMaterials.white;
 }
 
 // Helper function to apply preset
@@ -232,16 +271,17 @@ function applyMaterialPreset(presetName) {
 }
 
 // Material Preference Storage Functions
-function saveMaterialPreferences(diceType, floorType) {
+function saveMaterialPreferences(diceType, floorType, backgroundType = 'white') {
     const preferences = {
         dice: diceType,
         floor: floorType,
+        background: backgroundType,
         timestamp: Date.now()
     };
     
     try {
         localStorage.setItem('farkle_material_preferences', JSON.stringify(preferences));
-        console.log(`Material preferences saved: Dice=${diceType}, Floor=${floorType}`);
+        console.log(`Material preferences saved: Dice=${diceType}, Floor=${floorType}, Background=${backgroundType}`);
         return true;
     } catch (error) {
         console.warn('Failed to save material preferences:', error);
@@ -258,12 +298,14 @@ function loadMaterialPreferences() {
             // Validate that the saved materials still exist in the config
             const diceExists = MaterialConfig.diceMaterials[preferences.dice];
             const floorExists = MaterialConfig.floorMaterials[preferences.floor];
+            const backgroundExists = MaterialConfig.backgroundMaterials[preferences.background || 'white'];
             
-            if (diceExists && floorExists) {
-                console.log(`Material preferences loaded: Dice=${preferences.dice}, Floor=${preferences.floor}`);
+            if (diceExists && floorExists && backgroundExists) {
+                console.log(`Material preferences loaded: Dice=${preferences.dice}, Floor=${preferences.floor}, Background=${preferences.background || 'white'}`);
                 return {
                     dice: preferences.dice,
                     floor: preferences.floor,
+                    background: preferences.background || 'white',
                     timestamp: preferences.timestamp
                 };
             } else {
@@ -279,6 +321,7 @@ function loadMaterialPreferences() {
     return {
         dice: 'default',
         floor: 'grass',
+        background: 'white',
         timestamp: null
     };
 }
@@ -319,6 +362,7 @@ if (typeof module !== 'undefined' && module.exports) {
         MaterialConfig,
         getDiceMaterialProperties,
         getFloorMaterialProperties,
+        getBackgroundMaterialProperties,
         applyMaterialPreset,
         saveMaterialPreferences,
         loadMaterialPreferences,
