@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farkle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid vh-100 d-flex flex-column">
+        <div class="row flex-grow-1">
+            <!-- Controls on the left -->
+            <div class="col-md-3 d-flex flex-column gap-3 bg-dark text-white p-3"> 
+                <h2 class="text-center">Farkle</h2>
+                <div id="admin-section">
+                    <button id="admin-button" class="btn btn-warning w-100 mb-2" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
+                    <button id="materials-button" class="btn btn-info w-100 mb-2" data-bs-toggle="modal" data-bs-target="#materialsModal">Materials</button>
+                </div>
+                <div id="room-setup">
+                    <input type="text" id="room-name" class="form-control" placeholder="Enter room name">
+                    <div id="room-display" class="alert alert-info" style="display: none;">
+                        <strong>Room:</strong> <span id="current-room-name"></span>
+                    </div>
+                </div>
+                <div id="player-setup">
+                    <input type="text" id="player-name" class="form-control mb-2" placeholder="Enter your name">
+                    <div id="name-error" class="text-danger small mb-2" style="display: none;"></div>
+                    <div id="player-display" class="alert alert-success" style="display: none;">
+                        <strong>Player:</strong> <span id="current-player-name"></span>
+                    </div>
+                    <button id="join-room" class="btn btn-success w-100">Join Room</button>
+                </div>
+                <div id="controls">
+                    <button id="roll-dice" class="btn btn-primary w-100">Roll Dice</button>
+                </div>
+                <div id="energy-slider-container">
+                    <label for="energy-slider" class="form-label">Roll Energy:</label>
+                    <input type="range" id="energy-slider" class="form-range" min="10" max="30" value="12">
+                </div>
+                <div id="camera-controls" style="display: none;">
+                    <label for="camera-height" class="form-label">Camera Height:</label>
+                    <input type="range" id="camera-height" class="form-range" min="5" max="20" value="10">
+
+                    <label for="camera-distance" class="form-label">Camera Distance:</label>
+                    <input type="range" id="camera-distance" class="form-range" min="5" max="20" value="10">
+
+                    <label for="camera-angle" class="form-label">Camera Angle:</label>
+                    <input type="range" id="camera-angle" class="form-range" min="-45" max="45" value="0">
+                </div>
+                <div id="player-list" class="mt-3">
+                    <h5 id="player-list-title" style="display: none;">Player List</h5>
+                    <ul class="list-group">
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-9 d-flex flex-column align-items-center justify-content-center">
+                <!-- Turn indicator -->
+                <div id="turn-indicator" class="alert alert-info mb-3" style="display: none;">
+                    Current Turn: Player 1
+                </div>
+                
+                <div id="dice-results-container" class="mb-3 d-flex justify-content-center align-items-center flex-wrap gap-2" style="min-height: 80px;">
+                    <!-- Dice result images will be displayed here -->
+                </div>
+                <div id="dice-selection-controls" class="mb-3" style="display: none;">
+                    <button id="lock-selected-dice" class="btn btn-success me-2">Lock Selected Dice</button>
+                    <button id="clear-selection" class="btn btn-secondary me-2">Clear Selection</button>
+                    <button id="bank-points" class="btn btn-warning me-2" style="display: none;">Bank Points & End Turn</button>
+                    <div class="mt-2">
+                        <small class="text-muted">Click on dice above to select them for locking</small>
+                    </div>
+                </div>
+                <canvas id="dice-canvas" class="w-100" style="max-width: 600px; height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="modal fade" id="adminModal" tabindex="-1" aria-labelledby="adminModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adminModalLabel">Admin Panel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Room Management</h6>
+                    <div class="mb-3">
+                        <button id="clear-room" class="btn btn-danger">Clear Current Room</button>
+                    </div>
+                    <div class="mb-3">
+                        <button id="reset-scores" class="btn btn-warning">Reset All Scores</button>
+                    </div>
+                    <h6>Database Management</h6>
+                    <div class="mb-3">
+                        <button id="clear-database" class="btn btn-danger">Clear All Rooms</button>
+                    </div>
+                    <div class="mb-3">
+                        <button id="test-firebase" class="btn btn-secondary">Test Room Connection</button>
+                    </div>
+                    <h6>Debugging</h6>
+                    <div class="mb-3">
+                        <button id="reset-dice" class="btn btn-danger w-100">Reset Dice</button>
+                    </div>
+                    <div class="mb-3">
+                        <button id="reset-locked-dice" class="btn btn-warning w-100">Reset Locked Dice</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Materials Modal -->
+    <div class="modal fade" id="materialsModal" tabindex="-1" aria-labelledby="materialsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="materialsModalLabel">Customize Materials</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Quick Presets</h6>
+                    <div class="mb-3">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100 preset-option" data-preset="casino">
+                                    🎰 Casino
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100 preset-option" data-preset="luxury">
+                                    💎 Luxury
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100 preset-option" data-preset="classic">
+                                    🌰 Classic
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100 preset-option" data-preset="modern">
+                                    🔧 Modern
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100 preset-option" data-preset="garden">
+                                    🌿 Garden
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100 preset-option" data-preset="elegant">
+                                    🥂 Elegant
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">Click a preset to automatically select dice and floor materials</small>
+                    </div>
+
+                    <hr>
+
+                    <h6>Dice Material</h6>
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="wood" data-type="dice">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #8B4513, #A0522D); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Wood
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="metal" data-type="dice">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #C0C0C0, #E5E5E5); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Metal
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="marble" data-type="dice">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #F8F8FF, #E6E6FA); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Marble
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="plastic" data-type="dice">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #FF6347, #FF7F50); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Plastic
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="glass" data-type="dice">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, rgba(173,216,230,0.8), rgba(135,206,235,0.8)); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Glass
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option active" data-material="default" data-type="dice">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #FFFFFF, #F0F0F0); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Default
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6>Floor Material</h6>
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="wood" data-type="floor">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #8B4513, #A0522D); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Wood
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="stone" data-type="floor">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #696969, #808080); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Stone
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="carpet" data-type="floor">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #8B0000, #B22222); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Carpet
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="marble" data-type="floor">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #F8F8FF, #E6E6FA); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Marble
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option" data-material="felt" data-type="floor">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #006400, #228B22); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Felt
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100 material-option active" data-material="grass" data-type="floor">
+                                    <div class="material-preview" style="background: linear-gradient(45deg, #228B22, #32CD32); height: 30px; border-radius: 4px; margin-bottom: 5px;"></div>
+                                    Grass
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" id="clear-preferences">Clear Saved Preferences</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="apply-materials">Apply Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <script src="js/material-config.js"></script>
+    <script src="js/turn-system-integration.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/webrtc.js"></script>
+</body>
+</html>
