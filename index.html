@@ -20,17 +20,19 @@
                 </div>
                 <div id="admin-section">
                     <div class="row g-2">
-                        <div class="col-3">
+                        <div class="col-4">
                             <button id="admin-button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
                         </div>
-                        <div class="col-3">
-                            <button id="customize-game-button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#gameSettingsModal" style="display: none;">Game Rules</button>
-                        </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <button id="materials-button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#materialsModal">Materials</button>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <button id="scoring-button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#scoringModal">Scoring</button>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-12">
+                            <button id="customize-game-button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#gameSettingsModal" style="display: none;">Game Rules</button>
                         </div>
                     </div>
                 </div>
@@ -64,7 +66,7 @@
                     <div class="card-body text-center">
                         <div class="d-flex flex-column align-items-center gap-3">
                             <div id="controls">
-                                <button id="roll-dice" class="btn btn-primary btn-lg px-4">Roll Dice</button>
+                                <button id="roll-dice" class="btn btn-primary btn-lg px-4">Roll</button>
                             </div>
                             <div id="energy-slider-container" class="d-flex align-items-center gap-3 w-100 justify-content-center">
                                 <label for="energy-slider" class="form-label mb-0 text-nowrap fw-bold text-light">Roll Energy:</label>
@@ -84,7 +86,7 @@
                         <small class="text-muted">Click on dice above to select them for locking</small>
                     </div>
                 </div>
-                <canvas id="dice-canvas" class="w-100" style="max-width: 800px; height: 500px;"></canvas>
+                <canvas id="dice-canvas" class="w-100" style="max-width: 800px; height: 500px; display: none;"></canvas>
             </div>
         </div>
     </div>
@@ -117,6 +119,10 @@
                         <span id="test-firebase-status" class="text-success" style="display: none;">✅</span>
                     </div>
                     <h6>Debugging</h6>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button id="toggle-3d-view" class="btn btn-info me-2">Show 3D Dice View</button>
+                        <span class="text-muted small">Toggle visibility of 3D dice canvas</span>
+                    </div>
                     <div class="mb-3">
                         <button id="reset-dice" class="btn btn-danger w-100">Reset Dice</button>
                         <div id="reset-dice-status" class="mt-2 small" style="display: none;"></div>

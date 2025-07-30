@@ -133,6 +133,9 @@ function applyPlayerMaterialPreferences(playerId) {
 }
 
 function updateTurnDisplay() {
+    // NOTE: Farkle indicator clearing is now handled by Firebase state manager 
+    // in updateTurnIndicators() when a player's turn actually starts
+    
     // Update turn indicators in the player list instead of using alert box
     const playerListContainer = document.getElementById('player-list');
     if (playerListContainer && currentPlayerTurn) {
@@ -605,7 +608,7 @@ function onTurnChangeReceived(data) {
         console.log('🎲 It\'s now my turn - clearing dice display');
         const diceResultsContainer = document.getElementById('dice-results-container');
         if (diceResultsContainer) {
-            diceResultsContainer.innerHTML = '<p class="text-muted">Click "Roll Dice" to start your turn</p>';
+            diceResultsContainer.innerHTML = '<p class="text-muted">Click "Roll" to start your turn</p>';
             // Hide dice selection controls when showing turn start message
             const diceSelectionControls = document.getElementById('dice-selection-controls');
             if (diceSelectionControls) {
@@ -664,17 +667,6 @@ function broadcastMaterialChange(playerId, diceType, floorType) {
     }
     
     console.log(`Broadcasting material change: ${playerId} -> Dice=${diceType}, Floor=${floorType}`);
-}
-
-function broadcastDiceResults(playerId, diceResults) {
-    // Use Firebase for dice results broadcasting
-    if (typeof window.broadcastDiceResults === 'function') {
-        window.broadcastDiceResults(playerId, diceResults);
-    } else {
-        console.error('❌ Firebase broadcastDiceResults function not available');
-    }
-    
-    console.log(`Broadcasting dice results for ${playerId}:`, diceResults);
 }
 
 function onDiceResultsReceived(data) {

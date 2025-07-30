@@ -1,0 +1,15 @@
+"filename", "language", "HTML", "PostCSS", "JavaScript", "Markdown", "comment", "blank", "total"
+"/Users/brandon/Documents/GitHub/farkle/README.md", "Markdown", 0, 0, 0, 21, 0, 11, 32
+"/Users/brandon/Documents/GitHub/farkle/css/styles.css", "PostCSS", 0, 113, 0, 0, 5, 24, 142
+"/Users/brandon/Documents/GitHub/farkle/firebase-state-test.html", "HTML", 229, 0, 0, 0, 1, 34, 264
+"/Users/brandon/Documents/GitHub/farkle/index.html", "HTML", 413, 0, 0, 0, 6, 20, 439
+"/Users/brandon/Documents/GitHub/farkle/js/farkle-scoring.js", "JavaScript", 0, 0, 174, 0, 36, 24, 234
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-config.js", "JavaScript", 0, 0, 174, 0, 35, 40, 249
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-state-manager.js", "JavaScript", 0, 0, 566, 0, 107, 136, 809
+"/Users/brandon/Documents/GitHub/farkle/js/game-settings.js", "JavaScript", 0, 0, 184, 0, 76, 45, 305
+"/Users/brandon/Documents/GitHub/farkle/js/game.js", "JavaScript", 0, 0, 1327, 0, 318, 350, 1995
+"/Users/brandon/Documents/GitHub/farkle/js/material-config.js", "JavaScript", 0, 0, 332, 0, 20, 22, 374
+"/Users/brandon/Documents/GitHub/farkle/js/turn-system-integration.js", "JavaScript", 0, 0, 535, 0, 86, 122, 743
+"/Users/brandon/Documents/GitHub/farkle/js/webrtc-simple.js", "JavaScript", 0, 0, 439, 0, 41, 84, 564
+"/Users/brandon/Documents/GitHub/farkle/js/webrtc.js", "JavaScript", 0, 0, 247, 0, 22, 54, 323
+"Total", "-", 642, 113, 3978, 21, 753, 966, 6473

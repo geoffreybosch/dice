@@ -98,15 +98,33 @@ if (joinRoomButton) {
             const nameError = document.getElementById('name-error');
             if (nameError) nameError.style.display = 'none';
 
-            // Add player to room
+            // Add player to room, preserving existing data if player is reconnecting
+            const existingPlayer = players?.[playerName];
             const roomUpdates = {};
-            roomUpdates[`players/${playerName}`] = { 
-                name: playerName, 
-                score: players?.[playerName]?.score || 0,
-                isHost: isHost,
-                state: 'waiting',
-                joinedAt: Date.now()
-            };
+            
+            if (existingPlayer) {
+                // Player is reconnecting - preserve their data and mark as connected
+                console.log(`🔌 Player ${playerName} reconnecting, preserving existing data:`, existingPlayer);
+                roomUpdates[`players/${playerName}`] = {
+                    ...existingPlayer, // Preserve all existing data
+                    isConnected: true, // Mark as connected
+                    lastConnectionUpdate: Date.now(), // Update connection timestamp
+                    isHost: isHost, // Update host status (may have changed)
+                    state: 'waiting' // Reset state to waiting
+                };
+            } else {
+                // New player joining for the first time
+                console.log(`🆕 New player ${playerName} joining room`);
+                roomUpdates[`players/${playerName}`] = { 
+                    name: playerName, 
+                    score: 0,
+                    isHost: isHost,
+                    state: 'waiting',
+                    isConnected: true,
+                    joinedAt: Date.now(),
+                    lastConnectionUpdate: Date.now()
+                };
+            }
             
             if (isHost) {
                 roomUpdates['hostId'] = playerName; // Use player name as host ID
@@ -171,15 +189,24 @@ if (joinRoomButton) {
                         turnIndicator.textContent = '●';
                         turnIndicator.style.display = 'none';
                         
+                        // Create Farkle indicator
+                        const farkleIndicator = document.createElement('span');
+                        farkleIndicator.className = 'farkle-indicator ms-2';
+                        farkleIndicator.textContent = '⚠️';
+                        farkleIndicator.style.display = 'none';
+                        farkleIndicator.title = 'This player just Farkled!';
+                        
                         const hostBadge = document.createElement('span');
-                        hostBadge.className = 'host-badge badge bg-warning text-dark ms-1';
-                        hostBadge.textContent = '👑 HOST';
+                        hostBadge.className = 'host-badge ms-1';
+                        hostBadge.textContent = '👑';
+                        hostBadge.title = 'Room Host';
                         hostBadge.style.display = players[id].isHost ? 'inline' : 'none';
                         
                         const playerNameContainer = document.createElement('div');
                         playerNameContainer.className = 'd-flex align-items-center';
                         playerNameContainer.appendChild(playerNameSpan);
                         playerNameContainer.appendChild(turnIndicator);
+                        playerNameContainer.appendChild(farkleIndicator);
                         playerNameContainer.appendChild(hostBadge);
                         
                         const scoreBadge = document.createElement('span');

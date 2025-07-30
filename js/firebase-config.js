@@ -77,10 +77,18 @@ function updatePlayerList(snapshot) {
             turnIndicator.textContent = '●';
             turnIndicator.style.display = 'none';
             
+            // Create Farkle indicator
+            const farkleIndicator = document.createElement('span');
+            farkleIndicator.className = 'farkle-indicator ms-2';
+            farkleIndicator.textContent = '⚠️';
+            farkleIndicator.style.display = 'none';
+            farkleIndicator.title = 'This player just Farkled!';
+            
             const playerNameContainer = document.createElement('div');
             playerNameContainer.className = 'd-flex align-items-center';
             playerNameContainer.appendChild(playerNameSpan);
             playerNameContainer.appendChild(turnIndicator);
+            playerNameContainer.appendChild(farkleIndicator);
 
             const scoreBadge = document.createElement('span');
             scoreBadge.className = 'badge bg-primary rounded-pill';
@@ -246,3 +254,64 @@ clearDatabaseButton.addEventListener('click', () => {
         clearDatabaseButton.removeEventListener('click', firstConfirmHandler);
     }, 5000);
 });
+
+// Farkle Indicator Management Functions
+/**
+ * Show a Farkle warning indicator next to a player's name
+ * @param {string} playerNameOrId - The name or ID of the player who Farkled
+ */
+function showFarkleIndicator(playerNameOrId) {
+    // Try both data-player-name and data-player-id selectors
+    let playerListItem = document.querySelector(`[data-player-name="${playerNameOrId}"]`);
+    if (!playerListItem) {
+        playerListItem = document.querySelector(`[data-player-id="${playerNameOrId}"]`);
+    }
+    
+    if (playerListItem) {
+        const farkleIndicator = playerListItem.querySelector('.farkle-indicator');
+        if (farkleIndicator) {
+            farkleIndicator.style.display = 'inline';
+            console.log(`⚠️ Farkle indicator shown for ${playerNameOrId}`);
+        } else {
+            console.warn(`⚠️ Farkle indicator element not found for ${playerNameOrId}`);
+        }
+    } else {
+        console.warn(`⚠️ Player list item not found for ${playerNameOrId}`);
+    }
+}
+
+/**
+ * Hide the Farkle warning indicator for a specific player
+ * @param {string} playerNameOrId - The name or ID of the player to clear the indicator for
+ */
+function hideFarkleIndicator(playerNameOrId) {
+    // Try both data-player-name and data-player-id selectors
+    let playerListItem = document.querySelector(`[data-player-name="${playerNameOrId}"]`);
+    if (!playerListItem) {
+        playerListItem = document.querySelector(`[data-player-id="${playerNameOrId}"]`);
+    }
+    
+    if (playerListItem) {
+        const farkleIndicator = playerListItem.querySelector('.farkle-indicator');
+        if (farkleIndicator) {
+            farkleIndicator.style.display = 'none';
+            console.log(`✅ Farkle indicator hidden for ${playerNameOrId}`);
+        }
+    }
+}
+
+/**
+ * Clear all Farkle indicators from all players
+ */
+function clearAllFarkleIndicators() {
+    const allFarkleIndicators = document.querySelectorAll('.farkle-indicator');
+    allFarkleIndicators.forEach(indicator => {
+        indicator.style.display = 'none';
+    });
+    console.log('🧹 All Farkle indicators cleared');
+}
+
+// Export functions for global access
+window.showFarkleIndicator = showFarkleIndicator;
+window.hideFarkleIndicator = hideFarkleIndicator;
+window.clearAllFarkleIndicators = clearAllFarkleIndicators;

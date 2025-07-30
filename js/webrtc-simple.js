@@ -380,8 +380,9 @@ if (joinRoomButton) {
                         turnIndicator.style.display = 'none';
                         
                         const hostBadge = document.createElement('span');
-                        hostBadge.className = 'host-badge badge bg-warning text-dark ms-1';
-                        hostBadge.textContent = '👑 HOST';
+                        hostBadge.className = 'host-badge ms-1';
+                        hostBadge.textContent = '👑';
+                        hostBadge.title = 'Room Host';
                         hostBadge.style.display = players[id].isHost ? 'inline' : 'none';
                         
                         const playerNameContainer = document.createElement('div');
