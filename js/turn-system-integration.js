@@ -17,16 +17,18 @@ let currentTurnPoints = []; // Array of point awards this turn for display
 
 // Core Turn System Functions
 function initializeTurnSystem(players, isMultiplayer = false, preserveCurrentTurn = false) {
+    console.log(`Turn system initialized for ${players.length} players. First turn: ${players[0]}`);
+    console.log(`🔧 INIT DEBUG: isMultiplayer=${isMultiplayer}, preserveCurrentTurn=${preserveCurrentTurn}`);
+    console.log(`🔧 INIT DEBUG: Current pendingPoints=${pendingPoints}, currentPlayerTurn=${currentPlayerTurn}`);
+    
     turnSystemPlayerList = [...players];
     
-    // Only reset the turn if we're not preserving it or if no current turn is set
-    if (!preserveCurrentTurn || !currentPlayerTurn || !turnSystemPlayerList.includes(currentPlayerTurn)) {
-        currentPlayerIndex = 0;
-        currentPlayerTurn = turnSystemPlayerList[0] || null;
-        console.log(`Turn system initialized for ${turnSystemPlayerList.length} players. First turn: ${currentPlayerTurn}`);
+    if (preserveCurrentTurn && turnSystemPlayerList.includes(currentPlayerTurn)) {
+        console.log(`Turn system updated for ${turnSystemPlayerList.length} players. Current turn preserved: ${currentPlayerTurn}`);
     } else {
-        // Preserve current turn but update the index to match the current player in the new list
-        currentPlayerIndex = turnSystemPlayerList.indexOf(currentPlayerTurn);
+        // Only reset turn state if not preserving current turn
+        currentPlayerIndex = 0;
+        currentPlayerTurn = players[0] || null;
         console.log(`Turn system updated for ${turnSystemPlayerList.length} players. Current turn preserved: ${currentPlayerTurn}`);
     }
     
@@ -34,8 +36,16 @@ function initializeTurnSystem(players, isMultiplayer = false, preserveCurrentTur
     
     // Initialize scoring system
     initializePlayerScores(players);
-    pendingPoints = 0;
-    currentTurnPoints = [];
+    
+    // Only reset pending points if we're not preserving the current turn
+    // This prevents pending points from being lost during Firebase state updates
+    if (!preserveCurrentTurn) {
+        pendingPoints = 0;
+        currentTurnPoints = [];
+        console.log('🎮 TURN INIT: Reset pending points (new game/turn)');
+    } else {
+        console.log('🎮 TURN INIT: Preserving pending points:', pendingPoints);
+    }
     
     updateTurnDisplay();
     updatePendingPointsDisplay();
@@ -210,6 +220,7 @@ function initializePlayerScores(players) {
 }
 
 function addPendingPoints(points, description = '') {
+    const oldPendingPoints = pendingPoints;
     pendingPoints += points;
     currentTurnPoints.push({
         points: points,
@@ -217,7 +228,10 @@ function addPendingPoints(points, description = '') {
         timestamp: Date.now()
     });
     
-    console.log(`Added ${points} pending points${description ? ` (${description})` : ''}. Total pending: ${pendingPoints}`);
+    console.log(`🎲 PENDING POINTS DEBUG: Added ${points} points (${description})`);
+    console.log(`🎲 Previous pending: ${oldPendingPoints}, New pending: ${pendingPoints}`);
+    console.log(`🎲 Current turn points array:`, currentTurnPoints);
+    
     updateTurnDisplay();
     updatePendingPointsDisplay();
 }
@@ -240,6 +254,8 @@ function bankPendingPoints(playerId = null) {
     console.log('🏛️ currentPlayerTurn:', currentPlayerTurn);
     console.log('🏛️ window.myPlayerId:', window.myPlayerId);
     console.log('🏛️ window.currentPlayerId:', window.currentPlayerId);
+    console.log('🏛️ 💰 PENDING POINTS AT BANKING START:', pendingPoints);
+    console.log('🏛️ 💰 CURRENT TURN POINTS:', currentTurnPoints);
     
     // CRITICAL FIX: Use Firebase currentPlayerId for multiplayer, fallback to currentPlayerTurn
     if (!playerId) {
@@ -291,12 +307,6 @@ function bankPendingPoints(playerId = null) {
         // Clear pending points
         pendingPoints = 0;
         currentTurnPoints = [];
-        
-        // Reset locked dice after banking
-        if (typeof resetLockedDice === 'function') {
-            resetLockedDice();
-            console.log('🏦 Cleared all locked dice after banking');
-        }
         
         updateTurnDisplay();
         updatePendingPointsDisplay();
@@ -534,7 +544,7 @@ function onPlayerLeft(playerId, updatedPlayerList) {
     
     // Update player list and reinitialize turn system
     if (typeof initializeTurnSystem === 'function') {
-        initializeTurnSystem(updatedPlayerList, true);
+        initializeTurnSystem(updatedPlayerList, true, true); // Preserve current turn and pending points
         updateGameControlsState();
     }
 }

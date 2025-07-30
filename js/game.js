@@ -261,7 +261,9 @@ function updateGameControlsState() {
         bankPointsButton.disabled = newDisabled;
         bankPointsButton.style.display = newDisplay;
         if (hasPendingPoints) {
-            bankPointsButton.textContent = `Bank ${getPendingPoints()} Points & End Turn`;
+            const currentPending = getPendingPoints();
+            console.log(`🎮 💰 BANK BUTTON: Updating text with ${currentPending} pending points`);
+            bankPointsButton.textContent = `Bank ${currentPending} Points & End Turn`;
         }
     }
     
@@ -678,8 +680,8 @@ function initializeMultiplayerMode(roomId, playerId, playerList) {
     window.myPlayerId = playerId; // Keep window variable in sync
     isInMultiplayerRoom = true;
     
-    // Initialize turn system with all players
-    initializeTurnSystem(playerList, true);
+    // Initialize turn system with all players - preserve current turn and pending points
+    initializeTurnSystem(playerList, true, true);
     
     // Load this player's material preferences
     const preferences = getPlayerMaterialPreferences(myPlayerId);
