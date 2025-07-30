@@ -36,7 +36,10 @@ let currentPlayerId = null;
 let currentPlayerName = null;
 let gameStateListener = null;
 let playersStateListener = null;
+let gameSettingsListener = null;
 let diceResultsListener = null;
+let diceSelectionsListener = null;
+let lockedDiceListener = null;
 let materialChangesListener = null;
 let farkleStatesListener = null;
 
@@ -103,7 +106,10 @@ function initializeFirebaseStateManager(roomId, playerId, playerName) {
     // Set up state listeners
     setupGameStateListener();
     setupPlayersStateListener();
+    setupGameSettingsListener();
     setupDiceResultsListener();
+    setupDiceSelectionsListener();
+    setupLockedDiceListener();
     setupMaterialChangesListener();
     setupFarkleStatesListener();
     
@@ -145,6 +151,39 @@ function setupPlayersStateListener() {
         
         if (players) {
             handlePlayersStateChange(players);
+        }
+    });
+}
+
+// Set up listener for game settings changes
+function setupGameSettingsListener() {
+    if (!currentRoomId) return;
+    
+    const gameSettingsRef = database.ref(`rooms/${currentRoomId}/gameSettings`);
+    
+    gameSettingsListener = gameSettingsRef.on('value', (snapshot) => {
+        const gameSettings = snapshot.val();
+        console.log('🎮 Game settings updated:', gameSettings);
+        
+        if (gameSettings && gameSettings.updatedBy !== currentPlayerId) {
+            // Only apply settings if they were updated by another player
+            console.log('🎮 Applying game settings from another player');
+            
+            // Update game settings using the game-settings.js module
+            if (typeof updateGameSettings === 'function') {
+                updateGameSettings(gameSettings);
+                
+                // Check if scoring modal is currently open and update it
+                const scoringModal = document.getElementById('scoringModal');
+                if (scoringModal && scoringModal.classList.contains('show')) {
+                    console.log('📊 Scoring modal is open - updating display immediately');
+                    if (typeof updateScoringGuide === 'function') {
+                        updateScoringGuide();
+                    }
+                }
+                
+                console.log(`🎮 Game settings updated by host: Three 1s=${gameSettings.threeOnesRule}, Winning=${gameSettings.winningScore}, Minimum=${gameSettings.minimumScore}`);
+            }
         }
     });
 }
@@ -804,6 +843,71 @@ function setupDiceResultsListener() {
     });
 }
 
+// Set up listener for dice selections
+function setupDiceSelectionsListener() {
+    if (!currentRoomId) return;
+    
+    const diceSelectionsRef = database.ref(`rooms/${currentRoomId}/diceSelections`);
+    
+    diceSelectionsListener = diceSelectionsRef.on('child_added', (snapshot) => {
+        const selectionData = snapshot.val();
+        console.log('🎯 Dice selection received:', selectionData);
+        
+        if (selectionData && selectionData.playerId !== currentPlayerId) {
+            // Call function to display other players' dice selections
+            if (typeof displayOtherPlayerDiceSelections === 'function') {
+                displayOtherPlayerDiceSelections({
+                    playerId: selectionData.playerId,
+                    selectedDiceIndices: selectionData.selectedDiceIndices,
+                    diceResults: selectionData.diceResults
+                });
+            }
+        }
+    });
+}
+
+// Set up listener for locked dice changes
+function setupLockedDiceListener() {
+    if (!currentRoomId) return;
+    
+    const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
+    
+    lockedDiceListener = lockedDiceRef.on('child_added', (snapshot) => {
+        try {
+            const lockedData = snapshot.val();
+            console.log('🔒 Locked dice received:', lockedData);
+            console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
+            
+            if (lockedData && lockedData.playerId !== currentPlayerId) {
+                console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
+                console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
+                console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
+                
+                // Call function to display other players' locked dice
+                if (typeof displayOtherPlayerLockedDice === 'function') {
+                    console.log('🔒 Calling displayOtherPlayerLockedDice...');
+                    displayOtherPlayerLockedDice({
+                        playerId: lockedData.playerId,
+                        lockedDiceIndices: lockedData.lockedDiceIndices,
+                        diceResults: lockedData.diceResults
+                    });
+                    console.log('🔒 displayOtherPlayerLockedDice call completed');
+                } else {
+                    console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
+                    console.error('🔒 Available functions in window:', Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('display')));
+                }
+                
+                console.log('🔒 playerLockedDiceStates after:', JSON.stringify(window.playerLockedDiceStates));
+            } else {
+                console.log('🔒 Ignoring locked dice from self or invalid data');
+            }
+        } catch (error) {
+            console.error('🔒 Error in locked dice listener:', error);
+            console.error('🔒 Error stack:', error.stack);
+        }
+    });
+}
+
 // Set up listener for material changes
 function setupMaterialChangesListener() {
     if (!currentRoomId) return;
@@ -885,6 +989,44 @@ function broadcastDiceResults(playerId, diceResults) {
     });
 }
 
+// Broadcast dice selection changes via Firebase
+function broadcastDiceSelection(playerId, selectedDiceIndices, diceResults) {
+    if (!currentRoomId || !database) return;
+    
+    console.log(`🎯 Broadcasting dice selection via Firebase for ${playerId}:`, selectedDiceIndices);
+    
+    const diceSelectionRef = database.ref(`rooms/${currentRoomId}/diceSelections`);
+    diceSelectionRef.push({
+        playerId: playerId,
+        selectedDiceIndices: selectedDiceIndices,
+        diceResults: diceResults, // Include current dice results for context
+        timestamp: Date.now()
+    }).then(() => {
+        console.log('🎯 Dice selection broadcast successfully');
+    }).catch((error) => {
+        console.error('❌ Error broadcasting dice selection:', error);
+    });
+}
+
+// Broadcast locked dice state via Firebase
+function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
+    if (!currentRoomId || !database) return;
+    
+    console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
+    
+    const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
+    lockedDiceRef.push({
+        playerId: playerId,
+        lockedDiceIndices: lockedDiceIndices,
+        diceResults: diceResults, // Include current dice results for context
+        timestamp: Date.now()
+    }).then(() => {
+        console.log('🔒 Locked dice broadcast successfully');
+    }).catch((error) => {
+        console.error('❌ Error broadcasting locked dice:', error);
+    });
+}
+
 // Broadcast material changes via Firebase
 function broadcastMaterialChange(playerId, diceType, floorType) {
     if (!currentRoomId || !database) return;
@@ -901,6 +1043,74 @@ function broadcastMaterialChange(playerId, diceType, floorType) {
         console.log('🎨 Material change broadcast successfully');
     }).catch((error) => {
         console.error('❌ Error broadcasting material change:', error);
+    });
+}
+
+// Broadcast game settings to all players in the room
+function broadcastGameSettings(gameSettings) {
+    if (!currentRoomId || !database) {
+        console.warn('Cannot broadcast game settings - no room or database connection');
+        return;
+    }
+    
+    console.log('🎮 Broadcasting game settings to all players:', gameSettings);
+    
+    // Save game settings to Firebase for all players in the room
+    const gameSettingsRef = database.ref(`rooms/${currentRoomId}/gameSettings`);
+    gameSettingsRef.set({
+        ...gameSettings,
+        updatedBy: currentPlayerId,
+        timestamp: Date.now()
+    }).then(() => {
+        console.log('✅ Game settings broadcast successfully');
+    }).catch((error) => {
+        console.error('❌ Error broadcasting game settings:', error);
+    });
+}
+
+// Reset all scores in the multiplayer room
+function resetAllScores() {
+    if (!currentRoomId || !database) {
+        console.warn('Cannot reset scores - no room or database connection');
+        // Fallback to local reset for single player
+        if (typeof initializePlayerScores === 'function') {
+            const players = Object.keys(getAllPlayerScores() || {});
+            initializePlayerScores(players);
+        }
+        if (typeof clearPendingPoints === 'function') {
+            clearPendingPoints();
+        }
+        return;
+    }
+    
+    console.log('🔄 Resetting all scores in multiplayer room');
+    
+    // Reset all player scores in Firebase
+    const playersRef = database.ref(`rooms/${currentRoomId}/players`);
+    playersRef.once('value', (snapshot) => {
+        const players = snapshot.val();
+        if (players) {
+            const updates = {};
+            for (const playerId in players) {
+                updates[`${playerId}/score`] = 0;
+            }
+            
+            playersRef.update(updates).then(() => {
+                console.log('✅ All scores reset successfully in Firebase');
+                
+                // Also reset local pending points
+                if (typeof clearPendingPoints === 'function') {
+                    clearPendingPoints();
+                }
+                
+                // Update UI
+                if (typeof updateGameControlsState === 'function') {
+                    updateGameControlsState();
+                }
+            }).catch((error) => {
+                console.error('❌ Error resetting scores in Firebase:', error);
+            });
+        }
     });
 }
 
@@ -933,9 +1143,24 @@ function cleanupFirebaseStateManager() {
         playersStateListener = null;
     }
     
+    if (gameSettingsListener && currentRoomId) {
+        database.ref(`rooms/${currentRoomId}/gameSettings`).off('value', gameSettingsListener);
+        gameSettingsListener = null;
+    }
+    
     if (diceResultsListener && currentRoomId) {
         database.ref(`rooms/${currentRoomId}/diceResults`).off('child_added', diceResultsListener);
         diceResultsListener = null;
+    }
+    
+    if (diceSelectionsListener && currentRoomId) {
+        database.ref(`rooms/${currentRoomId}/diceSelections`).off('child_added', diceSelectionsListener);
+        diceSelectionsListener = null;
+    }
+    
+    if (lockedDiceListener && currentRoomId) {
+        database.ref(`rooms/${currentRoomId}/lockedDice`).off('child_added', lockedDiceListener);
+        lockedDiceListener = null;
     }
     
     if (materialChangesListener && currentRoomId) {
@@ -984,6 +1209,8 @@ window.endMyTurn = endMyTurn;
 window.handlePlayerBanking = handlePlayerBanking;
 window.broadcastDiceResults = broadcastDiceResults;
 window.broadcastMaterialChange = broadcastMaterialChange;
+window.broadcastGameSettings = broadcastGameSettings;
+window.resetAllScores = resetAllScores;
 window.cleanupFirebaseStateManager = cleanupFirebaseStateManager;
 window.handlePlayerFarkle = handlePlayerFarkle;
 window.markPlayerAsConnected = markPlayerAsConnected;
@@ -1047,6 +1274,8 @@ if (typeof module !== 'undefined' && module.exports) {
         handlePlayerBanking,
         broadcastDiceResults,
         broadcastMaterialChange,
+        broadcastGameSettings,
+        resetAllScores,
         cleanupFirebaseStateManager,
         PLAYER_STATES
     };

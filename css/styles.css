@@ -40,10 +40,39 @@ canvas {
     transform: scale(1.05);
 }
 
+#dice-results-container img.selected-by-other {
+    border: 3px solid #ffc107 !important;
+    background-color: #fff3cd;
+    transform: scale(1.05);
+    animation: otherPlayerSelection 1s ease-in-out;
+}
+
+@keyframes otherPlayerSelection {
+    0% { box-shadow: 0 0 0 rgba(255, 193, 7, 0.7); }
+    50% { box-shadow: 0 0 15px rgba(255, 193, 7, 0.9); }
+    100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.7); }
+}
+
 #dice-results-container img.locked {
-    opacity: 0.5;
-    filter: grayscale(50%);
+    opacity: 0.8;
+    filter: grayscale(20%);
     cursor: not-allowed;
+    border: 3px solid #dc3545 !important;
+    background-color: #f8d7da;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.7) !important;
+    animation: lockedDiceGlow 2s ease-in-out infinite alternate;
+}
+
+/* Locked dice styling takes priority over selection styling */
+#dice-results-container img.locked.selected-by-other {
+    border: 3px solid #dc3545 !important;
+    background-color: #f8d7da !important;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.7) !important;
+}
+
+@keyframes lockedDiceGlow {
+    0% { box-shadow: 0 0 10px rgba(220, 53, 69, 0.5); }
+    100% { box-shadow: 0 0 20px rgba(220, 53, 69, 0.9); }
 }
 
 #dice-results-container img.rolling {

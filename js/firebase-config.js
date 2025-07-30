@@ -59,10 +59,15 @@ function updatePlayerList(snapshot) {
     }
 
     firebasePlayerList.innerHTML = ''; // Clear the current list
+    
+    // Show/hide player list title based on whether there are players
+    const playerListTitle = document.getElementById('player-list-title');
+    let hasPlayers = false;
 
     snapshot.forEach(childSnapshot => {
         const playerData = childSnapshot.val();
         if (playerData && playerData.name && playerData.score !== undefined) {
+            hasPlayers = true;
             const listItem = document.createElement('li');
             listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
             listItem.setAttribute('data-player-name', playerData.name);
@@ -99,6 +104,11 @@ function updatePlayerList(snapshot) {
             firebasePlayerList.appendChild(listItem);
         }
     });
+    
+    // Show player list title if there are players
+    if (playerListTitle) {
+        playerListTitle.style.display = hasPlayers ? 'block' : 'none';
+    }
 }
 
 // Listen for changes in the players data
@@ -131,14 +141,17 @@ clearRoomButton.addEventListener('click', () => {
         return;
     }
 
-    // Show confirmation message first
+    // Use lowercase for Firebase operations
+    const roomKey = roomName.toLowerCase();
+
+    // Show confirmation message first (with original capitalization)
     showAdminStatus('clear-room', `Click again to confirm clearing room "${roomName}"`, false, 5000);
     
     // Add temporary click handler for confirmation
     const confirmHandler = () => {
-        const roomRef = database.ref(`rooms/${roomName}/players`);
+        const roomRef = database.ref(`rooms/${roomKey}/players`); // Use lowercase for Firebase
         roomRef.remove().then(() => {
-            showAdminStatus('clear-room', `✅ Room "${roomName}" has been cleared.`);
+            showAdminStatus('clear-room', `✅ Room "${roomName}" has been cleared.`); // Display original capitalization
         }).catch((error) => {
             console.error('Error clearing room:', error);
             showAdminStatus('clear-room', 'Failed to clear the room. Check console for details.', false);
@@ -165,12 +178,15 @@ resetScoresButton.addEventListener('click', () => {
         return;
     }
 
-    // Show confirmation message first
+    // Use lowercase for Firebase operations
+    const roomKey = roomName.toLowerCase();
+
+    // Show confirmation message first (with original capitalization)
     showAdminStatus('reset-scores', `Click again to confirm resetting scores in "${roomName}"`, false, 5000);
     
     // Add temporary click handler for confirmation
     const confirmHandler = () => {
-        const roomPlayersRef = database.ref(`rooms/${roomName}/players`);
+        const roomPlayersRef = database.ref(`rooms/${roomKey}/players`); // Use lowercase for Firebase
         roomPlayersRef.once('value', (snapshot) => {
             const players = snapshot.val();
             if (players) {
@@ -179,7 +195,7 @@ resetScoresButton.addEventListener('click', () => {
                     updates[`${playerId}/score`] = 0;
                 }
                 roomPlayersRef.update(updates).then(() => {
-                    showAdminStatus('reset-scores', `✅ All scores in room "${roomName}" have been reset to 0.`);
+                    showAdminStatus('reset-scores', `✅ All scores in room "${roomName}" have been reset to 0.`); // Display original capitalization
                 }).catch((error) => {
                     console.error('Error resetting scores:', error);
                     showAdminStatus('reset-scores', 'Failed to reset scores. Check console for details.', false);

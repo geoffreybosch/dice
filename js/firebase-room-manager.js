@@ -1,5 +1,5 @@
-// Minimal WebRTC for room management only
-// Firebase handles all game communication (dice results, material changes, game state)
+// Firebase Room Management
+// Handles room creation, joining, leaving, and UI management for multiplayer rooms
 
 // URL parameter utility functions
 function getURLParameter(name) {
@@ -44,8 +44,8 @@ let hostId = null;
 let roomId = null; // This will be the lowercase version for Firebase
 let displayRoomName = null; // This will be the original capitalization for display
 
-// Basic Firebase signaling for host management
-function setupSignaling() {
+// Firebase host management
+function setupHostManagement() {
     if (!roomId || !database) return;
     
     const roomRef = database.ref(`rooms/${roomId}`);
@@ -65,7 +65,7 @@ const roomNameInput = document.getElementById('room-name');
 const playerNameInput = document.getElementById('player-name');
 const joinRoomButton = document.getElementById('join-room');
 const playerListContainer = document.getElementById('player-list');
-const webrtcPlayerList = playerListContainer?.querySelector('ul');
+const roomPlayerList = playerListContainer?.querySelector('ul');
 
 // Enable the join room button only if both fields have text
 function updateJoinButtonState() {
@@ -97,7 +97,7 @@ if (joinRoomButton) {
         displayRoomName = roomName;
         roomId = roomName.toLowerCase();
         
-        setupSignaling();
+        setupHostManagement();
         savePlayerData(roomName, playerName); // Save original capitalization
 
         const roomRef = database.ref(`rooms/${roomId}`); // Use lowercase for Firebase
@@ -214,8 +214,8 @@ if (joinRoomButton) {
             // Listen for player list changes
             roomRef.child('players').on('value', (snapshot) => {
                 const players = snapshot.val();
-                if (webrtcPlayerList) {
-                    webrtcPlayerList.innerHTML = '';
+                if (roomPlayerList) {
+                    roomPlayerList.innerHTML = '';
                     const playerNames = [];
                     const currentPlayerIds = [];
                     
@@ -267,7 +267,7 @@ if (joinRoomButton) {
                         
                         li.appendChild(playerNameContainer);
                         li.appendChild(scoreBadge);
-                        webrtcPlayerList.appendChild(li);
+                        roomPlayerList.appendChild(li);
                         
                         playerNames.push(players[id].name);
                     }
@@ -421,3 +421,10 @@ window.addEventListener('beforeunload', () => {
         });
     }
 });
+
+// Export functions for global access
+window.getURLParameter = getURLParameter;
+window.setURLParameter = setURLParameter;
+window.initializeRoomFromURL = initializeRoomFromURL;
+window.hideInputsShowDisplay = hideInputsShowDisplay;
+window.showInputsHideDisplay = showInputsHideDisplay;

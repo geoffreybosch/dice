@@ -26,6 +26,11 @@ let selectedDiceIndices = [];
 let lockedDiceIndices = [];
 let availableDiceCount = 6;
 
+// Store locked dice state for each player (for spectating functionality)
+let playerLockedDiceStates = {};
+// Make it accessible globally for debugging
+window.playerLockedDiceStates = playerLockedDiceStates;
+
 // Initialize Three.js scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 800 / 500, 0.1, 1000);
@@ -186,9 +191,13 @@ function updateGameControlsState() {
     const diceSelectionControls = document.getElementById('dice-selection-controls');
     const diceCanvas = document.getElementById('dice-canvas');
     const diceResultsContainer = document.getElementById('dice-results-container');
+    const energySliderContainer = document.getElementById('energy-slider-container');
     
     const canAct = canPlayerAct();
     const hasPendingPoints = typeof getPendingPoints === 'function' ? getPendingPoints() > 0 : false;
+    
+    // Find the dice rolling container (the card containing roll button and energy slider)
+    const diceRollingContainer = rollButton ? rollButton.closest('.card') : null;
     
     console.log('🎮 Control state info:', {
         myPlayerId,
@@ -202,7 +211,9 @@ function updateGameControlsState() {
             materialsButton: !!materialsButton,
             diceSelectionControls: !!diceSelectionControls,
             diceCanvas: !!diceCanvas,
-            diceResultsContainer: !!diceResultsContainer
+            diceResultsContainer: !!diceResultsContainer,
+            energySliderContainer: !!energySliderContainer,
+            diceRollingContainer: !!diceRollingContainer
         }
     });
     
@@ -215,15 +226,29 @@ function updateGameControlsState() {
         diceResultsContainer.style.display = 'flex';
     }
     
-    // Show waiting message if not your turn and in multiplayer mode (only if no dice results)
-    if (!canAct && isInMultiplayerRoom) {
-        console.log('🎮 Not player turn and in multiplayer - checking for waiting message');
-        // Only show waiting message if there are no current dice results displayed
-        const hasCurrentResults = currentDiceResults && currentDiceResults.length > 0;
-        console.log(`🎮 Has current results: ${hasCurrentResults}, currentDiceResults:`, currentDiceResults);
-        if (!hasCurrentResults) {
-            console.log('🎮 Showing waiting message');
-            showWaitingForTurnMessage();
+    // Show/hide dice rolling container based on turn
+    if (diceRollingContainer) {
+        if (canAct) {
+            console.log('🎮 Showing dice rolling container (player can act)');
+            diceRollingContainer.style.display = 'block';
+        } else {
+            console.log('🎮 Hiding dice rolling container (not player\'s turn)');
+            diceRollingContainer.style.display = 'none';
+        }
+    }
+    
+    // Show waiting message if it's not your turn and in multiplayer mode
+    const isMyTurn = typeof isPlayerTurn === 'function' ? isPlayerTurn(myPlayerId) : true;
+    if (!isMyTurn && isInMultiplayerRoom) {
+        console.log('🎮 Not my turn and in multiplayer - showing waiting message');
+        console.log('🎮 Debug: myPlayerId =', myPlayerId, 'isMyTurn =', isMyTurn);
+        showWaitingForTurnMessage();
+    } else if (isMyTurn && isInMultiplayerRoom) {
+        console.log('🎮 It is my turn - ensuring waiting message is not shown');
+        // If it's my turn and the dice results container only has waiting message, clear it
+        const diceResultsContainer = document.getElementById('dice-results-container');
+        if (diceResultsContainer && diceResultsContainer.textContent.includes('Waiting for other player')) {
+            diceResultsContainer.innerHTML = '<p class="text-muted">Click "Roll" to start your turn</p>';
         }
     }
     
@@ -232,6 +257,13 @@ function updateGameControlsState() {
         const newDisabled = !canAct;
         console.log(`🎮 Setting materials button disabled: ${materialsButton.disabled} → ${newDisabled}`);
         materialsButton.disabled = newDisabled;
+    }
+    
+    // Enable/disable roll button based on turn
+    if (rollButton) {
+        const newDisabled = !canAct;
+        console.log(`🎮 Setting roll button disabled: ${rollButton.disabled} → ${newDisabled}`);
+        rollButton.disabled = newDisabled;
     }
     
     // Show/hide dice selection controls based on turn AND whether there are dice to select
@@ -390,6 +422,9 @@ function displayDiceResults(results) {
 
 // Function to display other players' dice results
 function displayOtherPlayerResults(playerId, diceResults) {
+    console.log(`🎲 [displayOtherPlayerResults] Called for ${playerId} with results:`, diceResults);
+    console.log(`🎲 [displayOtherPlayerResults] Current stored locked states:`, JSON.stringify(playerLockedDiceStates));
+    
     const diceResultsContainer = document.getElementById('dice-results-container');
     if (!diceResultsContainer) return;
     
@@ -418,6 +453,15 @@ function displayOtherPlayerResults(playerId, diceResults) {
         diceImage.style.opacity = '0.8'; // Slightly transparent to show it's not your turn
         diceImage.title = `${playerId}'s dice ${index + 1} (value: ${result})`;
         
+        // Check if this dice is locked for this player and apply red glow
+        const playerLockedDice = playerLockedDiceStates[playerId] || [];
+        console.log(`🔒 [displayOtherPlayerResults] Checking dice ${index} for ${playerId}, locked dice:`, playerLockedDice);
+        if (playerLockedDice.includes(index)) {
+            diceImage.classList.add('locked');
+            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${result}) - LOCKED`;
+            console.log(`🔒 [displayOtherPlayerResults] Applied locked styling to dice ${index} for ${playerId}`);
+        }
+        
         // Add error handling for missing images
         diceImage.onerror = function() {
             this.style.display = 'none';
@@ -429,6 +473,8 @@ function displayOtherPlayerResults(playerId, diceResults) {
     
     diceResultsContainer.appendChild(diceContainer);
     
+    console.log(`🎲 Displayed dice results for ${playerId} with locked dice:`, playerLockedDiceStates[playerId] || []);
+    
     // Hide dice selection controls when showing other player's results (not interactive)
     const diceSelectionControls = document.getElementById('dice-selection-controls');
     if (diceSelectionControls) {
@@ -438,6 +484,108 @@ function displayOtherPlayerResults(playerId, diceResults) {
     // Hide instruction text when showing other player's results
     updateInstructionTextVisibility(false);
 }
+
+// Function to display other players' dice selections (updates existing dice with selection indicators)
+function displayOtherPlayerDiceSelections(data) {
+    const { playerId, selectedDiceIndices, diceResults } = data;
+    
+    console.log(`🎯 Displaying dice selections from ${playerId}:`, selectedDiceIndices);
+    console.log(`🎯 Current locked dice for ${playerId}:`, playerLockedDiceStates[playerId] || []);
+    
+    // Only show selection indicators if the dice results are currently displayed for this player
+    const diceResultsContainer = document.getElementById('dice-results-container');
+    if (!diceResultsContainer) return;
+    
+    // Check if we're currently showing this player's results
+    const header = diceResultsContainer.querySelector('div strong');
+    if (!header || !header.textContent.includes(playerId)) {
+        console.log(`🎯 Not currently showing ${playerId}'s results, skipping selection display`);
+        return;
+    }
+    
+    // Find all dice images and update their selection indicators
+    const diceImages = diceResultsContainer.querySelectorAll('img[alt*="' + playerId + '"]');
+    diceImages.forEach((diceImage, index) => {
+        // Remove any existing selection indicators, but preserve locked indicators
+        diceImage.classList.remove('selected-by-other');
+        
+        // Check if this dice is locked (preserve locked styling)
+        const playerLockedDice = playerLockedDiceStates[playerId] || [];
+        const isLocked = playerLockedDice.includes(index);
+        
+        if (isLocked) {
+            // Keep locked styling and don't override it
+            diceImage.classList.add('locked');
+            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]}) - LOCKED`;
+        } else {
+            // Clear any inline selection styling first for non-locked dice
+            diceImage.style.border = '';
+            diceImage.style.boxShadow = '';
+            
+            // Add selection indicator if this dice is selected
+            if (selectedDiceIndices.includes(index)) {
+                diceImage.classList.add('selected-by-other');
+                diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]}) - SELECTED`;
+                console.log(`🎯 Applied selection styling to dice ${index} for ${playerId}`);
+            } else {
+                diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]})`;
+                console.log(`🎯 Cleared selection styling from dice ${index} for ${playerId}`);
+            }
+        }
+    });
+}
+
+// Function to display other players' locked dice (updates existing dice with locked indicators)
+function displayOtherPlayerLockedDice(data) {
+    const { playerId, lockedDiceIndices, diceResults } = data;
+    
+    console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, lockedDiceIndices);
+    console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
+    
+    // Store the locked dice state for this player
+    playerLockedDiceStates[playerId] = lockedDiceIndices;
+    window.playerLockedDiceStates = playerLockedDiceStates;
+    console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
+    console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
+    
+    // Only show locked indicators if the dice results are currently displayed for this player
+    const diceResultsContainer = document.getElementById('dice-results-container');
+    if (!diceResultsContainer) {
+        console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
+        return;
+    }
+    
+    // Check if we're currently showing this player's results
+    const header = diceResultsContainer.querySelector('div strong');
+    if (!header || !header.textContent.includes(playerId)) {
+        console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
+        console.log(`🔒 [displayOtherPlayerLockedDice] Header text:`, header?.textContent);
+        return;
+    }
+    
+    console.log(`🔒 [displayOtherPlayerLockedDice] Currently showing ${playerId}'s results, applying locked styling now`);
+    
+    // Find all dice images and update their locked indicators
+    const diceImages = diceResultsContainer.querySelectorAll('img[alt*="' + playerId + '"]');
+    console.log(`🔒 [displayOtherPlayerLockedDice] Found ${diceImages.length} dice images for ${playerId}`);
+    
+    diceImages.forEach((diceImage, index) => {
+        // Remove any existing locked indicators first
+        diceImage.classList.remove('locked');
+        
+        // Add locked indicator if this dice is locked
+        if (lockedDiceIndices.includes(index)) {
+            diceImage.classList.add('locked');
+            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]}) - LOCKED`;
+            console.log(`🔒 [displayOtherPlayerLockedDice] Applied locked class to dice ${index} for ${playerId}`);
+        } else {
+            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]})`;
+        }
+    });
+}
+
+// Make the function globally accessible
+window.displayOtherPlayerLockedDice = displayOtherPlayerLockedDice;
 
 // Function to show waiting message when not your turn
 function showWaitingForTurnMessage() {
@@ -479,6 +627,11 @@ function toggleDiceSelection(diceIndex, imageElement) {
         // Select dice
         selectedDiceIndices.push(diceIndex);
         imageElement.classList.add('selected');
+    }
+    
+    // Broadcast dice selection to other players in multiplayer mode
+    if (isInMultiplayerRoom && typeof broadcastDiceSelection === 'function' && myPlayerId) {
+        broadcastDiceSelection(myPlayerId, selectedDiceIndices, currentDiceResults);
     }
     
     updateSelectionControls();
@@ -580,6 +733,13 @@ function lockSelectedDice() {
     // Clear selection
     selectedDiceIndices = [];
     
+    // Broadcast locked dice state to other players in multiplayer mode
+    if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
+        broadcastLockedDice(myPlayerId, lockedDiceIndices, currentDiceResults);
+        // Also store the state locally for consistency
+        playerLockedDiceStates[myPlayerId] = lockedDiceIndices;
+    }
+    
     // Re-display results without locked dice
     displayDiceResults(currentDiceResults);
     
@@ -611,6 +771,13 @@ function resetAllDiceForNewTurn() {
     lockedDiceIndices = [];
     availableDiceCount = 6;
     currentDiceResults = [];
+    
+    // Broadcast that all dice are now unlocked to other players in multiplayer mode
+    if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
+        broadcastLockedDice(myPlayerId, [], []); // Empty arrays indicate no locked dice
+        // Also clear the stored state for this player
+        playerLockedDiceStates[myPlayerId] = [];
+    }
     
     // Reset 3D dice positions and make them visible
     diceBodies.forEach((body, index) => {
@@ -770,6 +937,13 @@ function resetLockedDice() {
     selectedDiceIndices = [];
     availableDiceCount = 6;
     
+    // Broadcast that all dice are now unlocked to other players in multiplayer mode
+    if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
+        broadcastLockedDice(myPlayerId, [], []); // Empty arrays indicate no locked dice
+        // Also clear the stored state for this player
+        playerLockedDiceStates[myPlayerId] = [];
+    }
+    
     // Reset roll button
     const rollButton = document.getElementById('roll-dice');
     if (rollButton) {
@@ -804,9 +978,40 @@ function updateGameState() {
             rollButton.textContent = 'Roll';
             rollButton.disabled = false;
         } else {
-            rollButton.textContent = 'All Dice Locked';
-            rollButton.disabled = true;
+            // Hot dice scenario - all 6 dice are locked!
+            console.log('🔥 HOT DICE! All 6 dice are locked - resetting and allowing player to continue');
+            
+            // Show hot dice message
+            showHotDiceMessage();
+            
+            // Reset all locked dice after a brief delay to let the message show
+            setTimeout(() => {
+                resetLockedDice();
+                
+                // Keep the roll button enabled so player can continue
+                if (rollButton) {
+                    rollButton.textContent = 'Roll';
+                    rollButton.disabled = false;
+                }
+            }, 100); // Small delay to ensure UI updates properly
         }
+    }
+}
+
+// Function to show hot dice message
+function showHotDiceMessage() {
+    const hotDiceMessage = document.getElementById('hot-dice-message');
+    if (hotDiceMessage) {
+        const playerName = myPlayerId || window.myPlayerId || 'Player';
+        hotDiceMessage.innerHTML = `🔥 ${playerName} has hot dice! 🔥<br><small>All 6 dice scored - roll again!</small>`;
+        hotDiceMessage.style.display = 'block';
+        
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+            hotDiceMessage.style.display = 'none';
+        }, 3000);
+        
+        console.log(`🔥 Hot dice message displayed for ${playerName}`);
     }
 }
 
