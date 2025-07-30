@@ -285,8 +285,7 @@ function hideInputsShowDisplay(roomName, playerName) {
         joinRoomButton: document.getElementById('join-room'),
         currentRoomName: document.getElementById('current-room-name'),
         currentPlayerName: document.getElementById('current-player-name'),
-        roomDisplay: document.getElementById('room-display'),
-        playerDisplay: document.getElementById('player-display')
+        roomPlayerInfo: document.getElementById('room-player-info')
     };
 
     if (elements.roomNameInput) elements.roomNameInput.style.display = 'none';
@@ -294,8 +293,7 @@ function hideInputsShowDisplay(roomName, playerName) {
     if (elements.joinRoomButton) elements.joinRoomButton.style.display = 'none';
     if (elements.currentRoomName) elements.currentRoomName.textContent = roomName;
     if (elements.currentPlayerName) elements.currentPlayerName.textContent = playerName;
-    if (elements.roomDisplay) elements.roomDisplay.style.display = 'block';
-    if (elements.playerDisplay) elements.playerDisplay.style.display = 'block';
+    if (elements.roomPlayerInfo) elements.roomPlayerInfo.style.display = 'block';
 }
 
 function showInputsHideDisplay() {
@@ -303,15 +301,13 @@ function showInputsHideDisplay() {
         roomNameInput: document.getElementById('room-name'),
         playerNameInput: document.getElementById('player-name'),
         joinRoomButton: document.getElementById('join-room'),
-        roomDisplay: document.getElementById('room-display'),
-        playerDisplay: document.getElementById('player-display')
+        roomPlayerInfo: document.getElementById('room-player-info')
     };
 
     if (elements.roomNameInput) elements.roomNameInput.style.display = 'block';
     if (elements.playerNameInput) elements.playerNameInput.style.display = 'block';
     if (elements.joinRoomButton) elements.joinRoomButton.style.display = 'block';
-    if (elements.roomDisplay) elements.roomDisplay.style.display = 'none';
-    if (elements.playerDisplay) elements.playerDisplay.style.display = 'none';
+    if (elements.roomPlayerInfo) elements.roomPlayerInfo.style.display = 'none';
 }
 
 // Load player data on page load

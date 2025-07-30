@@ -13,30 +13,28 @@
             <!-- Controls on the left -->
             <div class="col-md-3 d-flex flex-column gap-3 bg-dark text-white p-3"> 
                 <h2 class="text-center">Farkle</h2>
+                <div id="room-player-info" class="text-center small" style="display: none;">
+                    <div class="text-light bg-secondary rounded px-2 py-1">
+                        <span id="current-room-name"></span> | <span id="current-player-name"></span>
+                    </div>
+                </div>
                 <div id="admin-section">
-                    <button id="admin-button" class="btn btn-warning w-100 mb-2" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
-                    <button id="materials-button" class="btn btn-info w-100 mb-2" data-bs-toggle="modal" data-bs-target="#materialsModal">Materials</button>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button id="admin-button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
+                        </div>
+                        <div class="col-6">
+                            <button id="materials-button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#materialsModal">Materials</button>
+                        </div>
+                    </div>
                 </div>
                 <div id="room-setup">
                     <input type="text" id="room-name" class="form-control" placeholder="Enter room name">
-                    <div id="room-display" class="alert alert-info" style="display: none;">
-                        <strong>Room:</strong> <span id="current-room-name"></span>
-                    </div>
                 </div>
                 <div id="player-setup">
                     <input type="text" id="player-name" class="form-control mb-2" placeholder="Enter your name">
                     <div id="name-error" class="text-danger small mb-2" style="display: none;"></div>
-                    <div id="player-display" class="alert alert-success" style="display: none;">
-                        <strong>Player:</strong> <span id="current-player-name"></span>
-                    </div>
                     <button id="join-room" class="btn btn-success w-100">Join Room</button>
-                </div>
-                <div id="controls">
-                    <button id="roll-dice" class="btn btn-primary w-100">Roll Dice</button>
-                </div>
-                <div id="energy-slider-container">
-                    <label for="energy-slider" class="form-label">Roll Energy:</label>
-                    <input type="range" id="energy-slider" class="form-range" min="10" max="30" value="12">
                 </div>
                 <div id="camera-controls" style="display: none;">
                     <label for="camera-height" class="form-label">Camera Height:</label>
@@ -56,6 +54,19 @@
             </div>
 
             <div class="col-md-9 d-flex flex-column align-items-center justify-content-center">
+                <div class="card bg-dark border-2 border-primary shadow-sm mb-4" style="min-width: 300px;">
+                    <div class="card-body text-center">
+                        <div class="d-flex flex-column align-items-center gap-3">
+                            <div id="controls">
+                                <button id="roll-dice" class="btn btn-primary btn-lg px-4">Roll Dice</button>
+                            </div>
+                            <div id="energy-slider-container" class="d-flex align-items-center gap-3 w-100 justify-content-center">
+                                <label for="energy-slider" class="form-label mb-0 text-nowrap fw-bold text-light">Roll Energy:</label>
+                                <input type="range" id="energy-slider" class="form-range" min="10" max="30" value="12" style="width: 150px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="dice-results-container" class="mb-3 d-flex justify-content-center align-items-center flex-wrap gap-2" style="min-height: 80px;">
                     <!-- Dice result images will be displayed here -->
                 </div>
