@@ -67,18 +67,26 @@ function nextTurn() {
     const oldPlayerIndex = currentPlayerIndex;
     const oldPlayer = currentPlayerTurn;
     
-    currentPlayerIndex = (currentPlayerIndex + 1) % turnSystemPlayerList.length;
-    currentPlayerTurn = turnSystemPlayerList[currentPlayerIndex];
-    
-    console.log(`🔄 Turn advanced from ${oldPlayer} (index ${oldPlayerIndex}) to ${currentPlayerTurn} (index ${currentPlayerIndex})`);
-    
-    updateTurnDisplay();
-    updatePendingPointsDisplay();
-    
-    // Apply the new player's material preferences
-    if (isMultiplayerMode) {
-        console.log(`🔄 Applying material preferences for ${currentPlayerTurn}`);
-        applyPlayerMaterialPreferences(currentPlayerTurn);
+    // Use Firebase state management instead of local turn tracking
+    if (typeof endMyTurn === 'function') {
+        console.log('🔄 Using Firebase state management to end turn');
+        endMyTurn(); // This will trigger Firebase state updates
+        return currentPlayerTurn; // Return current player since Firebase will handle the transition
+    } else {
+        // Fallback to local turn management if Firebase not available
+        currentPlayerIndex = (currentPlayerIndex + 1) % turnSystemPlayerList.length;
+        currentPlayerTurn = turnSystemPlayerList[currentPlayerIndex];
+        
+        console.log(`🔄 Turn advanced from ${oldPlayer} (index ${oldPlayerIndex}) to ${currentPlayerTurn} (index ${currentPlayerIndex})`);
+        
+        updateTurnDisplay();
+        updatePendingPointsDisplay();
+        
+        // Apply the new player's material preferences
+        if (isMultiplayerMode) {
+            console.log(`🔄 Applying material preferences for ${currentPlayerTurn}`);
+            applyPlayerMaterialPreferences(currentPlayerTurn);
+        }
     }
     
     console.log(`🔄 === nextTurn() END ===`);
@@ -191,7 +199,7 @@ function initializePlayerScores(players) {
                     }
                 }
                 console.log('Player scores loaded from Firebase (current players only):', playerScores);
-                updateScoreDisplay(); // Update the UI with loaded scores
+                updateScoreDisplayUI(); // Update ONLY the UI with loaded scores (no Firebase write)
             }
         }).catch((error) => {
             console.error('Error loading existing scores from Firebase:', error);
@@ -227,64 +235,141 @@ function clearPendingPoints() {
 }
 
 function bankPendingPoints(playerId = null) {
+    console.log('🏛️ === bankPendingPoints() START ===');
+    console.log('🏛️ Input playerId:', playerId);
+    console.log('🏛️ currentPlayerTurn:', currentPlayerTurn);
+    console.log('🏛️ window.myPlayerId:', window.myPlayerId);
+    console.log('🏛️ window.currentPlayerId:', window.currentPlayerId);
+    
+    // CRITICAL FIX: Use Firebase currentPlayerId for multiplayer, fallback to currentPlayerTurn
     if (!playerId) {
-        playerId = currentPlayerTurn;
+        if (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId) {
+            playerId = window.currentPlayerId;
+            console.log('🏛️ Using window.currentPlayerId as playerId:', playerId);
+        } else {
+            playerId = currentPlayerTurn;
+            console.log('🏛️ Using currentPlayerTurn as playerId:', playerId);
+        }
     }
+    
+    console.log('🏛️ Final playerId for banking:', playerId);
     
     if (pendingPoints <= 0) {
         console.log('No pending points to bank');
         return 0;
+    }
+
+    // Mark as critical operation to prevent connection cleanup during banking
+    if (typeof startCriticalOperation === 'function') {
+        startCriticalOperation();
     }
     
     const currentPendingPoints = pendingPoints; // Store the current pending points
     
     // Function to complete the banking process
     function completeBanking(existingScore = 0) {
+        console.log('🏦 === completeBanking() START ===');
+        console.log('🏦 Player ID:', playerId);
+        console.log('🏦 Existing score from Firebase:', existingScore);
+        console.log('🏦 Current pending points:', currentPendingPoints);
+        console.log('🏦 Current playerScores state:', playerScores);
+        
         // Initialize player's banked score if not exists, or use existing score from Firebase
         if (!(playerId in playerScores)) {
             playerScores[playerId] = existingScore;
+            console.log('🏦 Initialized playerScores for', playerId, 'with', existingScore);
+        } else {
+            console.log('🏦 Player', playerId, 'already in playerScores with score:', playerScores[playerId]);
         }
         
         // Add pending points to player's banked score
         playerScores[playerId] += currentPendingPoints;
+        const newScore = playerScores[playerId];
         
-        console.log(`${playerId} banked ${currentPendingPoints} points. New total: ${playerScores[playerId]} (was ${existingScore})`);
+        console.log(`🏦 ${playerId} banked ${currentPendingPoints} points. New total: ${newScore} (was ${existingScore})`);
         
         // Clear pending points
         pendingPoints = 0;
         currentTurnPoints = [];
         
+        // Reset locked dice after banking
+        if (typeof resetLockedDice === 'function') {
+            resetLockedDice();
+            console.log('🏦 Cleared all locked dice after banking');
+        }
+        
         updateTurnDisplay();
         updatePendingPointsDisplay();
         updateScoreDisplay();
+
+        // Use Firebase state management for banking
+        if (typeof handlePlayerBanking === 'function') {
+            console.log('🔥 Using Firebase state management for banking');
+            console.log('🔥 Calling handlePlayerBanking with:', currentPendingPoints, newScore);
+            handlePlayerBanking(currentPendingPoints, newScore);
+        } else {
+            // End critical operation if Firebase not available
+            if (typeof endCriticalOperation === 'function') {
+                endCriticalOperation();
+            }
+        }
         
         return currentPendingPoints;
     }
     
     // Check if in multiplayer room and get existing Firebase score
     if (typeof roomId !== 'undefined' && roomId && typeof database !== 'undefined') {
-        const roomRef = database.ref(`rooms/${roomId}/players`);
+        // Use Firebase state manager's currentRoomId and currentPlayerId if available
+        const firebaseRoomId = (typeof currentRoomId !== 'undefined' && currentRoomId) ? currentRoomId : roomId;
+        const firebasePlayerId = (typeof currentPlayerId !== 'undefined' && currentPlayerId) ? currentPlayerId : null;
         
-        roomRef.once('value', (snapshot) => {
-            const players = snapshot.val();
-            let existingScore = 0;
+        if (firebasePlayerId) {
+            // Direct lookup using Firebase player ID
+            const playerRef = database.ref(`rooms/${firebaseRoomId}/players/${firebasePlayerId}`);
             
-            if (players) {
-                // Find the current player's existing score in Firebase
-                for (const id in players) {
-                    if (players[id].name === playerId) {
-                        existingScore = players[id].score || 0;
-                        break;
+            console.log('🔍 Banking: Direct Firebase lookup');
+            console.log('🔍 Room:', firebaseRoomId);
+            console.log('🔍 Player ID:', firebasePlayerId);
+            console.log('🔍 Firebase path:', `rooms/${firebaseRoomId}/players/${firebasePlayerId}`);
+            
+            playerRef.once('value', (snapshot) => {
+                const player = snapshot.val();
+                const existingScore = player ? (player.score || 0) : 0;
+                
+                console.log('🔥 Found existing score for', firebasePlayerId, ':', existingScore);
+                console.log('🔥 Player data:', player);
+                completeBanking(existingScore);
+            }).catch((error) => {
+                console.error('Error fetching existing score:', error);
+                // Continue with banking even if Firebase read fails
+                completeBanking(0);
+            });
+        } else {
+            // Fallback: search by player name (original logic)
+            const roomRef = database.ref(`rooms/${firebaseRoomId}/players`);
+            
+            roomRef.once('value', (snapshot) => {
+                const players = snapshot.val();
+                let existingScore = 0;
+                
+                if (players) {
+                    // Find the current player's existing score in Firebase
+                    for (const id in players) {
+                        if (players[id].name === playerId) {
+                            existingScore = players[id].score || 0;
+                            console.log(`🔍 Found score by name search for ${playerId}: ${existingScore}`);
+                            break;
+                        }
                     }
                 }
-            }
-            
-            completeBanking(existingScore);
-        }).catch((error) => {
-            console.error('Error fetching existing score:', error);
-            // Continue with banking even if Firebase read fails
-            completeBanking(0);
-        });
+                
+                completeBanking(existingScore);
+            }).catch((error) => {
+                console.error('Error fetching existing score:', error);
+                // Continue with banking even if Firebase read fails
+                completeBanking(0);
+            });
+        }
         
         return currentPendingPoints; // Return immediately for async call
     } else {
@@ -345,9 +430,9 @@ function updatePendingPointsDisplay() {
     }
 }
 
-function updateScoreDisplay() {
-    // Update player scores in the player list
-    console.log('Updated player scores:', playerScores);
+function updateScoreDisplayUI() {
+    // Update player scores ONLY in the UI (no Firebase writes)
+    console.log('🎯 Updating UI with player scores:', playerScores);
     
     // Update local player list badges (both Firebase and WebRTC)
     const playerListContainer = document.getElementById('player-list');
@@ -362,40 +447,66 @@ function updateScoreDisplay() {
                 
                 if (scoreBadge && playerName && playerScores[playerName] !== undefined) {
                     scoreBadge.textContent = playerScores[playerName];
+                    console.log(`🎯 UI updated for ${playerName}: ${playerScores[playerName]}`);
                 }
             });
         }
     }
+}
+
+function updateScoreDisplay() {
+    // Update player scores in the player list
+    console.log('🔄 === updateScoreDisplay() START ===');
+    console.log('🔄 Current playerScores:', playerScores);
     
-    // Update Firebase database with new scores for multiplayer rooms
+    // First update the UI
+    updateScoreDisplayUI();
+    
+    // Then update Firebase database with new scores for multiplayer rooms
     if (typeof roomId !== 'undefined' && roomId && typeof database !== 'undefined') {
+        console.log('🔄 Updating Firebase with local scores...');
         const roomRef = database.ref(`rooms/${roomId}/players`);
         
         // Get current players and update their scores
         roomRef.once('value', (snapshot) => {
             const players = snapshot.val();
+            console.log('🔄 Firebase players from DB:', players);
+            
             if (players) {
                 const updates = {};
                 
                 for (const playerId in players) {
                     const playerName = players[playerId].name;
+                    console.log(`🔄 Processing Firebase player ID: ${playerId}, name: ${playerName}`);
+                    
                     if (playerScores[playerName] !== undefined) {
+                        console.log(`🔄 Will update ${playerId}/${playerName} score: ${playerScores[playerName]}`);
                         // Set the score in Firebase to match our local playerScores
                         updates[`${playerId}/score`] = playerScores[playerName];
+                    } else {
+                        console.log(`🔄 Skipping ${playerId}/${playerName} - not in local playerScores`);
                     }
                 }
+                
+                console.log('🔄 Final Firebase updates to apply:', updates);
                 
                 // Apply all updates at once
                 if (Object.keys(updates).length > 0) {
                     roomRef.update(updates).then(() => {
-                        console.log('Firebase scores updated successfully');
+                        console.log('🔄 Firebase scores updated successfully');
                     }).catch((error) => {
-                        console.error('Error updating Firebase scores:', error);
+                        console.error('🔄 Error updating Firebase scores:', error);
                     });
+                } else {
+                    console.log('🔄 No Firebase updates needed');
                 }
             }
         });
+    } else {
+        console.log('🔄 No Firebase room found - UI only update');
     }
+    
+    console.log('🔄 === updateScoreDisplay() END ===');
 }
 
 // Integration functions for WebRTC system
@@ -524,84 +635,28 @@ function onMaterialChangeReceived(data) {
 
 // Enhanced broadcasting functions
 function broadcastTurnChange(nextPlayerId) {
-    console.log(`📡 === broadcastTurnChange() START ===`);
-    console.log(`📡 Broadcasting turn change to: ${nextPlayerId}`);
-    
-    const data = {
-        type: 'turn_change',
-        currentPlayer: nextPlayerId,
-        timestamp: Date.now()
-    };
-    
-    console.log(`📡 Turn change data:`, data);
-    
-    // Send via WebRTC data channels
-    if (typeof sendToAllPeers === 'function') {
-        console.log('📡 sendToAllPeers function is available, attempting to send...');
-        try {
-            sendToAllPeers(JSON.stringify(data));
-            console.log('📡 Turn change broadcast sent successfully');
-        } catch (error) {
-            console.error('📡 Error sending turn change broadcast:', error);
-        }
-    } else {
-        console.error('📡 sendToAllPeers function not available!');
-    }
-    
-    console.log(`📡 === broadcastTurnChange() END ===`);
+    // Turn changes are now handled entirely by Firebase state management
+    // This function is kept for compatibility but does nothing
+    console.log(`📡 Turn change broadcasting handled by Firebase for: ${nextPlayerId}`);
 }
 
 function broadcastMaterialChange(playerId, diceType, floorType) {
-    const data = {
-        type: 'material_change',
-        playerId: playerId,
-        diceType: diceType,
-        floorType: floorType,
-        timestamp: Date.now()
-    };
-    
-    // Send via WebRTC data channels
-    if (typeof sendToAllPeers === 'function') {
-        sendToAllPeers(JSON.stringify(data));
+    // Use Firebase for material change broadcasting
+    if (typeof window.broadcastMaterialChange === 'function') {
+        window.broadcastMaterialChange(playerId, diceType, floorType);
+    } else {
+        console.error('❌ Firebase broadcastMaterialChange function not available');
     }
     
     console.log(`Broadcasting material change: ${playerId} -> Dice=${diceType}, Floor=${floorType}`);
 }
 
-// Message router for incoming WebRTC messages
-function handleIncomingMessage(senderId, messageData) {
-    try {
-        const data = JSON.parse(messageData);
-        
-        switch (data.type) {
-            case 'turn_change':
-                onTurnChangeReceived(data);
-                break;
-            case 'material_change':
-                onMaterialChangeReceived(data);
-                break;
-            case 'dice_results':
-                onDiceResultsReceived(data);
-                break;
-            default:
-                console.log(`Unknown message type: ${data.type}`);
-        }
-    } catch (error) {
-        console.error('Error handling incoming message:', error);
-    }
-}
-
 function broadcastDiceResults(playerId, diceResults) {
-    const data = {
-        type: 'dice_results',
-        playerId: playerId,
-        diceResults: diceResults,
-        timestamp: Date.now()
-    };
-    
-    // Send via WebRTC data channels
-    if (typeof sendToAllPeers === 'function') {
-        sendToAllPeers(JSON.stringify(data));
+    // Use Firebase for dice results broadcasting
+    if (typeof window.broadcastDiceResults === 'function') {
+        window.broadcastDiceResults(playerId, diceResults);
+    } else {
+        console.error('❌ Firebase broadcastDiceResults function not available');
     }
     
     console.log(`Broadcasting dice results for ${playerId}:`, diceResults);
@@ -656,6 +711,7 @@ if (typeof module !== 'undefined' && module.exports) {
         getAllPlayerScores,
         updatePendingPointsDisplay,
         updateScoreDisplay,
+        updateScoreDisplayUI,
         // WebRTC integration functions
         onRoomJoined,
         onPlayerJoined,
@@ -666,7 +722,6 @@ if (typeof module !== 'undefined' && module.exports) {
         broadcastTurnChange,
         broadcastMaterialChange,
         broadcastDiceResults,
-        onDiceResultsReceived,
-        handleIncomingMessage
+        onDiceResultsReceived
     };
 }

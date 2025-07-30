@@ -11,6 +11,9 @@ let currentBackgroundMaterial = savedPreferences.background || 'white';
 let myPlayerId = null;
 let isInMultiplayerRoom = false;
 
+// Make myPlayerId globally accessible for WebRTC integration
+window.myPlayerId = myPlayerId;
+
 // Use a div container for dice results images
 const diceResultsContainer = document.getElementById('dice-results-container');
 if (!diceResultsContainer) {
@@ -160,6 +163,17 @@ if (currentBackgroundMaterial !== 'white') {
 // Turn-based system functions
 function canPlayerAct(playerId = myPlayerId) {
     if (!isInMultiplayerRoom) return true; // Single player mode - always allow
+    
+    // For Firebase state management, check if this player is the current turn player
+    if (typeof currentRoomId !== 'undefined' && currentRoomId && typeof currentPlayerId !== 'undefined' && currentPlayerId) {
+        // Use Firebase state management
+        console.log('🔥 Checking turn via Firebase state management');
+        // We'll rely on the game state to determine if it's the player's turn
+        // The Firebase state manager will call updateGameControlsState when needed
+        return isPlayerTurn(playerId);
+    }
+    
+    // Fallback to original turn system
     return isPlayerTurn(playerId);
 }
 
@@ -192,12 +206,8 @@ function updateGameControlsState() {
         }
     });
     
-    // Show/hide dice canvas based on turn
-    if (diceCanvas) {
-        const newDisplay = canAct ? 'block' : 'none';
-        console.log(`🎮 Setting dice canvas display: ${diceCanvas.style.display} → ${newDisplay}`);
-        diceCanvas.style.display = newDisplay;
-    }
+    // Note: Dice canvas visibility is now controlled by Firebase state manager based on player state
+    // The showDiceRollingUI/hideDiceRollingUI functions handle dice canvas display
     
     // Always keep dice results container visible for showing other players' results
     if (diceResultsContainer) {
@@ -205,7 +215,7 @@ function updateGameControlsState() {
         diceResultsContainer.style.display = 'flex';
     }
     
-    // Show waiting message if not your turn and in multiplayer mode
+    // Show waiting message if not your turn and in multiplayer mode (only if no dice results)
     if (!canAct && isInMultiplayerRoom) {
         console.log('🎮 Not player turn and in multiplayer - checking for waiting message');
         // Only show waiting message if there are no current dice results displayed
@@ -217,12 +227,7 @@ function updateGameControlsState() {
         }
     }
     
-    // Enable/disable controls based on turn
-    if (rollButton) {
-        const newDisabled = !canAct;
-        console.log(`🎮 Setting roll button disabled: ${rollButton.disabled} → ${newDisabled}`);
-        rollButton.disabled = newDisabled;
-    }
+    // Enable/disable materials button based on turn
     if (materialsButton) {
         const newDisabled = !canAct;
         console.log(`🎮 Setting materials button disabled: ${materialsButton.disabled} → ${newDisabled}`);
@@ -670,6 +675,7 @@ function endPlayerTurn() {
 // Integration with multiplayer system
 function initializeMultiplayerMode(roomId, playerId, playerList) {
     myPlayerId = playerId;
+    window.myPlayerId = playerId; // Keep window variable in sync
     isInMultiplayerRoom = true;
     
     // Initialize turn system with all players
@@ -692,6 +698,7 @@ function initializeMultiplayerMode(roomId, playerId, playerList) {
 function exitMultiplayerMode() {
     isInMultiplayerRoom = false;
     myPlayerId = 'Player1';
+    window.myPlayerId = 'Player1'; // Keep window variable in sync
     
     // Reset to single player mode
     initializeTurnSystem([myPlayerId], false);
@@ -1327,9 +1334,26 @@ function updateDiceResults() {
 const energySlider = document.getElementById('energy-slider');
 
 // Event listener for roll dice button
-rollDiceButton.addEventListener('click', () => {
-    // If currently rolling, stop the rolling state
-    if (isRolling) {
+if (rollDiceButton) {
+    rollDiceButton.addEventListener('click', () => {
+        console.log('🎲 Roll dice button clicked!');
+        console.log('🎲 Debug info:', {
+            myPlayerId: myPlayerId,
+            isInMultiplayerRoom: isInMultiplayerRoom,
+            firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
+            canPlayerActResult: canPlayerAct()
+        });
+        
+        // Check if player can act first
+        if (!canPlayerAct()) {
+            console.log('Cannot roll dice - not your turn!');
+            return;
+        }
+        
+        console.log('🎲 Player can act - proceeding with dice roll');
+        
+        // If currently rolling, stop the rolling state
+        if (isRolling) {
         isRolling = false;
         isSettled = false;
         settlementStartTime = null;
@@ -1359,6 +1383,11 @@ rollDiceButton.addEventListener('click', () => {
         
         console.log('Rolling stopped manually. Current results:', results);
         return;
+    }
+    
+    // Set Firebase state to rolling when starting to roll
+    if (typeof startMyTurn === 'function') {
+        startMyTurn();
     }
     
     const energy = parseFloat(energySlider.value); // Get energy from slider
@@ -1423,6 +1452,9 @@ rollDiceButton.addEventListener('click', () => {
     
     console.log('Dice rolling with energy:', energy);
 });
+} else {
+    console.error('Roll dice button not found in DOM');
+}
 
 // Camera controls are already in the HTML, no need to move them
 // The sliders (cameraHeightSlider, cameraDistanceSlider, cameraAngleSlider) are already properly positioned
@@ -1644,6 +1676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize turn system (single player by default)
     myPlayerId = 'Player1'; // This would be set by the multiplayer system
+    window.myPlayerId = 'Player1'; // Keep window variable in sync
     initializeTurnSystem([myPlayerId], false);
     updateGameControlsState();
     

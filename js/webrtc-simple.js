@@ -1,25 +1,233 @@
-// Minimal WebRTC for room management only
-// Firebase handles all game communication (dice results, material changes, game state)
+// Simplified WebRTC for dice results and material changes only
+// Firebase handles all game state coordination, WebRTC just for direct peer communication
+
+const peerConnections = {};
+const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+// Generate a unique ID for this player
+const myId = Math.random().toString(36).substring(2, 15);
 
 // Host management
 let isHost = false;
 let hostId = null;
 let roomId = null;
 
-// Basic Firebase signaling for host management
+// Send signaling data to Firebase
+function sendSignalingData(data) {
+    if (!roomId || !database) return;
+    
+    const serializedData = { ...data };
+    if (data.offer) {
+        serializedData.offer = { type: data.offer.type, sdp: data.offer.sdp };
+    }
+    if (data.answer) {
+        serializedData.answer = { type: data.answer.type, sdp: data.answer.sdp };
+    }
+    if (data.candidate) {
+        serializedData.candidate = {
+            candidate: data.candidate.candidate,
+            sdpMid: data.candidate.sdpMid,
+            sdpMLineIndex: data.candidate.sdpMLineIndex
+        };
+    }
+    
+    database.ref(`rooms/${roomId}/signaling`).push(serializedData);
+}
+
+// Set up signaling listener
 function setupSignaling() {
     if (!roomId || !database) return;
     
     const roomRef = database.ref(`rooms/${roomId}`);
+    const signalingRef = database.ref(`rooms/${roomId}/signaling`);
     
     // Listen for host changes
     roomRef.child('hostId').on('value', (snapshot) => {
         const newHostId = snapshot.val();
         if (newHostId && newHostId !== hostId) {
             hostId = newHostId;
-            isHost = (newHostId === window.myPlayerId); // Compare with player name
+            isHost = (newHostId === myId);
         }
     });
+    
+    // Listen for signaling data
+    signalingRef.on('child_added', (snapshot) => {
+        const data = snapshot.val();
+        if (!data || data.sender === myId) return;
+        
+        if (data.type === 'offer') {
+            handleOffer(data);
+        } else if (data.type === 'answer' && peerConnections[data.sender]) {
+            handleAnswer(data);
+        } else if (data.type === 'ice-candidate' && peerConnections[data.sender]) {
+            handleIceCandidate(data);
+        }
+    });
+}
+
+// Handle WebRTC offer
+function handleOffer(data) {
+    if (!data.offer?.type || !data.offer?.sdp) return;
+    
+    if (!peerConnections[data.sender]) {
+        peerConnections[data.sender] = createPeerConnection(data.sender);
+    }
+    
+    const peerConnection = peerConnections[data.sender];
+    
+    peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer))
+        .then(() => peerConnection.createAnswer())
+        .then((answer) => peerConnection.setLocalDescription(answer))
+        .then(() => {
+            sendSignalingData({
+                type: 'answer',
+                sender: myId,
+                target: data.sender,
+                answer: peerConnection.localDescription
+            });
+        })
+        .catch(error => console.error('Error handling offer:', error));
+}
+
+// Handle WebRTC answer
+function handleAnswer(data) {
+    if (!data.answer?.type || !data.answer?.sdp) return;
+    
+    peerConnections[data.sender].setRemoteDescription(new RTCSessionDescription(data.answer))
+        .catch(error => console.error('Error handling answer:', error));
+}
+
+// Handle ICE candidate
+function handleIceCandidate(data) {
+    if (!data.candidate) return;
+    
+    peerConnections[data.sender].addIceCandidate(new RTCIceCandidate(data.candidate))
+        .catch(error => console.error('Error adding ICE candidate:', error));
+}
+
+// Create a new WebRTC peer connection
+function createPeerConnection(targetId) {
+    const peerConnection = new RTCPeerConnection(configuration);
+    
+    // Create data channel for outgoing messages
+    const dataChannel = peerConnection.createDataChannel('gameMessages', { ordered: true });
+    dataChannel.onopen = () => console.log(`Data channel opened with ${targetId}`);
+    dataChannel.onmessage = (e) => handleReceivedMessage(e.data, targetId);
+    peerConnection.dataChannel = dataChannel;
+
+    // Handle ICE candidates
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            sendSignalingData({
+                type: 'ice-candidate',
+                sender: myId,
+                target: targetId,
+                candidate: event.candidate
+            });
+        }
+    };
+
+    // Handle incoming data channel
+    peerConnection.ondatachannel = (event) => {
+        const channel = event.channel;
+        channel.onmessage = (e) => handleReceivedMessage(e.data, targetId);
+        peerConnection.incomingDataChannel = channel;
+    };
+
+    // Simple connection state handling
+    peerConnection.onconnectionstatechange = () => {
+        if (peerConnection.connectionState === 'failed') {
+            setTimeout(() => {
+                delete peerConnections[targetId];
+                if (isHost) initiateConnection(targetId);
+            }, 1000);
+        }
+    };
+
+    return peerConnection;
+}
+
+// Initiate WebRTC connection
+function initiateConnection(targetId) {
+    if (peerConnections[targetId]) return;
+    
+    const peerConnection = createPeerConnection(targetId);
+    peerConnections[targetId] = peerConnection;
+    
+    peerConnection.createOffer()
+        .then(offer => peerConnection.setLocalDescription(offer))
+        .then(() => {
+            sendSignalingData({
+                type: 'offer',
+                sender: myId,
+                target: targetId,
+                offer: peerConnection.localDescription
+            });
+        })
+        .catch(error => console.error('Error creating offer:', error));
+}
+
+// Message handling for WebRTC data channels (simplified for Firebase state management)
+function handleReceivedMessage(messageData, fromPeerId = null) {
+    try {
+        const data = JSON.parse(messageData);
+        
+        switch (data.type) {
+            case 'material_change':
+                if (typeof onMaterialChangeReceived === 'function') {
+                    onMaterialChangeReceived({
+                        playerId: data.playerId,
+                        diceType: data.diceType,
+                        floorType: data.floorType
+                    });
+                }
+                break;
+            case 'dice_results':
+                if (typeof onDiceResultsReceived === 'function') {
+                    onDiceResultsReceived({
+                        playerId: data.playerId,
+                        diceResults: data.diceResults
+                    });
+                }
+                break;
+        }
+    } catch (error) {
+        console.error('Error parsing message:', error);
+    }
+}
+
+// Send message to all connected peers
+function sendToAllPeers(messageData) {
+    if (isHost) {
+        // Host sends to all clients
+        for (const peerId in peerConnections) {
+            const connection = peerConnections[peerId];
+            if (connection?.connectionState === 'connected' && 
+                connection.dataChannel?.readyState === 'open') {
+                try {
+                    connection.dataChannel.send(messageData);
+                } catch (error) {
+                    console.error(`Error sending to ${peerId}:`, error);
+                }
+            }
+        }
+    } else {
+        // Client sends to host
+        if (hostId && peerConnections[hostId]) {
+            const connection = peerConnections[hostId];
+            if (connection?.connectionState === 'connected') {
+                const channel = connection.dataChannel?.readyState === 'open' ? 
+                    connection.dataChannel : connection.incomingDataChannel;
+                if (channel?.readyState === 'open') {
+                    try {
+                        channel.send(messageData);
+                    } catch (error) {
+                        console.error('Error sending to host:', error);
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Player setup and room management
@@ -60,7 +268,7 @@ if (joinRoomButton) {
         savePlayerData(roomName, playerName);
 
         const roomRef = database.ref(`rooms/${roomId}`);
-        const playerRef = roomRef.child(`players/${playerName}`); // Use player name as ID
+        const playerRef = roomRef.child(`players/${myId}`);
 
         // Check for host status and duplicate names
         roomRef.once('value', (roomSnapshot) => {
@@ -70,21 +278,21 @@ if (joinRoomButton) {
             // Determine host status
             if (!roomData || Object.keys(players).length === 0) {
                 isHost = true;
-                hostId = playerName; // Use player name as host ID
+                hostId = myId;
             } else {
                 const existingHostId = roomData.hostId;
                 if (existingHostId && players[existingHostId]) {
-                    isHost = (existingHostId === playerName);
+                    isHost = (existingHostId === myId);
                     hostId = existingHostId;
                 } else {
                     isHost = true;
-                    hostId = playerName; // Use player name as host ID
+                    hostId = myId;
                 }
             }
             
             // Check for duplicate names
             for (const id in players) {
-                if (id !== playerName && players[id].name === playerName) {
+                if (id !== myId && players[id].name === playerName) {
                     const nameError = document.getElementById('name-error');
                     if (nameError) {
                         nameError.textContent = 'This name is already in use. Please choose a different name.';
@@ -100,16 +308,16 @@ if (joinRoomButton) {
 
             // Add player to room
             const roomUpdates = {};
-            roomUpdates[`players/${playerName}`] = { 
+            roomUpdates[`players/${myId}`] = { 
                 name: playerName, 
-                score: players?.[playerName]?.score || 0,
+                score: players?.[myId]?.score || 0,
                 isHost: isHost,
                 state: 'waiting',
                 joinedAt: Date.now()
             };
             
             if (isHost) {
-                roomUpdates['hostId'] = playerName; // Use player name as host ID
+                roomUpdates['hostId'] = myId;
             }
             
             roomRef.update(roomUpdates).then(() => {
@@ -193,9 +401,29 @@ if (joinRoomButton) {
                         playerNames.push(players[id].name);
                     }
                     
+                    // Clean up old peer connections
+                    for (const peerId in peerConnections) {
+                        if (!currentPlayerIds.includes(peerId)) {
+                            const connection = peerConnections[peerId];
+                            if (connection.dataChannel) connection.dataChannel.close();
+                            if (connection.incomingDataChannel) connection.incomingDataChannel.close();
+                            connection.close();
+                            delete peerConnections[peerId];
+                        }
+                    }
+                    
                     // Initialize multiplayer turn system
                     if (typeof onRoomJoined === 'function' && playerNames.length > 0) {
-                        onRoomJoined(roomId, playerName, playerNames);
+                        onRoomJoined(roomId, playerNames);
+                    }
+                    
+                    // Establish WebRTC connections
+                    if (isHost) {
+                        for (const id in players) {
+                            if (id !== myId && !peerConnections[id]) {
+                                initiateConnection(id);
+                            }
+                        }
                     }
                 }
             });
@@ -219,12 +447,21 @@ function createLeaveRoomButton() {
         leaveRoomButton.style.marginTop = '10px';
 
         leaveRoomButton.addEventListener('click', () => {
-            if (!roomId || !window.myPlayerId) return;
+            if (!roomId) return;
 
             const roomRef = database.ref(`rooms/${roomId}`);
-            const playerRef = roomRef.child(`players/${window.myPlayerId}`); // Use player name
+            const playerRef = roomRef.child(`players/${myId}`);
 
             playerRef.remove().then(() => {
+                // Clean up connections
+                for (const peerId in peerConnections) {
+                    const connection = peerConnections[peerId];
+                    if (connection.dataChannel) connection.dataChannel.close();
+                    if (connection.incomingDataChannel) connection.incomingDataChannel.close();
+                    connection.close();
+                }
+                Object.keys(peerConnections).forEach(key => delete peerConnections[key]);
+
                 // Reset state
                 roomId = null;
                 isHost = false;
@@ -319,8 +556,8 @@ window.addEventListener('load', loadPlayerData);
 
 // Clean up on page unload
 window.addEventListener('beforeunload', () => {
-    if (roomId && window.myPlayerId) {
-        const playerRef = database.ref(`rooms/${roomId}/players/${window.myPlayerId}`);
+    if (roomId) {
+        const playerRef = database.ref(`rooms/${roomId}/players/${myId}`);
         playerRef.remove();
     }
 });
