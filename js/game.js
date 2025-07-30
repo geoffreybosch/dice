@@ -500,19 +500,12 @@ function updateSelectionControls() {
         } else {
             lockButton.className = 'btn btn-success me-2'; // Green when enabled
             
-            // Calculate potential points for selected dice
-            let potentialPoints = 0;
-            selectedDiceIndices.forEach(index => {
-                const diceValue = currentDiceResults[index];
-                if (diceValue === 1) {
-                    potentialPoints += 100;
-                } else if (diceValue === 5) {
-                    potentialPoints += 50;
-                }
-            });
+            // Calculate potential points for selected dice using comprehensive scoring
+            const selectedDiceValues = selectedDiceIndices.map(index => currentDiceResults[index]);
+            const scoreResult = calculateSelectedDiceScore(selectedDiceValues);
             
-            if (potentialPoints > 0) {
-                lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (${potentialPoints} pts)`;
+            if (scoreResult.points > 0) {
+                lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (${scoreResult.points} pts)`;
             } else {
                 lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (0 pts)`;
             }
@@ -548,37 +541,21 @@ function lockSelectedDice() {
         return;
     }
     
-    // Calculate points for selected dice
-    let totalPoints = 0;
-    let scoringDetails = [];
-    
-    selectedDiceIndices.forEach(index => {
-        const diceValue = currentDiceResults[index];
-        let points = 0;
-        
-        if (diceValue === 1) {
-            points = 100;
-            scoringDetails.push(`${points} (1)`);
-        } else if (diceValue === 5) {
-            points = 50;
-            scoringDetails.push(`${points} (5)`);
-        }
-        
-        totalPoints += points;
-    });
+    // Calculate points for selected dice using comprehensive scoring
+    const selectedDiceValues = selectedDiceIndices.map(index => currentDiceResults[index]);
+    const scoreResult = calculateSelectedDiceScore(selectedDiceValues);
     
     // Prevent locking dice that don't score any points
-    if (totalPoints === 0) {
-        alert('You can only lock dice that score points (1s and 5s). Selected dice are worth 0 points.');
+    if (!scoreResult.isValid || scoreResult.points === 0) {
+        alert(`You can only lock dice that score points. Selected dice: ${scoreResult.description || 'No scoring combination'}`);
         return;
     }
     
     // Add points to pending score
-    const description = scoringDetails.join(' + ');
     if (typeof addPendingPoints === 'function') {
-        addPendingPoints(totalPoints, description);
+        addPendingPoints(scoreResult.points, scoreResult.description);
     }
-    console.log(`Locked dice scored ${totalPoints} points: ${description}`);
+    console.log(`Locked dice scored ${scoreResult.points} points: ${scoreResult.description}`);
     
     // Add selected dice to locked dice
     lockedDiceIndices.push(...selectedDiceIndices);
@@ -1323,6 +1300,28 @@ function updateDiceResults() {
         });
         displayDiceResults(results);
         
+        // Check for Farkle (only on unlocked dice from the current roll)
+        const unlockedDice = results.filter((_, index) => !lockedDiceIndices.includes(index));
+        if (unlockedDice.length > 0 && isFarkle(unlockedDice)) {
+            // It's a Farkle! Clear pending points and end turn
+            setTimeout(() => {
+                alert('🎲 FARKLE! No scoring dice in your roll. All pending points are lost and your turn ends.');
+                if (typeof clearPendingPoints === 'function') {
+                    clearPendingPoints();
+                }
+                if (typeof nextTurn === 'function') {
+                    const nextPlayer = nextTurn();
+                    console.log('🎲 Farkle - turn passing to:', nextPlayer);
+                    updateGameControlsState();
+                    
+                    // Broadcast turn change in multiplayer
+                    if (isInMultiplayerRoom && typeof broadcastTurnChange === 'function') {
+                        broadcastTurnChange(nextPlayer);
+                    }
+                }
+            }, 500); // Small delay to show the dice first
+        }
+        
         // Broadcast dice results to other players if in multiplayer room
         if (isInMultiplayerRoom && typeof broadcastDiceResults === 'function' && myPlayerId) {
             broadcastDiceResults(myPlayerId, results);
@@ -1490,17 +1489,63 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
                 }
             });
+            
+            // Show success status
+            const showAdminStatus = (buttonId, message, isSuccess = true, duration = 3000) => {
+                const statusElement = document.getElementById(`${buttonId}-status`);
+                if (statusElement) {
+                    statusElement.textContent = message;
+                    statusElement.className = `mt-2 small ${isSuccess ? 'text-success' : 'text-danger'}`;
+                    statusElement.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        statusElement.style.display = 'none';
+                    }, duration);
+                }
+            };
+            
+            showAdminStatus('reset-dice', '✅ Dice positions have been reset');
         });
+    }
+    
+    // Utility function to show status messages for admin buttons
+    function showAdminStatus(buttonId, message, isSuccess = true, duration = 3000) {
+        const statusElement = document.getElementById(`${buttonId}-status`);
+        if (statusElement) {
+            statusElement.textContent = message;
+            statusElement.className = `mt-2 small ${isSuccess ? 'text-success' : 'text-danger'}`;
+            statusElement.style.display = 'block';
+            
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, duration);
+        }
     }
     
     // Add event listener for reset locked dice button
     const resetLockedDiceButton = document.getElementById('reset-locked-dice');
     if (resetLockedDiceButton) {
         resetLockedDiceButton.addEventListener('click', () => {
-            if (confirm('Reset all locked dice? This will clear your current selections.')) {
+            // Show confirmation message first
+            showAdminStatus('reset-locked-dice', 'Click again to confirm resetting locked dice', false, 5000);
+            
+            // Add temporary click handler for confirmation
+            const confirmHandler = () => {
                 resetLockedDice();
                 updateGameState();
-            }
+                showAdminStatus('reset-locked-dice', '✅ Locked dice have been reset');
+                
+                // Remove the confirmation handler
+                resetLockedDiceButton.removeEventListener('click', confirmHandler);
+            };
+            
+            // Add the confirmation handler
+            resetLockedDiceButton.addEventListener('click', confirmHandler);
+            
+            // Remove the confirmation handler after 5 seconds
+            setTimeout(() => {
+                resetLockedDiceButton.removeEventListener('click', confirmHandler);
+            }, 5000);
         });
     }
     
@@ -1528,53 +1573,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isInMultiplayerRoom && typeof broadcastTurnChange === 'function') {
                     broadcastTurnChange(nextPlayer);
                     console.log('✅ broadcastTurnChange() called with:', nextPlayer);
+                    showAdminStatus('pass-turn-test', '✅ Turn passed successfully');
                 } else {
                     console.warn('❌ Not in multiplayer room or broadcastTurnChange not available');
+                    showAdminStatus('pass-turn-test', 'Turn passed (single player mode)', true);
                 }
             } else {
                 console.error('❌ nextTurn function not available');
+                showAdminStatus('pass-turn-test', 'Error: nextTurn function not available', false);
             }
         });
     }
     
-    // Add event listener for WebRTC debug button
-    const debugWebRTCButton = document.getElementById('debug-webrtc');
-    if (debugWebRTCButton) {
-        debugWebRTCButton.addEventListener('click', () => {
-            console.log('🔍 WebRTC Debug Button Clicked');
-            if (typeof debugWebRTCConnections === 'function') {
-                debugWebRTCConnections();
-            } else {
-                console.error('❌ debugWebRTCConnections function not available');
-            }
-        });
-    }
-    
-    // Add event listener for signaling debug button
-    const debugSignalingButton = document.getElementById('debug-signaling');
-    if (debugSignalingButton) {
-        debugSignalingButton.addEventListener('click', () => {
-            console.log('📡 Signaling Debug Button Clicked');
-            if (typeof debugSignaling === 'function') {
-                debugSignaling();
-            } else {
-                console.error('❌ debugSignaling function not available');
-            }
-        });
-    }
-    
-    // Add event listener for clear signaling button
-    const clearSignalingButton = document.getElementById('clear-signaling');
-    if (clearSignalingButton) {
-        clearSignalingButton.addEventListener('click', () => {
-            console.log('🧹 Clear Signaling Button Clicked');
-            if (typeof clearStaleSignaling === 'function') {
-                clearStaleSignaling();
-            } else {
-                console.error('❌ clearStaleSignaling function not available');
-            }
-        });
-    }
+
 });
 
 // Update dice bodies to use the dice material

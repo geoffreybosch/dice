@@ -20,11 +20,17 @@
                 </div>
                 <div id="admin-section">
                     <div class="row g-2">
-                        <div class="col-6">
+                        <div class="col-3">
                             <button id="admin-button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
                         </div>
-                        <div class="col-6">
+                        <div class="col-3">
+                            <button id="customize-game-button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#gameSettingsModal" style="display: none;">Game Rules</button>
+                        </div>
+                        <div class="col-3">
                             <button id="materials-button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#materialsModal">Materials</button>
+                        </div>
+                        <div class="col-3">
+                            <button id="scoring-button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#scoringModal">Scoring</button>
                         </div>
                     </div>
                 </div>
@@ -95,43 +101,33 @@
                     <h6>Room Management</h6>
                     <div class="mb-3">
                         <button id="clear-room" class="btn btn-danger">Clear Current Room</button>
+                        <div id="clear-room-status" class="mt-2 small" style="display: none;"></div>
                     </div>
                     <div class="mb-3">
                         <button id="reset-scores" class="btn btn-warning">Reset All Scores</button>
+                        <div id="reset-scores-status" class="mt-2 small" style="display: none;"></div>
                     </div>
                     <h6>Database Management</h6>
                     <div class="mb-3">
                         <button id="clear-database" class="btn btn-danger">Clear All Rooms</button>
+                        <div id="clear-database-status" class="mt-2 small" style="display: none;"></div>
                     </div>
-                    <div class="mb-3">
-                        <button id="test-firebase" class="btn btn-secondary">Test Room Connection</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button id="test-firebase" class="btn btn-secondary me-2">Test Room Connection</button>
+                        <span id="test-firebase-status" class="text-success" style="display: none;">✅</span>
                     </div>
                     <h6>Debugging</h6>
                     <div class="mb-3">
                         <button id="reset-dice" class="btn btn-danger w-100">Reset Dice</button>
+                        <div id="reset-dice-status" class="mt-2 small" style="display: none;"></div>
                     </div>
                     <div class="mb-3">
                         <button id="reset-locked-dice" class="btn btn-warning w-100">Reset Locked Dice</button>
+                        <div id="reset-locked-dice-status" class="mt-2 small" style="display: none;"></div>
                     </div>
                     <div class="mb-3">
                         <button id="pass-turn-test" class="btn btn-info w-100">Pass Turn (Test)</button>
-                    </div>
-                    <div class="mb-3">
-                        <button id="debug-webrtc" class="btn btn-secondary w-100">Check WebRTC Status</button>
-                    </div>
-                    <div class="mb-3">
-                        <button id="debug-signaling" class="btn btn-secondary w-100">Debug Signaling</button>
-                    </div>
-                    <div class="mb-3">
-                        <button id="clear-signaling" class="btn btn-warning w-100">Clear Stale Signaling</button>
-                    </div>
-                    <div class="mb-3">
-                        <div id="webrtc-status-display" class="border rounded p-3" style="background-color: #f8f9fa; max-height: 300px; overflow-y: auto; display: none;">
-                            <h6 class="mb-2">WebRTC Connection Status</h6>
-                            <div id="webrtc-status-content">
-                                <p class="text-muted">Click "Check WebRTC Status" to view connection details</p>
-                            </div>
-                        </div>
+                        <div id="pass-turn-test-status" class="mt-2 small" style="display: none;"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -286,12 +282,153 @@
         </div>
     </div>
 
+    <!-- Scoring Guide Modal -->
+    <div class="modal fade" id="scoringModal" tabindex="-1" aria-labelledby="scoringModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scoringModalLabel">🎲 Farkle Scoring Guide</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">🏆 Special Combinations</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <tbody>
+                                        <tr><td><strong>Six of any kind</strong></td><td class="text-success">3,000 pts</td></tr>
+                                        <tr><td><strong>Straight (1-2-3-4-5-6)</strong></td><td class="text-success">1,500 pts</td></tr>
+                                        <tr><td><strong>Three pairs</strong></td><td class="text-success">1,500 pts</td></tr>
+                                        <tr><td><strong>Four of a kind + pair</strong></td><td class="text-success">1,500 pts</td></tr>
+                                        <tr><td><strong>Two triplets</strong></td><td class="text-success">2,500 pts</td></tr>
+                                        <tr><td><strong>Five of any kind</strong></td><td class="text-success">2,000 pts</td></tr>
+                                        <tr><td><strong>Four of any kind</strong></td><td class="text-success">1,000 pts</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <h6 class="text-primary mt-4">🎯 Three of a Kind</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <tbody>
+                                        <tr id="three-ones-row"><td><strong>Three 1s</strong></td><td class="text-success">1,000 pts</td></tr>
+                                        <tr><td><strong>Three 2s</strong></td><td class="text-success">200 pts</td></tr>
+                                        <tr><td><strong>Three 3s</strong></td><td class="text-success">300 pts</td></tr>
+                                        <tr><td><strong>Three 4s</strong></td><td class="text-success">400 pts</td></tr>
+                                        <tr><td><strong>Three 5s</strong></td><td class="text-success">500 pts</td></tr>
+                                        <tr><td><strong>Three 6s</strong></td><td class="text-success">600 pts</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-primary">🎲 Individual Dice</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <tbody>
+                                        <tr><td><strong>Each 1</strong></td><td class="text-success">100 pts</td></tr>
+                                        <tr><td><strong>Each 5</strong></td><td class="text-success">50 pts</td></tr>
+                                        <tr><td>Each 2, 3, 4, or 6</td><td class="text-muted">0 pts</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <h6 class="text-primary mt-4">💡 Game Rules</h6>
+                            <ul class="list-unstyled small">
+                                <li><strong>🎯 Goal:</strong> First to 10,000 points wins</li>
+                                <li><strong>🚀 Entry:</strong> Need 500+ points to get "on the board"</li>
+                                <li><strong>💥 Farkle:</strong> No scoring dice = lose all pending points</li>
+                                <li><strong>🏁 Hot Dice:</strong> Score with all 6 dice = roll again</li>
+                                <li><strong>🔒 Lock & Roll:</strong> Lock scoring dice, roll the rest</li>
+                                <li><strong>🏦 Banking:</strong> Bank points to secure them and end turn</li>
+                            </ul>
+                            
+                            <div class="alert alert-info mt-3">
+                                <small><strong>💡 Pro Tip:</strong> Higher combinations override individual dice scoring. For example, three 1s = 1,000 points (not 300 points for 3 individual 1s).</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Settings Modal (Host Only) -->
+    <div class="modal fade" id="gameSettingsModal" tabindex="-1" aria-labelledby="gameSettingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gameSettingsModalLabel">🎯 Game Rule Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>🏠 Host Only:</strong> These settings apply to all players in the room.
+                    </div>
+                    
+                    <h6>Scoring Rules</h6>
+                    <div class="mb-4">
+                        <label class="form-label"><strong>Three 1s Scoring:</strong></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="threeOnesRule" id="threeOnes300" value="300">
+                            <label class="form-check-label" for="threeOnes300">
+                                <strong>300 points</strong> - Classic/Conservative rule
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="threeOnesRule" id="threeOnes1000" value="1000" checked>
+                            <label class="form-check-label" for="threeOnes1000">
+                                <strong>1,000 points</strong> - Modern/Standard rule (recommended)
+                            </label>
+                        </div>
+                        <small class="text-muted">This affects how much three 1s are worth. Other three-of-a-kind remain unchanged.</small>
+                    </div>
+                    
+                    <h6>Game Settings</h6>
+                    <div class="mb-3">
+                        <label for="winningScore" class="form-label"><strong>Winning Score:</strong></label>
+                        <select class="form-select" id="winningScore">
+                            <option value="5000">5,000 points (Quick game)</option>
+                            <option value="10000" selected>10,000 points (Standard)</option>
+                            <option value="15000">15,000 points (Long game)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="minimumScore" class="form-label"><strong>Minimum Score to Get on Board:</strong></label>
+                        <select class="form-select" id="minimumScore">
+                            <option value="300">300 points</option>
+                            <option value="500" selected>500 points (Standard)</option>
+                            <option value="750">750 points</option>
+                            <option value="1000">1,000 points</option>
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <small><strong>⚠️ Note:</strong> Changing rules will reset all current scores and restart the game.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="apply-game-settings">Apply Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <script src="js/farkle-scoring.js"></script>
+    <script src="js/game-settings.js"></script>
     <script src="js/material-config.js"></script>
     <script src="js/turn-system-integration.js"></script>
     <script src="js/firebase-state-manager.js"></script>

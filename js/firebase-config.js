@@ -17,10 +17,24 @@ const database = firebase.database();
 const testButton = document.getElementById('test-firebase');
 testButton.addEventListener('click', () => {
     const testRef = database.ref('test');
+    const statusElement = document.getElementById('test-firebase-status');
+    
+    // Hide the status while testing
+    if (statusElement) {
+        statusElement.style.display = 'none';
+    }
+    
     testRef.set({
         message: 'Firebase is working!'
     }).then(() => {
-        alert('Data written to Firebase successfully!');
+        // Show green checkbox on success
+        if (statusElement) {
+            statusElement.style.display = 'inline';
+            // Hide the checkbox after 3 seconds
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
     }).catch((error) => {
         console.error('Error writing to Firebase:', error);
         alert('Failed to write to Firebase. Check the console for details.');
@@ -87,34 +101,67 @@ const clearRoomButton = document.getElementById('clear-room');
 const resetScoresButton = document.getElementById('reset-scores');
 const clearDatabaseButton = document.getElementById('clear-database');
 
+// Utility function to show status messages
+function showAdminStatus(buttonId, message, isSuccess = true, duration = 3000) {
+    const statusElement = document.getElementById(`${buttonId}-status`);
+    if (statusElement) {
+        statusElement.textContent = message;
+        statusElement.className = `mt-2 small ${isSuccess ? 'text-success' : 'text-danger'}`;
+        statusElement.style.display = 'block';
+        
+        setTimeout(() => {
+            statusElement.style.display = 'none';
+        }, duration);
+    }
+}
+
 // Clear current room
 clearRoomButton.addEventListener('click', () => {
     const roomName = document.getElementById('room-name').value.trim();
     if (!roomName) {
-        alert('Please enter a room name first.');
+        showAdminStatus('clear-room', 'Please enter a room name first.', false);
         return;
     }
 
-    if (confirm(`Are you sure you want to clear all players from room "${roomName}"?`)) {
+    // Show confirmation message first
+    showAdminStatus('clear-room', `Click again to confirm clearing room "${roomName}"`, false, 5000);
+    
+    // Add temporary click handler for confirmation
+    const confirmHandler = () => {
         const roomRef = database.ref(`rooms/${roomName}/players`);
         roomRef.remove().then(() => {
-            alert(`Room "${roomName}" has been cleared.`);
+            showAdminStatus('clear-room', `✅ Room "${roomName}" has been cleared.`);
         }).catch((error) => {
             console.error('Error clearing room:', error);
-            alert('Failed to clear the room. Check the console for details.');
+            showAdminStatus('clear-room', 'Failed to clear the room. Check console for details.', false);
         });
-    }
+        
+        // Remove the confirmation handler
+        clearRoomButton.removeEventListener('click', confirmHandler);
+    };
+    
+    // Add the confirmation handler
+    clearRoomButton.addEventListener('click', confirmHandler);
+    
+    // Remove the confirmation handler after 5 seconds
+    setTimeout(() => {
+        clearRoomButton.removeEventListener('click', confirmHandler);
+    }, 5000);
 });
 
 // Reset all scores in current room
 resetScoresButton.addEventListener('click', () => {
     const roomName = document.getElementById('room-name').value.trim();
     if (!roomName) {
-        alert('Please enter a room name first.');
+        showAdminStatus('reset-scores', 'Please enter a room name first.', false);
         return;
     }
 
-    if (confirm(`Are you sure you want to reset all scores in room "${roomName}"?`)) {
+    // Show confirmation message first
+    showAdminStatus('reset-scores', `Click again to confirm resetting scores in "${roomName}"`, false, 5000);
+    
+    // Add temporary click handler for confirmation
+    const confirmHandler = () => {
         const roomPlayersRef = database.ref(`rooms/${roomName}/players`);
         roomPlayersRef.once('value', (snapshot) => {
             const players = snapshot.val();
@@ -124,25 +171,44 @@ resetScoresButton.addEventListener('click', () => {
                     updates[`${playerId}/score`] = 0;
                 }
                 roomPlayersRef.update(updates).then(() => {
-                    alert(`All scores in room "${roomName}" have been reset to 0.`);
+                    showAdminStatus('reset-scores', `✅ All scores in room "${roomName}" have been reset to 0.`);
                 }).catch((error) => {
                     console.error('Error resetting scores:', error);
-                    alert('Failed to reset scores. Check the console for details.');
+                    showAdminStatus('reset-scores', 'Failed to reset scores. Check console for details.', false);
                 });
             } else {
-                alert('No players found in this room.');
+                showAdminStatus('reset-scores', 'No players found in this room.', false);
             }
         });
-    }
+        
+        // Remove the confirmation handler
+        resetScoresButton.removeEventListener('click', confirmHandler);
+    };
+    
+    // Add the confirmation handler
+    resetScoresButton.addEventListener('click', confirmHandler);
+    
+    // Remove the confirmation handler after 5 seconds
+    setTimeout(() => {
+        resetScoresButton.removeEventListener('click', confirmHandler);
+    }, 5000);
 });
 
 // Clear entire database
 clearDatabaseButton.addEventListener('click', () => {
-    if (confirm('Are you sure you want to clear ALL rooms from the database? This action cannot be undone!')) {
-        if (confirm('This will permanently delete all room data. Are you absolutely sure?')) {
+    // Show first confirmation message
+    showAdminStatus('clear-database', 'Click again to confirm clearing ALL rooms (PERMANENT!)', false, 5000);
+    
+    // Add temporary click handler for first confirmation
+    const firstConfirmHandler = () => {
+        // Show second confirmation message
+        showAdminStatus('clear-database', 'Click one more time to PERMANENTLY delete all room data!', false, 5000);
+        
+        // Add temporary click handler for final confirmation
+        const finalConfirmHandler = () => {
             const roomsRef = database.ref('rooms');
             roomsRef.remove().then(() => {
-                alert('All rooms have been cleared from the database.');
+                showAdminStatus('clear-database', '✅ All rooms have been cleared from the database.');
                 // Clear the current player list display
                 const playerListContainer = document.getElementById('player-list');
                 if (playerListContainer) {
@@ -153,8 +219,30 @@ clearDatabaseButton.addEventListener('click', () => {
                 }
             }).catch((error) => {
                 console.error('Error clearing database:', error);
-                alert('Failed to clear the database. Check the console for details.');
+                showAdminStatus('clear-database', 'Failed to clear the database. Check console for details.', false);
             });
-        }
-    }
+            
+            // Remove the final confirmation handler
+            clearDatabaseButton.removeEventListener('click', finalConfirmHandler);
+        };
+        
+        // Add the final confirmation handler
+        clearDatabaseButton.addEventListener('click', finalConfirmHandler);
+        
+        // Remove the final confirmation handler after 5 seconds
+        setTimeout(() => {
+            clearDatabaseButton.removeEventListener('click', finalConfirmHandler);
+        }, 5000);
+        
+        // Remove the first confirmation handler
+        clearDatabaseButton.removeEventListener('click', firstConfirmHandler);
+    };
+    
+    // Add the first confirmation handler
+    clearDatabaseButton.addEventListener('click', firstConfirmHandler);
+    
+    // Remove the first confirmation handler after 5 seconds
+    setTimeout(() => {
+        clearDatabaseButton.removeEventListener('click', firstConfirmHandler);
+    }, 5000);
 });

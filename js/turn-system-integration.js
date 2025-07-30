@@ -217,6 +217,11 @@ function initializePlayerScores(players) {
     }
     
     console.log('Player scores initialized:', playerScores);
+    
+    // Update customize button visibility based on host status
+    if (typeof updateCustomizeButtonVisibility === 'function') {
+        updateCustomizeButtonVisibility();
+    }
 }
 
 function addPendingPoints(points, description = '') {
