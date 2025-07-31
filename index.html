@@ -8,63 +8,50 @@
     <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container-fluid vh-100 d-flex flex-column">
+        <div class="container-fluid p-0 h-100 d-flex flex-column">
         <div class="row flex-grow-1">
-            <!-- Controls on the left -->
-            <div class="col-md-3 d-flex flex-column gap-3 bg-dark text-white p-3"> 
-                <h2 class="text-center">Farkle</h2>
-                <div id="room-player-info" class="text-center small" style="display: none;">
-                    <div class="text-light bg-secondary rounded px-2 py-1">
-                        <span id="current-room-name"></span> | <span id="current-player-name"></span>
-                    </div>
-                </div>
-                <div id="admin-section">
+            <!-- Responsive Sidebar -->
+            <div class="col-12 col-lg-3 bg-dark text-white p-3 order-1 order-lg-1"> 
+                <h2 class="text-center d-none d-lg-block">Farkle</h2>
+                <h4 class="text-center d-lg-none mb-3">Farkle</h4>
+                <div id="admin-section" class="mb-3">
                     <div class="row g-2">
-                        <div class="col-4">
-                            <button id="admin-button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
+                        <div class="col-4 col-lg-12 mb-lg-2">
+                            <button id="admin-button" class="btn btn-warning w-100 btn-sm btn-lg-normal" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
                         </div>
-                        <div class="col-4">
-                            <button id="materials-button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#materialsModal">Materials</button>
+                        <div class="col-4 col-lg-12 mb-lg-2">
+                            <button id="materials-button" class="btn btn-info w-100 btn-sm btn-lg-normal" data-bs-toggle="modal" data-bs-target="#materialsModal">Materials</button>
                         </div>
-                        <div class="col-4">
-                            <button id="scoring-button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#scoringModal">Scoring</button>
+                        <div class="col-4 col-lg-12 mb-lg-2">
+                            <button id="scoring-button" class="btn btn-success w-100 btn-sm btn-lg-normal" data-bs-toggle="modal" data-bs-target="#scoringModal">Scoring</button>
                         </div>
                     </div>
                     <div class="row g-2 mt-2">
                         <div class="col-12">
-                            <button id="customize-game-button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#gameSettingsModal" style="display: none;">Game Rules</button>
+                            <button id="customize-game-button" class="btn btn-primary w-100 btn-sm btn-lg-normal" data-bs-toggle="modal" data-bs-target="#gameSettingsModal" style="display: none;">Game Rules</button>
                         </div>
                     </div>
                 </div>
-                <div id="room-setup">
-                    <input type="text" id="room-name" class="form-control" placeholder="Enter room name">
+                <div id="room-setup" class="mb-3">
+                    <input type="text" id="room-name" class="form-control form-control-sm" placeholder="Enter room name">
                 </div>
-                <div id="player-setup">
-                    <input type="text" id="player-name" class="form-control mb-2" placeholder="Enter your name">
+                <div id="player-setup" class="mb-3">
+                    <input type="text" id="player-name" class="form-control form-control-sm mb-2" placeholder="Enter your name">
                     <div id="name-error" class="text-danger small mb-2" style="display: none;"></div>
-                    <button id="join-room" class="btn btn-success w-100">Join Room</button>
-                </div>
-                <div id="camera-controls" style="display: none;">
-                    <label for="camera-height" class="form-label">Camera Height:</label>
-                    <input type="range" id="camera-height" class="form-range" min="5" max="20" value="10">
-
-                    <label for="camera-distance" class="form-label">Camera Distance:</label>
-                    <input type="range" id="camera-distance" class="form-range" min="5" max="20" value="10">
-
-                    <label for="camera-angle" class="form-label">Camera Angle:</label>
-                    <input type="range" id="camera-angle" class="form-range" min="-45" max="45" value="0">
+                    <button id="join-room" class="btn btn-success w-100 btn-sm">Join Room</button>
                 </div>
                 <div id="player-list" class="mt-3">
                     <h6 id="room-name-display" class="text-light fw-bold mb-2" style="display: none;">
                         Room: <span id="room-name-text"></span>
                     </h6>
-                    <h5 id="player-list-title" style="display: none;">Player List</h5>
+                    <h5 id="player-list-title" class="text-light fw-bold mb-2 d-none d-lg-block" style="display: none;">Player List</h5>
+                    <h6 id="player-list-title-mobile" class="text-light fw-bold mb-2 d-lg-none" style="display: none;">Players</h6>
                     <ul class="list-group">
                     </ul>
                 </div>
             </div>
 
-            <div class="col-md-9 d-flex flex-column align-items-center justify-content-center">
+            <div class="col-12 col-lg-9 d-flex flex-column align-items-center justify-content-center order-2 order-lg-2">
                 <div class="card bg-dark border-2 border-primary shadow-sm mb-4" style="min-width: 300px;">
                     <div class="card-body text-center">
                         <div class="d-flex flex-column align-items-center gap-3">
@@ -92,7 +79,7 @@
                         <small class="text-muted">Click on dice above to select them for locking</small>
                     </div>
                 </div>
-                <canvas id="dice-canvas" class="w-100" style="max-width: 800px; height: 500px; display: none;"></canvas>
+                <canvas id="dice-canvas" class="w-100" style="max-width: 500px; height: 500px; display: none;"></canvas>
             </div>
         </div>
     </div>
@@ -445,6 +432,8 @@
     <script src="js/turn-system-integration.js"></script>
     <script src="js/firebase-state-manager.js"></script>
     <script src="js/firebase-room-manager.js"></script>
+    <script src="js/dice-styling-manager.js"></script>
+    <script src="js/dice-styling-integration.js"></script>
     <script src="js/game.js"></script>
 </body>
 </html>

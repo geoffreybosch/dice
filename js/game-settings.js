@@ -39,9 +39,9 @@ function loadGameSettings() {
         // Apply settings to UI
         applySettingsToUI();
         
-        console.log('Game settings loaded:', currentGameSettings);
+        // console.log('Game settings loaded:', currentGameSettings);
     } catch (error) {
-        console.error('Error loading game settings:', error);
+        // console.error('Error loading game settings:', error);
         currentGameSettings = { ...DEFAULT_GAME_SETTINGS };
     }
 }
@@ -52,9 +52,9 @@ function loadGameSettings() {
 function saveGameSettings() {
     try {
         localStorage.setItem('farkle_game_settings', JSON.stringify(currentGameSettings));
-        console.log('Game settings saved:', currentGameSettings);
+        // console.log('Game settings saved:', currentGameSettings);
     } catch (error) {
-        console.error('Error saving game settings:', error);
+        // console.error('Error saving game settings:', error);
     }
 }
 
@@ -165,7 +165,7 @@ function applyGameSettings() {
         }
         
     } catch (error) {
-        console.error('Error applying game settings:', error);
+        // console.error('Error applying game settings:', error);
         // Show error message under the button instead of alert
         showGameSettingsMessage('Error applying settings. Please try again.', 'error');
     }
@@ -275,7 +275,7 @@ function updateGameSettings(newSettings) {
     // Update scoring guide to reflect new settings
     updateScoringGuide();
     
-    console.log('Game settings updated from external source:', currentGameSettings);
+    // console.log('Game settings updated from external source:', currentGameSettings);
 }
 
 /**
@@ -304,12 +304,12 @@ function updateScoringGuide() {
         const pointsCell = threeOnesRow.cells[1]; // Second cell contains the points
         if (pointsCell) {
             pointsCell.innerHTML = `<span class="text-success">${currentGameSettings.threeOnesRule.toLocaleString()} pts</span>`;
-            console.log(`📊 Scoring guide updated: Three 1s now worth ${currentGameSettings.threeOnesRule} points`);
+            // console.log(`📊 Scoring guide updated: Three 1s now worth ${currentGameSettings.threeOnesRule} points`);
         } else {
-            console.warn('📊 Could not find points cell in three 1s row');
+            // console.warn('📊 Could not find points cell in three 1s row');
         }
     } else {
-        console.warn('📊 Could not find three-ones-row element in scoring guide');
+        // console.warn('📊 Could not find three-ones-row element in scoring guide');
     }
     
     // Update goal and entry lines more safely by looking for specific IDs or classes first
@@ -321,7 +321,7 @@ function updateScoringGuide() {
         
         if (goalElement) {
             goalElement.textContent = `🎯 Goal: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`;
-            console.log(`📊 Goal updated via ID: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`);
+            // console.log(`📊 Goal updated via ID: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`);
         } else {
             // Fallback: search for text within specific container, but be more careful
             const modalBody = scoringModal.querySelector('.modal-body');
@@ -338,7 +338,7 @@ function updateScoringGuide() {
                 while (node = walker.nextNode()) {
                     if (node.textContent.includes('🎯 Goal: First to') && node.textContent.includes('points wins')) {
                         node.textContent = `🎯 Goal: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`;
-                        console.log(`📊 Goal updated via text search: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`);
+                        // console.log(`📊 Goal updated via text search: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`);
                         break;
                     }
                 }
@@ -347,7 +347,7 @@ function updateScoringGuide() {
         
         if (entryElement) {
             entryElement.textContent = `🚀 Entry: Need ${currentGameSettings.minimumScore}+ points to get "on the board"`;
-            console.log(`📊 Entry updated via ID: Need ${currentGameSettings.minimumScore}+ points to get on the board`);
+            // console.log(`📊 Entry updated via ID: Need ${currentGameSettings.minimumScore}+ points to get on the board`);
         } else {
             // Fallback: search for text within specific container
             const modalBody = scoringModal.querySelector('.modal-body');
@@ -363,14 +363,14 @@ function updateScoringGuide() {
                 while (node = walker.nextNode()) {
                     if (node.textContent.includes('🚀 Entry: Need') && node.textContent.includes('points to get "on the board"')) {
                         node.textContent = `🚀 Entry: Need ${currentGameSettings.minimumScore}+ points to get "on the board"`;
-                        console.log(`📊 Entry updated via text search: Need ${currentGameSettings.minimumScore}+ points to get on the board`);
+                        // console.log(`📊 Entry updated via text search: Need ${currentGameSettings.minimumScore}+ points to get on the board`);
                         break;
                     }
                 }
             }
         }
     } else {
-        console.warn('📊 Could not find scoring modal for goal/entry updates');
+        // console.warn('📊 Could not find scoring modal for goal/entry updates');
     }
 }
 

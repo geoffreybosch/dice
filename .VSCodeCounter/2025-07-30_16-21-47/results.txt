@@ -1,0 +1,53 @@
+Date : 2025-07-30 16:21:47
+Directory : /Users/brandon/Documents/GitHub/farkle
+Total : 20 files,  6067 codes, 1101 comments, 1231 blanks, all 8399 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JavaScript |         13 |      4,944 |      1,071 |      1,089 |      7,104 |
+| HTML       |          5 |        888 |          8 |         87 |        983 |
+| PostCSS    |          1 |        214 |         22 |         44 |        280 |
+| Markdown   |          1 |         21 |          0 |         11 |         32 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                    | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                       |         20 |      6,067 |      1,101 |      1,231 |      8,399 |
+| . (Files)                                                               |          6 |        909 |          8 |         98 |      1,015 |
+| css                                                                     |          1 |        214 |         22 |         44 |        280 |
+| js                                                                      |         13 |      4,944 |      1,071 |      1,089 |      7,104 |
+| js (Files)                                                              |          8 |      4,464 |        908 |        994 |      6,366 |
+| js/firebase                                                             |          3 |        188 |         72 |         39 |        299 |
+| js/ui                                                                   |          2 |        292 |         91 |         56 |        439 |
++-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                | language   | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| /Users/brandon/Documents/GitHub/farkle/README.md                        | Markdown   |         21 |          0 |         11 |         32 |
+| /Users/brandon/Documents/GitHub/farkle/css/styles.css                   | PostCSS    |        214 |         22 |         44 |        280 |
+| /Users/brandon/Documents/GitHub/farkle/firebase-state-test.html         | HTML       |        229 |          1 |         34 |        264 |
+| /Users/brandon/Documents/GitHub/farkle/index.html                       | HTML       |        421 |          7 |         20 |        448 |
+| /Users/brandon/Documents/GitHub/farkle/js/farkle-scoring.js             | JavaScript |        174 |         36 |         24 |        234 |
+| /Users/brandon/Documents/GitHub/farkle/js/firebase-config.js            | JavaScript |        228 |         55 |         51 |        334 |
+| /Users/brandon/Documents/GitHub/farkle/js/firebase-room-manager.js      | JavaScript |        365 |         60 |         83 |        508 |
+| /Users/brandon/Documents/GitHub/farkle/js/firebase-state-manager.js     | JavaScript |        942 |        172 |        221 |      1,335 |
+| /Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-admin.js    | JavaScript |        146 |         35 |         26 |        207 |
+| /Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-database.js | JavaScript |         28 |         33 |          8 |         69 |
+| /Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-init.js     | JavaScript |         14 |          4 |          5 |         23 |
+| /Users/brandon/Documents/GitHub/farkle/js/game-settings.js              | JavaScript |        271 |         90 |         57 |        418 |
+| /Users/brandon/Documents/GitHub/farkle/js/game.js                       | JavaScript |      1,625 |        388 |        415 |      2,428 |
+| /Users/brandon/Documents/GitHub/farkle/js/material-config.js            | JavaScript |        332 |         20 |         22 |        374 |
+| /Users/brandon/Documents/GitHub/farkle/js/turn-system-integration.js    | JavaScript |        527 |         87 |        121 |        735 |
+| /Users/brandon/Documents/GitHub/farkle/js/ui/player-list-ui.js          | JavaScript |        127 |         37 |         26 |        190 |
+| /Users/brandon/Documents/GitHub/farkle/js/ui/room-ui.js                 | JavaScript |        165 |         54 |         30 |        249 |
+| /Users/brandon/Documents/GitHub/farkle/test-case-insensitive.html       | HTML       |        106 |          0 |         14 |        120 |
+| /Users/brandon/Documents/GitHub/farkle/test-locked-dice.html            | HTML       |         69 |          0 |          9 |         78 |
+| /Users/brandon/Documents/GitHub/farkle/test-url-sharing.html            | HTML       |         63 |          0 |         10 |         73 |
+| Total                                                                   |            |      6,067 |      1,101 |      1,231 |      8,399 |
++-------------------------------------------------------------------------+------------+------------+------------+------------+------------+

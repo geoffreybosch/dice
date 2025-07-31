@@ -25,59 +25,79 @@ canvas {
     overflow-x: auto;
 }
 
+/* Base dice styling with smooth transitions */
 #dice-results-container img {
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
     cursor: pointer;
+    user-select: none;
 }
 
 #dice-results-container img:hover {
     transform: scale(1.1);
 }
 
+/* Dice state styling - simplified and consistent */
 #dice-results-container img.selected {
     border: 3px solid #28a745 !important;
-    background-color: #d4edda;
+    background-color: rgba(40, 167, 69, 0.1);
     transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.6);
 }
 
 #dice-results-container img.selected-by-other {
     border: 3px solid #ffc107 !important;
-    background-color: #fff3cd;
+    background-color: rgba(255, 193, 7, 0.1);
     transform: scale(1.05);
-    animation: otherPlayerSelection 1s ease-in-out;
-}
-
-@keyframes otherPlayerSelection {
-    0% { box-shadow: 0 0 0 rgba(255, 193, 7, 0.7); }
-    50% { box-shadow: 0 0 15px rgba(255, 193, 7, 0.9); }
-    100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.7); }
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.6);
+    animation: pulseGlow 2s ease-in-out infinite;
 }
 
 #dice-results-container img.locked {
     opacity: 0.8;
     filter: grayscale(20%);
-    cursor: not-allowed;
+    cursor: not-allowed !important;
     border: 3px solid #dc3545 !important;
-    background-color: #f8d7da;
-    box-shadow: 0 0 15px rgba(220, 53, 69, 0.7) !important;
-    animation: lockedDiceGlow 2s ease-in-out infinite alternate;
-}
-
-/* Locked dice styling takes priority over selection styling */
-#dice-results-container img.locked.selected-by-other {
-    border: 3px solid #dc3545 !important;
-    background-color: #f8d7da !important;
-    box-shadow: 0 0 15px rgba(220, 53, 69, 0.7) !important;
-}
-
-@keyframes lockedDiceGlow {
-    0% { box-shadow: 0 0 10px rgba(220, 53, 69, 0.5); }
-    100% { box-shadow: 0 0 20px rgba(220, 53, 69, 0.9); }
+    background-color: rgba(220, 53, 69, 0.1);
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    animation: lockedGlow 2.5s ease-in-out infinite alternate;
 }
 
 #dice-results-container img.rolling {
-    animation: rollPulse 0.5s infinite alternate;
-    border: 2px solid #007bff !important;
+    animation: rollPulse 0.6s ease-in-out infinite alternate;
+    border: 3px solid #007bff !important;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+/* Animation keyframes */
+@keyframes pulseGlow {
+    0%, 100% { 
+        box-shadow: 0 0 8px rgba(255, 193, 7, 0.4);
+        transform: scale(1.05);
+    }
+    50% { 
+        box-shadow: 0 0 16px rgba(255, 193, 7, 0.8);
+        transform: scale(1.08);
+    }
+}
+
+@keyframes lockedGlow {
+    0% { 
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+    100% { 
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.9);
+    }
+}
+
+@keyframes rollPulse {
+    0% { 
+        transform: scale(1.0);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
 }
 
 @keyframes rollPulse {
@@ -167,4 +187,113 @@ canvas {
     opacity: 0.4 !important;
     cursor: not-allowed !important;
     pointer-events: none !important;
+}
+
+/* Responsive sidebar layout styles */
+@media (max-width: 991.98px) {
+    /* Mobile layout - sidebar appears at bottom */
+    .container-fluid {
+        height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    /* Sidebar styling for mobile - compact horizontal layout */
+    .col-12.bg-dark {
+        padding: 0.75rem !important;
+        flex-shrink: 0;
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+    
+    /* Compact button styling for mobile */
+    .btn-sm.btn-lg-normal {
+        font-size: 0.75rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+    
+    /* Compact form controls for mobile */
+    .form-control-sm {
+        font-size: 0.8rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+    
+    /* Game area takes remaining space */
+    .col-12.d-flex.flex-column {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        padding: 1rem !important;
+    }
+    
+    /* Compact player list for mobile */
+    #player-list .list-group-item {
+        padding: 0.5rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    /* Smaller dice for mobile */
+    #dice-results-container img {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    /* Compact game controls */
+    #dice-selection-controls button {
+        font-size: 0.8rem !important;
+        padding: 0.375rem 0.75rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Responsive canvas */
+    #dice-canvas {
+        height: 250px !important;
+        max-height: 30vh !important;
+    }
+}
+
+@media (min-width: 992px) {
+    /* Desktop layout - sidebar on left */
+    .col-lg-3.bg-dark {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+        min-height: 100vh;
+    }
+    
+    /* Normal button sizing for desktop */
+    .btn-lg-normal {
+        font-size: 1rem !important;
+        padding: 0.375rem 0.75rem !important;
+    }
+    
+    /* Admin section layout for desktop */
+    #admin-section .row .col-lg-12 {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* General responsive improvements */
+@media (max-width: 575.98px) {
+    /* Extra small screens - even more compact */
+    .col-12.bg-dark {
+        padding: 0.5rem !important;
+    }
+    
+    #dice-results-container img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .btn-sm.btn-lg-normal {
+        font-size: 0.7rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+}
+
+/* Desktop layout adjustments */
+@media (min-width: 768px) {
+    #mobile-top-bar,
+    #mobile-player-list {
+        display: none !important;
+    }
 }

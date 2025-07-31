@@ -281,10 +281,10 @@ function saveMaterialPreferences(diceType, floorType, backgroundType = 'white') 
     
     try {
         localStorage.setItem('farkle_material_preferences', JSON.stringify(preferences));
-        console.log(`Material preferences saved: Dice=${diceType}, Floor=${floorType}, Background=${backgroundType}`);
+        // console.log(`Material preferences saved: Dice=${diceType}, Floor=${floorType}, Background=${backgroundType}`);
         return true;
     } catch (error) {
-        console.warn('Failed to save material preferences:', error);
+        // console.warn('Failed to save material preferences:', error);
         return false;
     }
 }
@@ -301,7 +301,7 @@ function loadMaterialPreferences() {
             const backgroundExists = MaterialConfig.backgroundMaterials[preferences.background || 'white'];
             
             if (diceExists && floorExists && backgroundExists) {
-                console.log(`Material preferences loaded: Dice=${preferences.dice}, Floor=${preferences.floor}, Background=${preferences.background || 'white'}`);
+                // console.log(`Material preferences loaded: Dice=${preferences.dice}, Floor=${preferences.floor}, Background=${preferences.background || 'white'}`);
                 return {
                     dice: preferences.dice,
                     floor: preferences.floor,
@@ -309,12 +309,12 @@ function loadMaterialPreferences() {
                     timestamp: preferences.timestamp
                 };
             } else {
-                console.warn('Saved material preferences contain invalid materials, using defaults');
+                // console.warn('Saved material preferences contain invalid materials, using defaults');
                 clearMaterialPreferences();
             }
         }
     } catch (error) {
-        console.warn('Failed to load material preferences:', error);
+        // console.warn('Failed to load material preferences:', error);
     }
     
     // Return defaults if no valid saved preferences
@@ -329,10 +329,10 @@ function loadMaterialPreferences() {
 function clearMaterialPreferences() {
     try {
         localStorage.removeItem('farkle_material_preferences');
-        console.log('Material preferences cleared');
+        // console.log('Material preferences cleared');
         return true;
     } catch (error) {
-        console.warn('Failed to clear material preferences:', error);
+        // console.warn('Failed to clear material preferences:', error);
         return false;
     }
 }

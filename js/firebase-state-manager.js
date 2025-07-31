@@ -13,7 +13,7 @@ const PLAYER_STATES = {
 
 // Show dice rolling UI when player is in rolling state
 function showDiceRollingUI() {
-    console.log('🎲 Showing dice rolling UI - player is rolling');
+    // console.log('🎲 Showing dice rolling UI - player is rolling');
     
     // NOTE: Farkle indicator clearing is now handled in updateTurnIndicators()
     // This ensures only the current player's indicator is cleared, not the previous player's
@@ -49,7 +49,7 @@ let farkleIndicatorStates = {};
 // Helper functions for managing Farkle indicator states
 function setFarkleIndicatorState(playerId, isVisible) {
     farkleIndicatorStates[playerId] = isVisible;
-    console.log(`💾 Farkle indicator state set for ${playerId}: ${isVisible}`);
+    // console.log(`💾 Farkle indicator state set for ${playerId}: ${isVisible}`);
 }
 
 function getFarkleIndicatorState(playerId) {
@@ -62,12 +62,12 @@ function initializeFarkleStatesForPlayers(players) {
             farkleIndicatorStates[playerId] = false;
         }
     });
-    console.log('💾 Farkle indicator states initialized:', farkleIndicatorStates);
+    // console.log('💾 Farkle indicator states initialized:', farkleIndicatorStates);
 }
 
 // Function to be called when a player Farkles
 function handlePlayerFarkle(playerId) {
-    console.log(`⚠️ Player ${playerId} Farkled - setting persistent state`);
+    // console.log(`⚠️ Player ${playerId} Farkled - setting persistent state`);
     setFarkleIndicatorState(playerId, true);
     
     // Save Farkle state to Firebase for synchronization across all players
@@ -77,9 +77,9 @@ function handlePlayerFarkle(playerId) {
             isFarkled: true,
             timestamp: Date.now()
         }).then(() => {
-            console.log(`💾 Farkle state saved to Firebase for ${playerId}`);
+            // console.log(`💾 Farkle state saved to Firebase for ${playerId}`);
         }).catch((error) => {
-            console.error(`❌ Error saving Farkle state to Firebase for ${playerId}:`, error);
+            // console.error(`❌ Error saving Farkle state to Firebase for ${playerId}:`, error);
         });
     }
     
@@ -91,15 +91,15 @@ function handlePlayerFarkle(playerId) {
 
 // Initialize Firebase state management
 function initializeFirebaseStateManager(roomId, playerId, playerName) {
-    console.log('🔥 Initializing Firebase State Manager');
-    console.log('🔥 Room:', roomId, 'Player:', playerId, 'Name:', playerName);
+    // console.log('🔥 Initializing Firebase State Manager');
+    // console.log('🔥 Room:', roomId, 'Player:', playerId, 'Name:', playerName);
     
     currentRoomId = roomId;
     currentPlayerId = playerId;
     currentPlayerName = playerName;
     
     if (!database) {
-        console.error('❌ Firebase database not initialized');
+        // console.error('❌ Firebase database not initialized');
         return false;
     }
     
@@ -131,7 +131,7 @@ function setupGameStateListener() {
     
     gameStateListener = gameStateRef.on('value', (snapshot) => {
         const gameState = snapshot.val();
-        console.log('🔥 Game state updated:', gameState);
+        // console.log('🔥 Game state updated:', gameState);
         
         if (gameState) {
             handleGameStateChange(gameState);
@@ -147,7 +147,7 @@ function setupPlayersStateListener() {
     
     playersStateListener = playersRef.on('value', (snapshot) => {
         const players = snapshot.val();
-        console.log('🔥 Players state updated:', players);
+        // console.log('🔥 Players state updated:', players);
         
         if (players) {
             handlePlayersStateChange(players);
@@ -163,11 +163,11 @@ function setupGameSettingsListener() {
     
     gameSettingsListener = gameSettingsRef.on('value', (snapshot) => {
         const gameSettings = snapshot.val();
-        console.log('🎮 Game settings updated:', gameSettings);
+        // console.log('🎮 Game settings updated:', gameSettings);
         
         if (gameSettings && gameSettings.updatedBy !== currentPlayerId) {
             // Only apply settings if they were updated by another player
-            console.log('🎮 Applying game settings from another player');
+            // console.log('🎮 Applying game settings from another player');
             
             // Update game settings using the game-settings.js module
             if (typeof updateGameSettings === 'function') {
@@ -176,13 +176,13 @@ function setupGameSettingsListener() {
                 // Check if scoring modal is currently open and update it
                 const scoringModal = document.getElementById('scoringModal');
                 if (scoringModal && scoringModal.classList.contains('show')) {
-                    console.log('📊 Scoring modal is open - updating display immediately');
+                    // console.log('📊 Scoring modal is open - updating display immediately');
                     if (typeof updateScoringGuide === 'function') {
                         updateScoringGuide();
                     }
                 }
                 
-                console.log(`🎮 Game settings updated by host: Three 1s=${gameSettings.threeOnesRule}, Winning=${gameSettings.winningScore}, Minimum=${gameSettings.minimumScore}`);
+                // console.log(`🎮 Game settings updated by host: Three 1s=${gameSettings.threeOnesRule}, Winning=${gameSettings.winningScore}, Minimum=${gameSettings.minimumScore}`);
             }
         }
     });
@@ -192,36 +192,36 @@ function setupGameSettingsListener() {
 function handleGameStateChange(gameState) {
     const { currentTurn, turnStartTime, gamePhase } = gameState;
     
-    console.log('🎮 Game state change:', {
-        currentTurn,
-        turnStartTime,
-        gamePhase,
-        isMyTurn: currentTurn === currentPlayerId
-    });
+    // console.log('🎮 Game state change:', {
+    //     currentTurn,
+    //     turnStartTime,
+    //     gamePhase,
+    //     isMyTurn: currentTurn === currentPlayerId
+    // });
     
     // Set the Firebase current turn player for the isPlayerTurn function
     window.firebaseCurrentTurnPlayer = currentTurn;
-    console.log('🔥 Set Firebase current turn player to:', currentTurn);
+    // console.log('🔥 Set Firebase current turn player to:', currentTurn);
     
     // Update turn indicators in the UI
     updateTurnIndicators(currentTurn);
     
     // Update game controls based on whose turn it is
     if (typeof updateGameControlsState === 'function') {
-        console.log('🔥 Calling updateGameControlsState() after Firebase state change');
+        // console.log('🔥 Calling updateGameControlsState() after Firebase state change');
         updateGameControlsState();
     }
     
     // Show appropriate messages
     if (currentTurn === currentPlayerId) {
-        console.log('🎮 It\'s my turn - enabling controls');
+        // console.log('🎮 It\'s my turn - enabling controls');
         // Hide waiting message if visible
         const waitingMessage = document.getElementById('waiting-message');
         if (waitingMessage) {
             waitingMessage.style.display = 'none';
         }
     } else {
-        console.log('🎮 Not my turn - showing waiting message');
+        // console.log('🎮 Not my turn - showing waiting message');
         if (typeof showWaitingForTurnMessage === 'function') {
             showWaitingForTurnMessage();
         }
@@ -242,15 +242,15 @@ function handlePlayersStateChange(players) {
     const canActResult = typeof canPlayerAct === 'function' ? canPlayerAct() : false;
     const isMyTurn = firebaseIsMyTurn || canActResult || currentTurnPlayer === currentPlayerId;
     
-    console.log('👥 Players state analysis:', {
-        totalPlayers: playerList.length,
-        currentTurnPlayer,
-        myState,
-        firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
-        firebaseIsMyTurn,
-        canActResult,
-        isMyTurn
-    });
+    // console.log('👥 Players state analysis:', {
+    //     totalPlayers: playerList.length,
+    //     currentTurnPlayer,
+    //     myState,
+    //     firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
+    //     firebaseIsMyTurn,
+    //     canActResult,
+    //     isMyTurn
+    // });
     
     // Update player list UI
     updatePlayerListUI(players);
@@ -258,11 +258,11 @@ function handlePlayersStateChange(players) {
     // Show/hide dice rolling UI based on whether it's my turn
     if (isMyTurn) {
         // It's my turn - show the dice rolling UI
-        console.log('🎲 Showing dice UI - it\'s my turn');
+        // console.log('🎲 Showing dice UI - it\'s my turn');
         showDiceRollingUI();
     } else {
         // Not my turn - hide the dice rolling UI but show waiting message
-        console.log('🎲 Not my turn - showing waiting state');
+        // console.log('🎲 Not my turn - showing waiting state');
         hideDiceRollingUI();
         
         // Show waiting message if not my turn
@@ -280,13 +280,13 @@ function handlePlayersStateChange(players) {
     if (typeof initializeTurnSystem === 'function') {
         const connectedPlayers = Object.keys(players).filter(playerId => players[playerId].isConnected !== false);
         const connectedPlayerNames = connectedPlayers.map(id => players[id].name);
-        console.log('🔌 Initializing turn system for connected players:', connectedPlayerNames);
+        // console.log('🔌 Initializing turn system for connected players:', connectedPlayerNames);
         initializeTurnSystem(connectedPlayerNames, true, true);
     }
     
     // Update game controls after player state changes
     if (typeof updateGameControlsState === 'function') {
-        console.log('🔥 Calling updateGameControlsState() after player state change');
+        // console.log('🔥 Calling updateGameControlsState() after player state change');
         updateGameControlsState();
     }
 }
@@ -306,10 +306,10 @@ function updatePlayerListUI(players) {
         }
     });
     
-    console.log('🔌 Filtering players - Total:', Object.keys(players).length, 'Connected:', Object.keys(connectedPlayers).length);
+    // console.log('🔌 Filtering players - Total:', Object.keys(players).length, 'Connected:', Object.keys(connectedPlayers).length);
     
     // No need to extract states from DOM - we have persistent state
-    console.log('💾 Current Farkle states before recreation:', farkleIndicatorStates);
+    // console.log('💾 Current Farkle states before recreation:', farkleIndicatorStates);
     
     // Clear existing list
     playerListElement.innerHTML = '';
@@ -339,15 +339,73 @@ function updatePlayerListUI(players) {
             case PLAYER_STATES.ROLLING:
                 stateIndicator.classList.add('bg-success');
                 stateIndicator.textContent = '🎲 Rolling';
+                
+                // Show rolling animation for other players (not the current player)
+                if (playerId !== currentPlayerId) {
+                    if (typeof displayOtherPlayerRollingAnimation === 'function') {
+                        displayOtherPlayerRollingAnimation(playerId);
+                    }
+                    
+                    // Add to rolling players set and start animation interval if needed
+                    if (typeof window.otherPlayersRolling !== 'undefined') {
+                        window.otherPlayersRolling.add(playerId);
+                        
+                        // Start animation interval if not already running
+                        if (window.otherPlayerAnimationInterval === null && 
+                            window.otherPlayersRolling.size > 0) {
+                            window.otherPlayerAnimationInterval = setInterval(() => {
+                                if (window.otherPlayersRolling.size > 0 && typeof displayOtherPlayerRollingAnimation === 'function') {
+                                    // Get the first rolling player (in a real game you might want to track who's currently active)
+                                    const rollingPlayer = Array.from(window.otherPlayersRolling)[0];
+                                    displayOtherPlayerRollingAnimation(rollingPlayer);
+                                }
+                            }, 150);
+                        }
+                    }
+                }
                 break;
             case PLAYER_STATES.ENDED_TURN:
                 stateIndicator.classList.add('bg-warning', 'text-dark');
                 stateIndicator.textContent = '✅ Finished';
+                
+                // Remove from rolling players set and stop animation if needed
+                if (typeof window.otherPlayersRolling !== 'undefined') {
+                    window.otherPlayersRolling.delete(playerId);
+                    
+                    // Stop animation interval if no players are rolling
+                    if (window.otherPlayerAnimationInterval !== null && 
+                        window.otherPlayersRolling.size === 0) {
+                        clearInterval(window.otherPlayerAnimationInterval);
+                        window.otherPlayerAnimationInterval = null;
+                        
+                        // Clear the dice display since no one is rolling anymore
+                        if (typeof showWaitingForTurnMessage === 'function') {
+                            showWaitingForTurnMessage();
+                        }
+                    }
+                }
                 break;
             case PLAYER_STATES.WAITING:
             default:
                 stateIndicator.classList.add('bg-secondary');
                 stateIndicator.textContent = '⏳ Waiting';
+                
+                // Remove from rolling players set and stop animation if needed
+                if (typeof window.otherPlayersRolling !== 'undefined') {
+                    window.otherPlayersRolling.delete(playerId);
+                    
+                    // Stop animation interval if no players are rolling
+                    if (window.otherPlayerAnimationInterval !== null && 
+                        window.otherPlayersRolling.size === 0) {
+                        clearInterval(window.otherPlayerAnimationInterval);
+                        window.otherPlayerAnimationInterval = null;
+                        
+                        // Clear the dice display since no one is rolling anymore
+                        if (typeof showWaitingForTurnMessage === 'function') {
+                            showWaitingForTurnMessage();
+                        }
+                    }
+                }
                 break;
         }
         playerNameContainer.appendChild(stateIndicator);
@@ -362,10 +420,10 @@ function updatePlayerListUI(players) {
         const shouldShowFarkle = getFarkleIndicatorState(playerId);
         if (shouldShowFarkle) {
             farkleIndicator.style.display = 'inline';
-            console.log(`🔄 Restored Farkle indicator for ${playerId} from persistent state`);
+            // console.log(`🔄 Restored Farkle indicator for ${playerId} from persistent state`);
         } else {
             farkleIndicator.style.display = 'none';
-            console.log(`🚫 No Farkle indicator for ${playerId} (persistent state: false)`);
+            // console.log(`🚫 No Farkle indicator for ${playerId} (persistent state: false)`);
         }
         playerNameContainer.appendChild(farkleIndicator);
         
@@ -446,19 +504,19 @@ function checkAndAdvanceTurn(players) {
     const allConnectedPlayersEnded = connectedPlayerStates.every(state => state === PLAYER_STATES.ENDED_TURN);
     const hasMultipleConnectedPlayers = Object.keys(connectedPlayers).length > 1;
     
-    console.log('🔄 Turn advancement check:', {
-        totalPlayers: Object.keys(players).length,
-        connectedPlayers: Object.keys(connectedPlayers).length,
-        allConnectedPlayersWaiting,
-        allConnectedPlayersEnded,
-        hasMultipleConnectedPlayers,
-        currentTurnPlayer,
-        connectedPlayerStates
-    });
+    // console.log('🔄 Turn advancement check:', {
+    //     totalPlayers: Object.keys(players).length,
+    //     connectedPlayers: Object.keys(connectedPlayers).length,
+    //     allConnectedPlayersWaiting,
+    //     allConnectedPlayersEnded,
+    //     hasMultipleConnectedPlayers,
+    //     currentTurnPlayer,
+    //     connectedPlayerStates
+    // });
     
     // Special case: If all connected players have ended their turn, start a new round
     if (allConnectedPlayersEnded && hasMultipleConnectedPlayers) {
-        console.log('🔄 All connected players have ended their turns - starting new round');
+        // console.log('🔄 All connected players have ended their turns - starting new round');
         
         // Clear any existing timeout
         if (window.autoTurnTimeout) {
@@ -470,7 +528,7 @@ function checkAndAdvanceTurn(players) {
             const connectedPlayerIds = Object.keys(connectedPlayers);
             const firstPlayer = connectedPlayerIds[0]; // First connected player in the list
             
-            console.log('🎮 Starting new round - first connected player:', firstPlayer);
+            // console.log('🎮 Starting new round - first connected player:', firstPlayer);
             
             // Set all connected players to waiting state
             const updates = {};
@@ -486,9 +544,12 @@ function checkAndAdvanceTurn(players) {
             updates[`gameState/currentTurn`] = firstPlayer;
             updates[`gameState/turnStartTime`] = Date.now();
             
+            // Clear all locked dice data for the new round
+            clearAllLockedDiceFromFirebase();
+            
             // Apply all updates to Firebase
             database.ref(`rooms/${currentRoomId}`).update(updates).then(() => {
-                console.log('🎮 New round started - first connected player:', firstPlayer);
+                // console.log('🎮 New round started - first connected player:', firstPlayer);
             });
         }, 2000);
         
@@ -497,7 +558,7 @@ function checkAndAdvanceTurn(players) {
     
     // If all connected players are waiting and we have multiple connected players, auto-start next turn
     if (allConnectedPlayersWaiting && hasMultipleConnectedPlayers) {
-        console.log('🕐 All connected players waiting - auto-starting next turn in 2 seconds');
+        // console.log('🕐 All connected players waiting - auto-starting next turn in 2 seconds');
         
         // Clear any existing timeout
         if (window.autoTurnTimeout) {
@@ -510,7 +571,10 @@ function checkAndAdvanceTurn(players) {
             const connectedHostPlayer = Object.keys(connectedPlayers).find(playerId => connectedPlayers[playerId].isHost);
             const nextPlayer = connectedHostPlayer || Object.keys(connectedPlayers)[0];
             
-            console.log('🎮 Auto-starting turn for connected host:', nextPlayer);
+            // console.log('🎮 Auto-starting turn for connected host:', nextPlayer);
+            
+            // Clear all locked dice data for the new turn
+            clearAllLockedDiceFromFirebase();
             
             // Update game state to set the connected host as current turn
             const gameStateRef = database.ref(`rooms/${currentRoomId}/gameState`);
@@ -518,7 +582,7 @@ function checkAndAdvanceTurn(players) {
                 currentTurn: nextPlayer,
                 turnStartTime: Date.now()
             }).then(() => {
-                console.log('🎮 Auto-turn started for:', nextPlayer);
+                // console.log('🎮 Auto-turn started for:', nextPlayer);
                 
                 // Set the connected host to rolling state
                 setPlayerState(PLAYER_STATES.ROLLING, nextPlayer);
@@ -542,7 +606,7 @@ function checkAndAdvanceTurn(players) {
         
         // If the current turn player is different from what's in game state, update it
         if (currentTurnPlayer && currentTurnPlayer !== currentGameTurn) {
-            console.log('🔄 Advancing turn from', currentGameTurn, 'to', currentTurnPlayer);
+            // console.log('🔄 Advancing turn from', currentGameTurn, 'to', currentTurnPlayer);
             
             // Update game state
             const updates = {
@@ -551,7 +615,10 @@ function checkAndAdvanceTurn(players) {
             };
             
             database.ref(`rooms/${currentRoomId}/gameState`).update(updates).then(() => {
-                console.log('🔄 Turn advanced in Firebase, triggering UI update');
+                // console.log('🔄 Turn advanced in Firebase, triggering UI update');
+                
+                // Clear all locked dice data for the new turn
+                clearAllLockedDiceFromFirebase();
                 
                 // Set the Firebase current turn player
                 window.firebaseCurrentTurnPlayer = currentTurnPlayer;
@@ -573,16 +640,16 @@ function updateTurnIndicators(currentTurnPlayerId) {
     // Clear Farkle indicator ONLY for the current player whose turn is starting
     // This ensures the player's Farkle indicator clears when THEIR next turn begins
     if (currentTurnPlayerId) {
-        console.log(`🔄 Clearing Farkle indicator for ${currentTurnPlayerId} as their turn starts`);
+        // console.log(`🔄 Clearing Farkle indicator for ${currentTurnPlayerId} as their turn starts`);
         setFarkleIndicatorState(currentTurnPlayerId, false);
         
         // Clear Farkle state from Firebase
         if (currentRoomId && database) {
             const farkleStateRef = database.ref(`rooms/${currentRoomId}/farkleStates/${currentTurnPlayerId}`);
             farkleStateRef.remove().then(() => {
-                console.log(`💾 Farkle state cleared from Firebase for ${currentTurnPlayerId}`);
+                // console.log(`💾 Farkle state cleared from Firebase for ${currentTurnPlayerId}`);
             }).catch((error) => {
-                console.error(`❌ Error clearing Farkle state from Firebase for ${currentTurnPlayerId}:`, error);
+                // console.error(`❌ Error clearing Farkle state from Firebase for ${currentTurnPlayerId}:`, error);
             });
         }
         
@@ -590,12 +657,35 @@ function updateTurnIndicators(currentTurnPlayerId) {
         if (typeof hideFarkleIndicator === 'function') {
             hideFarkleIndicator(currentTurnPlayerId);
         }
+        
+        // ADDITIONAL: Clear any locked dice styling when a new turn starts
+        // This provides an extra safety net to ensure locked dice styling is cleared
+        // console.log(`🧹 Clearing locked dice styling for new turn (${currentTurnPlayerId})`);
+        
+        // Temporarily disable locked dice styling to prevent re-application
+        window.lockedDiceStylingDisabled = true;
+        
+        if (typeof window.clearAllDiceLockedStyling === 'function') {
+            window.clearAllDiceLockedStyling();
+        }
+        
+        // Also clear local player locked dice states
+        if (window.playerLockedDiceStates) {
+            window.playerLockedDiceStates = {};
+            // console.log(`🧹 Cleared local playerLockedDiceStates for new turn`);
+        }
+        
+        // Re-enable locked dice styling after a short delay
+        setTimeout(() => {
+            window.lockedDiceStylingDisabled = false;
+            // console.log(`🧹 Re-enabled locked dice styling for new turn`);
+        }, 1500);
     }
 }
 
 // Show dice rolling UI when player is in rolling state
 function showDiceRollingUI() {
-    console.log('� Showing dice rolling UI - player is rolling');
+    // console.log('� Showing dice rolling UI - player is rolling');
     
     // Show roll dice button
     const rollButton = document.getElementById('roll-dice');
@@ -632,7 +722,7 @@ function showDiceRollingUI() {
 
 // Hide dice rolling UI when player is not in rolling state
 function hideDiceRollingUI() {
-    console.log('� Hiding dice rolling UI - player not rolling');
+    // console.log('� Hiding dice rolling UI - player not rolling');
     
     // Disable roll dice button but keep it visible (don't hide it completely)
     const rollButton = document.getElementById('roll-dice');
@@ -669,65 +759,65 @@ function hideDiceRollingUI() {
 
 // Enable player controls for their turn (legacy function - now calls showDiceRollingUI)
 function enablePlayerControls() {
-    console.log('🎮 Enabling player controls - it\'s my turn!');
+    // console.log('🎮 Enabling player controls - it\'s my turn!');
     showDiceRollingUI();
 }
 
 // Disable player controls when not their turn (legacy function - now calls hideDiceRollingUI)
 function disablePlayerControls() {
-    console.log('🎮 Disabling player controls - not my turn');
+    // console.log('🎮 Disabling player controls - not my turn');
     hideDiceRollingUI();
 }
 
 // Set the current player's state
 function setPlayerState(state, playerId = null) {
     if (!currentRoomId) {
-        console.error('❌ Cannot set player state: no room ID');
+        // console.error('❌ Cannot set player state: no room ID');
         return;
     }
     
     const targetPlayerId = playerId || currentPlayerId;
     if (!targetPlayerId) {
-        console.error('❌ Cannot set player state: no player ID');
+        // console.error('❌ Cannot set player state: no player ID');
         return;
     }
     
-    console.log(`🔥 Setting player ${targetPlayerId} state to:`, state);
+    // console.log(`🔥 Setting player ${targetPlayerId} state to:`, state);
     
     const playerRef = database.ref(`rooms/${currentRoomId}/players/${targetPlayerId}`);
     playerRef.update({
         state: state,
         stateTimestamp: Date.now()
     }).then(() => {
-        console.log(`✅ Player state updated to: ${state}`);
+        // console.log(`✅ Player state updated to: ${state}`);
     }).catch((error) => {
-        console.error('❌ Error updating player state:', error);
+        // console.error('❌ Error updating player state:', error);
     });
 }
 
 // Mark player as connected or disconnected
 function markPlayerAsConnected(isConnected, playerId = null) {
     if (!currentRoomId) {
-        console.error('❌ Cannot update connection status: no room ID');
+        // console.error('❌ Cannot update connection status: no room ID');
         return;
     }
     
     const targetPlayerId = playerId || currentPlayerId;
     if (!targetPlayerId) {
-        console.error('❌ Cannot update connection status: no player ID');
+        // console.error('❌ Cannot update connection status: no player ID');
         return;
     }
     
-    console.log(`🔌 Setting player ${targetPlayerId} connection status to:`, isConnected);
+    // console.log(`🔌 Setting player ${targetPlayerId} connection status to:`, isConnected);
     
     const playerRef = database.ref(`rooms/${currentRoomId}/players/${targetPlayerId}`);
     playerRef.update({
         isConnected: isConnected,
         lastConnectionUpdate: Date.now()
     }).then(() => {
-        console.log(`✅ Player connection status updated: ${isConnected}`);
+        // console.log(`✅ Player connection status updated: ${isConnected}`);
     }).catch((error) => {
-        console.error('❌ Error updating connection status:', error);
+        // console.error('❌ Error updating connection status:', error);
     });
 }
 
@@ -735,7 +825,7 @@ function markPlayerAsConnected(isConnected, playerId = null) {
 function setupDisconnectionHandling() {
     // Handle page unload (refresh, close tab, navigate away)
     window.addEventListener('beforeunload', () => {
-        console.log('🔌 Page unloading - marking player as disconnected');
+        // console.log('🔌 Page unloading - marking player as disconnected');
         if (currentPlayerId) {
             markPlayerAsConnected(false);
         }
@@ -744,21 +834,21 @@ function setupDisconnectionHandling() {
     // Handle browser/tab visibility changes
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            console.log('🔌 Page hidden - player may be disconnecting');
+            // console.log('🔌 Page hidden - player may be disconnecting');
         } else {
-            console.log('🔌 Page visible - marking player as connected');
+            // console.log('🔌 Page visible - marking player as connected');
             if (currentPlayerId) {
                 markPlayerAsConnected(true);
             }
         }
     });
     
-    console.log('🔌 Disconnection handling set up');
+    // console.log('🔌 Disconnection handling set up');
 }
 
 // Start the current player's turn
 function startMyTurn() {
-    console.log('🎯 Starting my turn');
+    // console.log('🎯 Starting my turn');
     setPlayerState(PLAYER_STATES.ROLLING);
     
     // Mark as critical operation
@@ -769,7 +859,7 @@ function startMyTurn() {
 
 // End the current player's turn
 function endMyTurn() {
-    console.log('🎯 Ending my turn');
+    // console.log('🎯 Ending my turn');
     setPlayerState(PLAYER_STATES.ENDED_TURN);
     
     // End critical operation
@@ -794,27 +884,27 @@ function endMyTurn() {
 
 // Handle player banking points
 function handlePlayerBanking(points, newScore) {
-    console.log('💰 Player banking points:', points, 'New score:', newScore);
-    console.log('💰 Banking for player:', currentPlayerId, 'in room:', currentRoomId);
+    // console.log('💰 Player banking points:', points, 'New score:', newScore);
+    // console.log('💰 Banking for player:', currentPlayerId, 'in room:', currentRoomId);
     
     // Update score in Firebase
     if (currentRoomId && currentPlayerId) {
         const playerRef = database.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`);
-        console.log('💰 Updating Firebase path:', `rooms/${currentRoomId}/players/${currentPlayerId}`);
+        // console.log('💰 Updating Firebase path:', `rooms/${currentRoomId}/players/${currentPlayerId}`);
         
         playerRef.update({
             score: newScore,
             lastBankTime: Date.now()
         }).then(() => {
-            console.log('💰 Score updated successfully in Firebase for:', currentPlayerId);
+            // console.log('💰 Score updated successfully in Firebase for:', currentPlayerId);
         }).catch((error) => {
-            console.error('💰 Error updating score in Firebase:', error);
+            // console.error('💰 Error updating score in Firebase:', error);
         });
     } else {
-        console.error('💰 Missing currentRoomId or currentPlayerId:', {
-            currentRoomId,
-            currentPlayerId
-        });
+        // console.error('💰 Missing currentRoomId or currentPlayerId:', {
+        //     currentRoomId,
+        //     currentPlayerId
+        // });
     }
     
     // End turn after banking
@@ -829,7 +919,7 @@ function setupDiceResultsListener() {
     
     diceResultsListener = diceResultsRef.on('child_added', (snapshot) => {
         const diceData = snapshot.val();
-        console.log('🎲 Dice results received:', diceData);
+        // console.log('🎲 Dice results received:', diceData);
         
         if (diceData && diceData.playerId !== currentPlayerId) {
             // Call the existing onDiceResultsReceived function
@@ -851,7 +941,7 @@ function setupDiceSelectionsListener() {
     
     diceSelectionsListener = diceSelectionsRef.on('child_added', (snapshot) => {
         const selectionData = snapshot.val();
-        console.log('🎯 Dice selection received:', selectionData);
+        // console.log('🎯 Dice selection received:', selectionData);
         
         if (selectionData && selectionData.playerId !== currentPlayerId) {
             // Call function to display other players' dice selections
@@ -875,35 +965,35 @@ function setupLockedDiceListener() {
     lockedDiceListener = lockedDiceRef.on('child_added', (snapshot) => {
         try {
             const lockedData = snapshot.val();
-            console.log('🔒 Locked dice received:', lockedData);
-            console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
+            // console.log('🔒 Locked dice received:', lockedData);
+            // console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
             
             if (lockedData && lockedData.playerId !== currentPlayerId) {
-                console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
-                console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
-                console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
+                // console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
+                // console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
+                // console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
                 
                 // Call function to display other players' locked dice
                 if (typeof displayOtherPlayerLockedDice === 'function') {
-                    console.log('🔒 Calling displayOtherPlayerLockedDice...');
+                    // console.log('🔒 Calling displayOtherPlayerLockedDice...');
                     displayOtherPlayerLockedDice({
                         playerId: lockedData.playerId,
                         lockedDiceIndices: lockedData.lockedDiceIndices,
                         diceResults: lockedData.diceResults
                     });
-                    console.log('🔒 displayOtherPlayerLockedDice call completed');
+                    // console.log('🔒 displayOtherPlayerLockedDice call completed');
                 } else {
-                    console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
-                    console.error('🔒 Available functions in window:', Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('display')));
+                    // console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
+                    // console.error('🔒 Available functions in window:', Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('display')));
                 }
                 
-                console.log('🔒 playerLockedDiceStates after:', JSON.stringify(window.playerLockedDiceStates));
+                // console.log('🔒 playerLockedDiceStates after:', JSON.stringify(window.playerLockedDiceStates));
             } else {
-                console.log('🔒 Ignoring locked dice from self or invalid data');
+                // console.log('🔒 Ignoring locked dice from self or invalid data');
             }
         } catch (error) {
-            console.error('🔒 Error in locked dice listener:', error);
-            console.error('🔒 Error stack:', error.stack);
+            // console.error('🔒 Error in locked dice listener:', error);
+            // console.error('🔒 Error stack:', error.stack);
         }
     });
 }
@@ -916,7 +1006,7 @@ function setupMaterialChangesListener() {
     
     materialChangesListener = materialChangesRef.on('child_added', (snapshot) => {
         const materialData = snapshot.val();
-        console.log('🎨 Material change received:', materialData);
+        // console.log('🎨 Material change received:', materialData);
         
         if (materialData && materialData.playerId !== currentPlayerId) {
             // Call the existing onMaterialChangeReceived function
@@ -939,14 +1029,14 @@ function setupFarkleStatesListener() {
     
     farkleStatesListener = farkleStatesRef.on('value', (snapshot) => {
         const farkleStates = snapshot.val();
-        console.log('⚠️ Farkle states updated from Firebase:', farkleStates);
+        // console.log('⚠️ Farkle states updated from Firebase:', farkleStates);
         
         if (farkleStates) {
             // Update local farkle indicator states from Firebase
             Object.keys(farkleStates).forEach(playerId => {
                 const farkleData = farkleStates[playerId];
                 if (farkleData && farkleData.isFarkled) {
-                    console.log(`⚠️ Syncing Farkle state for ${playerId}: ${farkleData.isFarkled}`);
+                    // console.log(`⚠️ Syncing Farkle state for ${playerId}: ${farkleData.isFarkled}`);
                     setFarkleIndicatorState(playerId, farkleData.isFarkled);
                     
                     // Update UI if this is for another player
@@ -975,7 +1065,7 @@ function setupFarkleStatesListener() {
 function broadcastDiceResults(playerId, diceResults) {
     if (!currentRoomId || !database) return;
     
-    console.log(`🎲 Broadcasting dice results via Firebase for ${playerId}:`, diceResults);
+    // console.log(`🎲 Broadcasting dice results via Firebase for ${playerId}:`, diceResults);
     
     const diceResultsRef = database.ref(`rooms/${currentRoomId}/diceResults`);
     diceResultsRef.push({
@@ -983,9 +1073,9 @@ function broadcastDiceResults(playerId, diceResults) {
         diceResults: diceResults,
         timestamp: Date.now()
     }).then(() => {
-        console.log('🎲 Dice results broadcast successfully');
+        // console.log('🎲 Dice results broadcast successfully');
     }).catch((error) => {
-        console.error('❌ Error broadcasting dice results:', error);
+        // console.error('❌ Error broadcasting dice results:', error);
     });
 }
 
@@ -993,7 +1083,7 @@ function broadcastDiceResults(playerId, diceResults) {
 function broadcastDiceSelection(playerId, selectedDiceIndices, diceResults) {
     if (!currentRoomId || !database) return;
     
-    console.log(`🎯 Broadcasting dice selection via Firebase for ${playerId}:`, selectedDiceIndices);
+    // console.log(`🎯 Broadcasting dice selection via Firebase for ${playerId}:`, selectedDiceIndices);
     
     const diceSelectionRef = database.ref(`rooms/${currentRoomId}/diceSelections`);
     diceSelectionRef.push({
@@ -1002,9 +1092,9 @@ function broadcastDiceSelection(playerId, selectedDiceIndices, diceResults) {
         diceResults: diceResults, // Include current dice results for context
         timestamp: Date.now()
     }).then(() => {
-        console.log('🎯 Dice selection broadcast successfully');
+        // console.log('🎯 Dice selection broadcast successfully');
     }).catch((error) => {
-        console.error('❌ Error broadcasting dice selection:', error);
+        // console.error('❌ Error broadcasting dice selection:', error);
     });
 }
 
@@ -1012,7 +1102,7 @@ function broadcastDiceSelection(playerId, selectedDiceIndices, diceResults) {
 function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
     if (!currentRoomId || !database) return;
     
-    console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
+    // console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
     
     const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
     lockedDiceRef.push({
@@ -1021,9 +1111,9 @@ function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
         diceResults: diceResults, // Include current dice results for context
         timestamp: Date.now()
     }).then(() => {
-        console.log('🔒 Locked dice broadcast successfully');
+        // console.log('🔒 Locked dice broadcast successfully');
     }).catch((error) => {
-        console.error('❌ Error broadcasting locked dice:', error);
+        // console.error('❌ Error broadcasting locked dice:', error);
     });
 }
 
@@ -1031,7 +1121,7 @@ function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
 function broadcastMaterialChange(playerId, diceType, floorType) {
     if (!currentRoomId || !database) return;
     
-    console.log(`🎨 Broadcasting material change via Firebase for ${playerId}: Dice=${diceType}, Floor=${floorType}`);
+    // console.log(`🎨 Broadcasting material change via Firebase for ${playerId}: Dice=${diceType}, Floor=${floorType}`);
     
     const materialChangesRef = database.ref(`rooms/${currentRoomId}/materialChanges`);
     materialChangesRef.push({
@@ -1040,20 +1130,20 @@ function broadcastMaterialChange(playerId, diceType, floorType) {
         floorType: floorType,
         timestamp: Date.now()
     }).then(() => {
-        console.log('🎨 Material change broadcast successfully');
+        // console.log('🎨 Material change broadcast successfully');
     }).catch((error) => {
-        console.error('❌ Error broadcasting material change:', error);
+        // console.error('❌ Error broadcasting material change:', error);
     });
 }
 
 // Broadcast game settings to all players in the room
 function broadcastGameSettings(gameSettings) {
     if (!currentRoomId || !database) {
-        console.warn('Cannot broadcast game settings - no room or database connection');
+        // console.warn('Cannot broadcast game settings - no room or database connection');
         return;
     }
     
-    console.log('🎮 Broadcasting game settings to all players:', gameSettings);
+    // console.log('🎮 Broadcasting game settings to all players:', gameSettings);
     
     // Save game settings to Firebase for all players in the room
     const gameSettingsRef = database.ref(`rooms/${currentRoomId}/gameSettings`);
@@ -1062,16 +1152,16 @@ function broadcastGameSettings(gameSettings) {
         updatedBy: currentPlayerId,
         timestamp: Date.now()
     }).then(() => {
-        console.log('✅ Game settings broadcast successfully');
+        // console.log('✅ Game settings broadcast successfully');
     }).catch((error) => {
-        console.error('❌ Error broadcasting game settings:', error);
+        // console.error('❌ Error broadcasting game settings:', error);
     });
 }
 
 // Reset all scores in the multiplayer room
 function resetAllScores() {
     if (!currentRoomId || !database) {
-        console.warn('Cannot reset scores - no room or database connection');
+        // console.warn('Cannot reset scores - no room or database connection');
         // Fallback to local reset for single player
         if (typeof initializePlayerScores === 'function') {
             const players = Object.keys(getAllPlayerScores() || {});
@@ -1083,7 +1173,7 @@ function resetAllScores() {
         return;
     }
     
-    console.log('🔄 Resetting all scores in multiplayer room');
+    // console.log('🔄 Resetting all scores in multiplayer room');
     
     // Reset all player scores in Firebase
     const playersRef = database.ref(`rooms/${currentRoomId}/players`);
@@ -1096,7 +1186,7 @@ function resetAllScores() {
             }
             
             playersRef.update(updates).then(() => {
-                console.log('✅ All scores reset successfully in Firebase');
+                // console.log('✅ All scores reset successfully in Firebase');
                 
                 // Also reset local pending points
                 if (typeof clearPendingPoints === 'function') {
@@ -1108,7 +1198,7 @@ function resetAllScores() {
                     updateGameControlsState();
                 }
             }).catch((error) => {
-                console.error('❌ Error resetting scores in Firebase:', error);
+                // console.error('❌ Error resetting scores in Firebase:', error);
             });
         }
     });
@@ -1116,7 +1206,7 @@ function resetAllScores() {
 
 // Cleanup Firebase listeners
 function cleanupFirebaseStateManager() {
-    console.log('🔥 Cleaning up Firebase State Manager');
+    // console.log('🔥 Cleaning up Firebase State Manager');
     
     // Mark current player as disconnected before cleaning up
     if (currentPlayerId) {
@@ -1131,7 +1221,7 @@ function cleanupFirebaseStateManager() {
     
     // Clear Farkle indicator states
     farkleIndicatorStates = {};
-    console.log('💾 Cleared Farkle indicator states');
+    // console.log('💾 Cleared Farkle indicator states');
     
     if (gameStateListener && currentRoomId) {
         database.ref(`rooms/${currentRoomId}/gameState`).off('value', gameStateListener);
@@ -1182,7 +1272,7 @@ function cleanupFirebaseStateManager() {
 function initializeGameState() {
     if (!currentRoomId) return;
     
-    console.log('🔥 Initializing game state for room:', currentRoomId);
+    // console.log('🔥 Initializing game state for room:', currentRoomId);
     
     const gameStateRef = database.ref(`rooms/${currentRoomId}/gameState`);
     gameStateRef.once('value', (snapshot) => {
@@ -1196,7 +1286,7 @@ function initializeGameState() {
             };
             
             gameStateRef.set(initialGameState);
-            console.log('🔥 Game state initialized');
+            // console.log('🔥 Game state initialized');
         }
     });
 }
@@ -1237,13 +1327,13 @@ Object.defineProperty(window, 'currentPlayerName', {
 
 // Override isPlayerTurn for Firebase state management
 window.isPlayerTurnFirebase = function(playerId) {
-    console.log('🔥 isPlayerTurnFirebase called with:', {
-        playerId,
-        firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
-        comparison: window.firebaseCurrentTurnPlayer === playerId,
-        typeOfPlayerId: typeof playerId,
-        typeOfFirebasePlayer: typeof window.firebaseCurrentTurnPlayer
-    });
+    // console.log('🔥 isPlayerTurnFirebase called with:', {
+    //     playerId,
+    //     firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
+    //     comparison: window.firebaseCurrentTurnPlayer === playerId,
+    //     typeOfPlayerId: typeof playerId,
+    //     typeOfFirebasePlayer: typeof window.firebaseCurrentTurnPlayer
+    // });
     
     // This will be set by the Firebase state manager when game state changes
     if (window.firebaseCurrentTurnPlayer) {
@@ -1251,10 +1341,10 @@ window.isPlayerTurnFirebase = function(playerId) {
     }
     // Fallback to original function if available
     if (typeof window.originalIsPlayerTurn === 'function') {
-        console.log('🔥 Falling back to original isPlayerTurn function');
+        // console.log('🔥 Falling back to original isPlayerTurn function');
         return window.originalIsPlayerTurn(playerId);
     }
-    console.log('🔥 No firebase turn player and no original function - returning false');
+    // console.log('🔥 No firebase turn player and no original function - returning false');
     return false;
 };
 
@@ -1262,6 +1352,32 @@ window.isPlayerTurnFirebase = function(playerId) {
 if (typeof isPlayerTurn === 'function' && !window.originalIsPlayerTurn) {
     window.originalIsPlayerTurn = isPlayerTurn;
     window.isPlayerTurn = window.isPlayerTurnFirebase;
+}
+
+// Function to clear all locked dice data from Firebase
+function clearAllLockedDiceFromFirebase() {
+    if (!currentRoomId) return;
+    
+    // console.log('🧹 Clearing all locked dice data from Firebase');
+    
+    // Clear the lockedDice node in Firebase
+    const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
+    lockedDiceRef.remove().then(() => {
+        // console.log('🧹 Successfully cleared all locked dice data from Firebase');
+        
+        // Also clear local stored states
+        if (typeof window.clearAllDiceLockedStyling === 'function') {
+            window.clearAllDiceLockedStyling();
+        }
+        
+        // Clear the global playerLockedDiceStates
+        if (window.playerLockedDiceStates) {
+            window.playerLockedDiceStates = {};
+        }
+        
+    }).catch((error) => {
+        // console.error('🧹 Error clearing locked dice data from Firebase:', error);
+    });
 }
 
 // Export for other modules
@@ -1277,6 +1393,10 @@ if (typeof module !== 'undefined' && module.exports) {
         broadcastGameSettings,
         resetAllScores,
         cleanupFirebaseStateManager,
+        clearAllLockedDiceFromFirebase,
         PLAYER_STATES
     };
 }
+
+// Make function globally available
+window.clearAllLockedDiceFromFirebase = clearAllLockedDiceFromFirebase;

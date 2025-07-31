@@ -1,0 +1,17 @@
+"filename", "language", "JavaScript", "HTML", "PostCSS", "comment", "blank", "total"
+"/Users/brandon/Documents/GitHub/farkle/css/styles.css", "PostCSS", 0, 0, 232, 24, 44, 300
+"/Users/brandon/Documents/GitHub/farkle/index.html", "HTML", 0, 415, 0, 7, 18, 440
+"/Users/brandon/Documents/GitHub/farkle/js/dice-styling-integration.js", "JavaScript", 52, 0, 0, 20, 14, 86
+"/Users/brandon/Documents/GitHub/farkle/js/dice-styling-manager.js", "JavaScript", 274, 0, 0, 112, 75, 461
+"/Users/brandon/Documents/GitHub/farkle/js/farkle-scoring.js", "JavaScript", 174, 0, 0, 36, 24, 234
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-config.js", "JavaScript", 217, 0, 0, 66, 51, 334
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-room-manager.js", "JavaScript", 354, 0, 0, 62, 81, 497
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-state-manager.js", "JavaScript", 799, 0, 0, 322, 224, 1345
+"/Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-admin.js", "JavaScript", 142, 0, 0, 39, 26, 207
+"/Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-database.js", "JavaScript", 12, 0, 0, 12, 4, 28
+"/Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-init.js", "JavaScript", 13, 0, 0, 5, 5, 23
+"/Users/brandon/Documents/GitHub/farkle/js/game-settings.js", "JavaScript", 257, 0, 0, 104, 57, 418
+"/Users/brandon/Documents/GitHub/farkle/js/game.js", "JavaScript", 1400, 0, 0, 505, 387, 2292
+"/Users/brandon/Documents/GitHub/farkle/js/material-config.js", "JavaScript", 325, 0, 0, 27, 22, 374
+"/Users/brandon/Documents/GitHub/farkle/js/turn-system-integration.js", "JavaScript", 435, 0, 0, 179, 121, 735
+"Total", "-", 4454, 415, 232, 1520, 1153, 7774

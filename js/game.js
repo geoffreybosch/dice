@@ -26,16 +26,70 @@ let selectedDiceIndices = [];
 let lockedDiceIndices = [];
 let availableDiceCount = 6;
 
+// Ensure arrays are always properly initialized
+function ensureArraysInitialized() {
+    if (!Array.isArray(currentDiceResults)) currentDiceResults = [];
+    if (!Array.isArray(selectedDiceIndices)) selectedDiceIndices = [];
+    if (!Array.isArray(lockedDiceIndices)) lockedDiceIndices = [];
+}
+
+// Safe includes function to prevent undefined errors
+function safeIncludes(array, value) {
+    return Array.isArray(array) ? array.includes(value) : false;
+}
+
+// Initialize arrays immediately
+ensureArraysInitialized();
+
 // Store locked dice state for each player (for spectating functionality)
 let playerLockedDiceStates = {};
 // Make it accessible globally for debugging
 window.playerLockedDiceStates = playerLockedDiceStates;
 
+// Define utility function early to ensure it's available
+window.clearAllDiceLockedStyling = function() {
+    // console.log('🧹 Clearing all locked dice styling from display (early definition)');
+    
+    const diceResultsContainer = document.getElementById('dice-results-container');
+    if (!diceResultsContainer) return;
+    
+    // Find all dice images and remove locked classes/styling
+    const allDiceImages = diceResultsContainer.querySelectorAll('img');
+    allDiceImages.forEach(diceImage => {
+        // Remove CSS classes
+        diceImage.classList.remove('locked');
+        diceImage.classList.remove('selected-by-other');
+        diceImage.classList.remove('selected');
+        
+        // Force remove CSS properties that might be applied by the locked class
+        diceImage.style.removeProperty('opacity');
+        diceImage.style.removeProperty('filter');
+        diceImage.style.removeProperty('cursor');
+        diceImage.style.removeProperty('background-color');
+        diceImage.style.removeProperty('animation');
+        
+        // Reset border and box-shadow to default dice styling
+        diceImage.style.border = '2px solid #ddd';
+        diceImage.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        
+        // Reset any locked-specific styling
+        if (diceImage.title && diceImage.title.includes('LOCKED')) {
+            // Remove "LOCKED" from title and reset to basic title
+            const value = diceImage.dataset.diceValue || diceImage.alt.match(/\d+/)?.[0];
+            const index = diceImage.dataset.diceIndex || 0;
+            diceImage.title = `Dice ${parseInt(index) + 1} (value: ${value})`;
+        }
+    });
+    
+    // console.log('🧹 Cleared locked styling from all dice images (early definition)');
+};
+
 // Initialize Three.js scene
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, 800 / 500, 0.1, 1000);
+// The following perspectiveCamera uses the following properties: fov, aspect, near, far
+const camera = new THREE.PerspectiveCamera(50, 500 / 500, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('dice-canvas'), antialias: true });
-renderer.setSize(800, 500);
+renderer.setSize(500, 500);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -64,106 +118,24 @@ const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
 directionalLight2.position.set(-5, 8, -5);
 scene.add(directionalLight2);
 
-// Mouse controls for camera
-let mouseDown = false;
-let mouseX = 0;
-let mouseY = 0;
-let cameraDistance = 15; // Increased distance for top-down view
-let cameraAngleX = Math.PI / 2; // 90 degrees down for top-down view
-let cameraAngleY = 0;
-
-// Get the dice canvas for mouse events
-const diceCanvas = document.getElementById('dice-canvas');
-
-// Mouse event listeners
-diceCanvas.addEventListener('mousedown', (event) => {
-    mouseDown = true;
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-});
-
-diceCanvas.addEventListener('mouseup', () => {
-    mouseDown = false;
-});
-
-diceCanvas.addEventListener('mousemove', (event) => {
-    if (!mouseDown) return;
-    
-    const deltaX = event.clientX - mouseX;
-    const deltaY = event.clientY - mouseY;
-    
-    cameraAngleY += deltaX * 0.01;
-    cameraAngleX += deltaY * 0.01;
-    
-    // Limit vertical rotation to keep camera above the table (top-down bias)
-    cameraAngleX = Math.max(Math.PI/4, Math.min(Math.PI/2, cameraAngleX));
-    
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-    
-    updateCameraPosition();
-});
-
-// Mouse wheel for zoom
-diceCanvas.addEventListener('wheel', (event) => {
-    event.preventDefault();
-    cameraDistance += event.deltaY * 0.01;
-    cameraDistance = Math.max(5, Math.min(30, cameraDistance));
-    updateCameraPosition();
-});
-
-// Touch events for mobile
-diceCanvas.addEventListener('touchstart', (event) => {
-    event.preventDefault();
-    if (event.touches.length === 1) {
-        mouseDown = true;
-        mouseX = event.touches[0].clientX;
-        mouseY = event.touches[0].clientY;
-    }
-});
-
-diceCanvas.addEventListener('touchend', (event) => {
-    event.preventDefault();
-    mouseDown = false;
-});
-
-diceCanvas.addEventListener('touchmove', (event) => {
-    event.preventDefault();
-    if (!mouseDown || event.touches.length !== 1) return;
-    
-    const deltaX = event.touches[0].clientX - mouseX;
-    const deltaY = event.touches[0].clientY - mouseY;
-    
-    cameraAngleY += deltaX * 0.01;
-    cameraAngleX += deltaY * 0.01;
-    
-    // Limit vertical rotation to keep camera above the table (top-down bias)
-    cameraAngleX = Math.max(Math.PI/4, Math.min(Math.PI/2, cameraAngleX));
-    
-    mouseX = event.touches[0].clientX;
-    mouseY = event.touches[0].clientY;
-    
-    updateCameraPosition();
-});
-
-// Function to update camera position - optimized for top-down view
-function updateCameraPosition() {
-    // For top-down view, position camera directly above the center
-    const x = Math.sin(cameraAngleY) * Math.cos(cameraAngleX) * cameraDistance;
-    const y = Math.abs(Math.sin(cameraAngleX)) * cameraDistance; // Ensure Y is always positive (above)
-    const z = Math.cos(cameraAngleY) * Math.cos(cameraAngleX) * cameraDistance;
-    
-    camera.position.set(x, y, z);
-    camera.lookAt(0, 0, 0); // Always look at the center of the dice area
+// Fixed camera setup - optimal view for dice game
+function setupDefaultCamera() {
+    // Position camera for an optimal top-down angled view
+    // This provides a good perspective of the dice while maintaining readability
+    camera.position.set(0, 18, 0); // Slightly behind and above for better view
+    camera.lookAt(0, 0, 0); // Look at center of dice area
 }
 
 // Set initial camera position
-updateCameraPosition();
+setupDefaultCamera();
 
 // Apply saved background material preference
 if (currentBackgroundMaterial !== 'white') {
     changeBackgroundMaterial(currentBackgroundMaterial);
 }
+
+// Get the dice canvas element for WebGL rendering
+const diceCanvas = document.getElementById('dice-canvas');
 
 // Turn-based system functions
 function canPlayerAct(playerId = myPlayerId) {
@@ -172,7 +144,7 @@ function canPlayerAct(playerId = myPlayerId) {
     // For Firebase state management, check if this player is the current turn player
     if (typeof currentRoomId !== 'undefined' && currentRoomId && typeof currentPlayerId !== 'undefined' && currentPlayerId) {
         // Use Firebase state management
-        console.log('🔥 Checking turn via Firebase state management');
+        // console.log('🔥 Checking turn via Firebase state management');
         // We'll rely on the game state to determine if it's the player's turn
         // The Firebase state manager will call updateGameControlsState when needed
         return isPlayerTurn(playerId);
@@ -183,7 +155,7 @@ function canPlayerAct(playerId = myPlayerId) {
 }
 
 function updateGameControlsState() {
-    console.log('🎮 === updateGameControlsState() START ===');
+    // console.log('🎮 === updateGameControlsState() START ===');
     
     const rollButton = document.getElementById('roll-dice');
     const bankPointsButton = document.getElementById('bank-points');
@@ -199,40 +171,40 @@ function updateGameControlsState() {
     // Find the dice rolling container (the card containing roll button and energy slider)
     const diceRollingContainer = rollButton ? rollButton.closest('.card') : null;
     
-    console.log('🎮 Control state info:', {
-        myPlayerId,
-        isInMultiplayerRoom,
-        canAct,
-        hasPendingPoints,
-        currentTurn: typeof getCurrentTurn === 'function' ? getCurrentTurn() : 'function not available',
-        elementsFound: {
-            rollButton: !!rollButton,
-            bankPointsButton: !!bankPointsButton,
-            materialsButton: !!materialsButton,
-            diceSelectionControls: !!diceSelectionControls,
-            diceCanvas: !!diceCanvas,
-            diceResultsContainer: !!diceResultsContainer,
-            energySliderContainer: !!energySliderContainer,
-            diceRollingContainer: !!diceRollingContainer
-        }
-    });
+    // console.log('🎮 Control state info:', {
+    //     myPlayerId,
+    //     isInMultiplayerRoom,
+    //     canAct,
+    //     hasPendingPoints,
+    //     currentTurn: typeof getCurrentTurn === 'function' ? getCurrentTurn() : 'function not available',
+    //     elementsFound: {
+    //         rollButton: !!rollButton,
+    //         bankPointsButton: !!bankPointsButton,
+    //         materialsButton: !!materialsButton,
+    //         diceSelectionControls: !!diceSelectionControls,
+    //         diceCanvas: !!diceCanvas,
+    //         diceResultsContainer: !!diceResultsContainer,
+    //         energySliderContainer: !!energySliderContainer,
+    //         diceRollingContainer: !!diceRollingContainer
+    //     }
+    // });
     
     // Note: Dice canvas visibility is now controlled by Firebase state manager based on player state
     // The showDiceRollingUI/hideDiceRollingUI functions handle dice canvas display
     
     // Always keep dice results container visible for showing other players' results
     if (diceResultsContainer) {
-        console.log('🎮 Setting dice results container to visible');
+        // console.log('🎮 Setting dice results container to visible');
         diceResultsContainer.style.display = 'flex';
     }
     
     // Show/hide dice rolling container based on turn
     if (diceRollingContainer) {
         if (canAct) {
-            console.log('🎮 Showing dice rolling container (player can act)');
+            // console.log('🎮 Showing dice rolling container (player can act)');
             diceRollingContainer.style.display = 'block';
         } else {
-            console.log('🎮 Hiding dice rolling container (not player\'s turn)');
+            // console.log('🎮 Hiding dice rolling container (not player\'s turn)');
             diceRollingContainer.style.display = 'none';
         }
     }
@@ -240,11 +212,11 @@ function updateGameControlsState() {
     // Show waiting message if it's not your turn and in multiplayer mode
     const isMyTurn = typeof isPlayerTurn === 'function' ? isPlayerTurn(myPlayerId) : true;
     if (!isMyTurn && isInMultiplayerRoom) {
-        console.log('🎮 Not my turn and in multiplayer - showing waiting message');
-        console.log('🎮 Debug: myPlayerId =', myPlayerId, 'isMyTurn =', isMyTurn);
+        // console.log('🎮 Not my turn and in multiplayer - showing waiting message');
+        // console.log('🎮 Debug: myPlayerId =', myPlayerId, 'isMyTurn =', isMyTurn);
         showWaitingForTurnMessage();
     } else if (isMyTurn && isInMultiplayerRoom) {
-        console.log('🎮 It is my turn - ensuring waiting message is not shown');
+        // console.log('🎮 It is my turn - ensuring waiting message is not shown');
         // If it's my turn and the dice results container only has waiting message, clear it
         const diceResultsContainer = document.getElementById('dice-results-container');
         if (diceResultsContainer && diceResultsContainer.textContent.includes('Waiting for other player')) {
@@ -255,21 +227,22 @@ function updateGameControlsState() {
     // Enable/disable materials button based on turn
     if (materialsButton) {
         const newDisabled = !canAct;
-        console.log(`🎮 Setting materials button disabled: ${materialsButton.disabled} → ${newDisabled}`);
+        // console.log(`🎮 Setting materials button disabled: ${materialsButton.disabled} → ${newDisabled}`);
         materialsButton.disabled = newDisabled;
     }
     
     // Enable/disable roll button based on turn
     if (rollButton) {
         const newDisabled = !canAct;
-        console.log(`🎮 Setting roll button disabled: ${rollButton.disabled} → ${newDisabled}`);
+        // console.log(`🎮 Setting roll button disabled: ${rollButton.disabled} → ${newDisabled}`);
         rollButton.disabled = newDisabled;
     }
     
     // Show/hide dice selection controls based on turn AND whether there are dice to select
     if (diceSelectionControls) {
+        ensureArraysInitialized(); // Ensure arrays are properly initialized
         const hasDiceDisplayed = currentDiceResults && currentDiceResults.length > 0;
-        const hasSelectableDice = hasDiceDisplayed && currentDiceResults.some((_, index) => !lockedDiceIndices.includes(index));
+        const hasSelectableDice = hasDiceDisplayed && currentDiceResults.some((_, index) => !safeIncludes(lockedDiceIndices, index));
         const shouldShowControls = canAct && hasSelectableDice;
         
         if (shouldShowControls) {
@@ -289,17 +262,17 @@ function updateGameControlsState() {
     if (bankPointsButton) {
         const newDisabled = !canAct;
         const newDisplay = (canAct && hasPendingPoints) ? 'inline-block' : 'none';
-        console.log(`🎮 Setting bank button - disabled: ${bankPointsButton.disabled} → ${newDisabled}, display: ${bankPointsButton.style.display} → ${newDisplay}`);
+        // console.log(`🎮 Setting bank button - disabled: ${bankPointsButton.disabled} → ${newDisabled}, display: ${bankPointsButton.style.display} → ${newDisplay}`);
         bankPointsButton.disabled = newDisabled;
         bankPointsButton.style.display = newDisplay;
         if (hasPendingPoints) {
             const currentPending = getPendingPoints();
-            console.log(`🎮 💰 BANK BUTTON: Updating text with ${currentPending} pending points`);
+            // console.log(`🎮 💰 BANK BUTTON: Updating text with ${currentPending} pending points`);
             bankPointsButton.textContent = `Bank ${currentPending} Points & End Turn`;
         }
     }
     
-    console.log('🎮 === updateGameControlsState() END ===');
+    // console.log('🎮 === updateGameControlsState() END ===');
     // Note: Turn display is now handled by updateTurnDisplay() in the player list
     // No need for separate turn indicator element
 }
@@ -314,9 +287,12 @@ if (!diceCanvas) {
 
 // Function to simulate dice roll
 function rollDice() {
+    // Ensure arrays are initialized before use
+    ensureArraysInitialized();
+    
     // Check if player can act
     if (!canPlayerAct()) {
-        console.log('Cannot roll dice - not your turn!');
+        // console.log('Cannot roll dice - not your turn!');
         return;
     }
     
@@ -324,7 +300,7 @@ function rollDice() {
     
     // Generate results for all 6 dice positions
     for (let i = 0; i < 6; i++) {
-        if (lockedDiceIndices.includes(i)) {
+        if (safeIncludes(lockedDiceIndices, i)) {
             // Keep the previous result for locked dice
             diceResults.push(currentDiceResults[i] || 1);
         } else {
@@ -349,6 +325,13 @@ function displayDiceResults(results) {
     
     // Clear previous results
     diceResultsContainer.innerHTML = '';
+    
+    // Defensive: Clear any potentially stale locked dice styling from the container
+    // This ensures we start with a clean slate
+    const existingImages = diceResultsContainer.querySelectorAll('img');
+    existingImages.forEach(img => {
+        img.classList.remove('locked', 'selected-by-other', 'selected', 'rolling');
+    });
 
     results.forEach((result, index) => {
         // Create an image element for each dice result
@@ -367,7 +350,8 @@ function displayDiceResults(results) {
         diceImage.dataset.diceValue = result;
         
         // Check if this dice is locked
-        const isLocked = lockedDiceIndices.includes(index);
+        ensureArraysInitialized(); // Ensure arrays are initialized
+        const isLocked = safeIncludes(lockedDiceIndices, index);
         
         if (isLocked) {
             // Apply locked styling
@@ -385,12 +369,12 @@ function displayDiceResults(results) {
                     if (canPlayerAct()) {
                         toggleDiceSelection(index, diceImage);
                     } else {
-                        console.log('Cannot select dice - not your turn!');
+                        // console.log('Cannot select dice - not your turn!');
                     }
                 });
                 
                 // Apply selection state if already selected
-                if (selectedDiceIndices.includes(index)) {
+                if (safeIncludes(selectedDiceIndices, index)) {
                     diceImage.classList.add('selected');
                 }
             }
@@ -399,7 +383,7 @@ function displayDiceResults(results) {
         // Add error handling for missing images
         diceImage.onerror = function() {
             this.style.display = 'none';
-            console.warn(`Could not load dice image: assets/dice${result}.png`);
+            // console.warn(`Could not load dice image: assets/dice${result}.png`);
         };
         
         diceResultsContainer.appendChild(diceImage);
@@ -408,7 +392,8 @@ function displayDiceResults(results) {
     // Show/hide selection controls based on whether there are unlocked dice to select AND if it's the player's turn
     const selectionControls = document.getElementById('dice-selection-controls');
     if (selectionControls) {
-        const hasSelectableDice = results.some((_, index) => !lockedDiceIndices.includes(index));
+        ensureArraysInitialized(); // Ensure arrays are initialized
+        const hasSelectableDice = results.some((_, index) => !safeIncludes(lockedDiceIndices, index));
         const canAct = canPlayerAct();
         selectionControls.style.display = (hasSelectableDice && canAct) ? 'block' : 'none';
         
@@ -422,8 +407,13 @@ function displayDiceResults(results) {
 
 // Function to display other players' dice results
 function displayOtherPlayerResults(playerId, diceResults) {
-    console.log(`🎲 [displayOtherPlayerResults] Called for ${playerId} with results:`, diceResults);
-    console.log(`🎲 [displayOtherPlayerResults] Current stored locked states:`, JSON.stringify(playerLockedDiceStates));
+    // console.log(`🎲 [displayOtherPlayerResults] Called for ${playerId} with results:`, diceResults);
+    // console.log(`🎲 [displayOtherPlayerResults] Current stored locked states:`, JSON.stringify(playerLockedDiceStates));
+    
+    // Don't interrupt our own rolling animation
+    if (isRolling && (playerId === myPlayerId || playerId === window.myPlayerId)) {
+        return;
+    }
     
     const diceResultsContainer = document.getElementById('dice-results-container');
     if (!diceResultsContainer) return;
@@ -455,17 +445,17 @@ function displayOtherPlayerResults(playerId, diceResults) {
         
         // Check if this dice is locked for this player and apply red glow
         const playerLockedDice = playerLockedDiceStates[playerId] || [];
-        console.log(`🔒 [displayOtherPlayerResults] Checking dice ${index} for ${playerId}, locked dice:`, playerLockedDice);
-        if (playerLockedDice.includes(index)) {
+        // console.log(`🔒 [displayOtherPlayerResults] Checking dice ${index} for ${playerId}, locked dice:`, playerLockedDice);
+        if (safeIncludes(playerLockedDice, index)) {
             diceImage.classList.add('locked');
             diceImage.title = `${playerId}'s dice ${index + 1} (value: ${result}) - LOCKED`;
-            console.log(`🔒 [displayOtherPlayerResults] Applied locked styling to dice ${index} for ${playerId}`);
+            // console.log(`🔒 [displayOtherPlayerResults] Applied locked styling to dice ${index} for ${playerId}`);
         }
         
         // Add error handling for missing images
         diceImage.onerror = function() {
             this.style.display = 'none';
-            console.warn(`Could not load dice image: assets/dice${result}.png`);
+            // console.warn(`Could not load dice image: assets/dice${result}.png`);
         };
         
         diceContainer.appendChild(diceImage);
@@ -473,7 +463,7 @@ function displayOtherPlayerResults(playerId, diceResults) {
     
     diceResultsContainer.appendChild(diceContainer);
     
-    console.log(`🎲 Displayed dice results for ${playerId} with locked dice:`, playerLockedDiceStates[playerId] || []);
+    // console.log(`🎲 Displayed dice results for ${playerId} with locked dice:`, playerLockedDiceStates[playerId] || []);
     
     // Hide dice selection controls when showing other player's results (not interactive)
     const diceSelectionControls = document.getElementById('dice-selection-controls');
@@ -489,8 +479,12 @@ function displayOtherPlayerResults(playerId, diceResults) {
 function displayOtherPlayerDiceSelections(data) {
     const { playerId, selectedDiceIndices, diceResults } = data;
     
-    console.log(`🎯 Displaying dice selections from ${playerId}:`, selectedDiceIndices);
-    console.log(`🎯 Current locked dice for ${playerId}:`, playerLockedDiceStates[playerId] || []);
+    // Ensure arrays are properly initialized and validate incoming data
+    ensureArraysInitialized();
+    const validSelectedDiceIndices = Array.isArray(selectedDiceIndices) ? selectedDiceIndices : [];
+    
+    // console.log(`🎯 Displaying dice selections from ${playerId}:`, validSelectedDiceIndices);
+    // console.log(`🎯 Current locked dice for ${playerId}:`, playerLockedDiceStates[playerId] || []);
     
     // Only show selection indicators if the dice results are currently displayed for this player
     const diceResultsContainer = document.getElementById('dice-results-container');
@@ -499,7 +493,7 @@ function displayOtherPlayerDiceSelections(data) {
     // Check if we're currently showing this player's results
     const header = diceResultsContainer.querySelector('div strong');
     if (!header || !header.textContent.includes(playerId)) {
-        console.log(`🎯 Not currently showing ${playerId}'s results, skipping selection display`);
+        // console.log(`🎯 Not currently showing ${playerId}'s results, skipping selection display`);
         return;
     }
     
@@ -511,7 +505,7 @@ function displayOtherPlayerDiceSelections(data) {
         
         // Check if this dice is locked (preserve locked styling)
         const playerLockedDice = playerLockedDiceStates[playerId] || [];
-        const isLocked = playerLockedDice.includes(index);
+        const isLocked = safeIncludes(playerLockedDice, index);
         
         if (isLocked) {
             // Keep locked styling and don't override it
@@ -523,61 +517,74 @@ function displayOtherPlayerDiceSelections(data) {
             diceImage.style.boxShadow = '';
             
             // Add selection indicator if this dice is selected
-            if (selectedDiceIndices.includes(index)) {
+            if (safeIncludes(validSelectedDiceIndices, index)) {
                 diceImage.classList.add('selected-by-other');
                 diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]}) - SELECTED`;
-                console.log(`🎯 Applied selection styling to dice ${index} for ${playerId}`);
+                // console.log(`🎯 Applied selection styling to dice ${index} for ${playerId}`);
             } else {
                 diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]})`;
-                console.log(`🎯 Cleared selection styling from dice ${index} for ${playerId}`);
+                // console.log(`🎯 Cleared selection styling from dice ${index} for ${playerId}`);
             }
         }
     });
 }
 
+// Global flag to temporarily disable locked dice styling
+window.lockedDiceStylingDisabled = false;
+
 // Function to display other players' locked dice (updates existing dice with locked indicators)
 function displayOtherPlayerLockedDice(data) {
+    // Check if locked dice styling is temporarily disabled
+    if (window.lockedDiceStylingDisabled) {
+        // console.log('🔒 [displayOtherPlayerLockedDice] Locked dice styling is temporarily disabled, skipping');
+        return;
+    }
+    
     const { playerId, lockedDiceIndices, diceResults } = data;
     
-    console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, lockedDiceIndices);
-    console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
+    // Ensure arrays are properly initialized and validate incoming data
+    ensureArraysInitialized();
+    const validLockedDiceIndices = Array.isArray(lockedDiceIndices) ? lockedDiceIndices : [];
+    
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, validLockedDiceIndices);
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
     
     // Store the locked dice state for this player
-    playerLockedDiceStates[playerId] = lockedDiceIndices;
+    playerLockedDiceStates[playerId] = validLockedDiceIndices;
     window.playerLockedDiceStates = playerLockedDiceStates;
-    console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
-    console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
     
     // Only show locked indicators if the dice results are currently displayed for this player
     const diceResultsContainer = document.getElementById('dice-results-container');
     if (!diceResultsContainer) {
-        console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
+        // console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
         return;
     }
     
     // Check if we're currently showing this player's results
     const header = diceResultsContainer.querySelector('div strong');
     if (!header || !header.textContent.includes(playerId)) {
-        console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
-        console.log(`🔒 [displayOtherPlayerLockedDice] Header text:`, header?.textContent);
+        // console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
+        // console.log(`🔒 [displayOtherPlayerLockedDice] Header text:`, header?.textContent);
         return;
     }
     
-    console.log(`🔒 [displayOtherPlayerLockedDice] Currently showing ${playerId}'s results, applying locked styling now`);
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Currently showing ${playerId}'s results, applying locked styling now`);
     
     // Find all dice images and update their locked indicators
     const diceImages = diceResultsContainer.querySelectorAll('img[alt*="' + playerId + '"]');
-    console.log(`🔒 [displayOtherPlayerLockedDice] Found ${diceImages.length} dice images for ${playerId}`);
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Found ${diceImages.length} dice images for ${playerId}`);
     
     diceImages.forEach((diceImage, index) => {
         // Remove any existing locked indicators first
         diceImage.classList.remove('locked');
         
         // Add locked indicator if this dice is locked
-        if (lockedDiceIndices.includes(index)) {
+        if (safeIncludes(validLockedDiceIndices, index)) {
             diceImage.classList.add('locked');
             diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]}) - LOCKED`;
-            console.log(`🔒 [displayOtherPlayerLockedDice] Applied locked class to dice ${index} for ${playerId}`);
+            // console.log(`🔒 [displayOtherPlayerLockedDice] Applied locked class to dice ${index} for ${playerId}`);
         } else {
             diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]})`;
         }
@@ -612,12 +619,15 @@ function showWaitingForTurnMessage() {
 
 // Dice selection functions
 function toggleDiceSelection(diceIndex, imageElement) {
+    // Ensure arrays are initialized before use
+    ensureArraysInitialized();
+    
     // Prevent selection of locked dice or dice that are currently rolling
-    if (lockedDiceIndices.includes(diceIndex) || isRolling) {
+    if (safeIncludes(lockedDiceIndices, diceIndex) || isRolling) {
         return;
     }
     
-    const isSelected = selectedDiceIndices.includes(diceIndex);
+    const isSelected = safeIncludes(selectedDiceIndices, diceIndex);
     
     if (isSelected) {
         // Deselect dice
@@ -685,7 +695,7 @@ function updateInstructionTextVisibility(showInstructions) {
 
 function lockSelectedDice() {
     if (!canPlayerAct()) {
-        console.log('Cannot lock dice - not your turn!');
+        // console.log('Cannot lock dice - not your turn!');
         return;
     }
     
@@ -708,7 +718,7 @@ function lockSelectedDice() {
     if (typeof addPendingPoints === 'function') {
         addPendingPoints(scoreResult.points, scoreResult.description);
     }
-    console.log(`Locked dice scored ${scoreResult.points} points: ${scoreResult.description}`);
+    // console.log(`Locked dice scored ${scoreResult.points} points: ${scoreResult.description}`);
     
     // Add selected dice to locked dice
     lockedDiceIndices.push(...selectedDiceIndices);
@@ -747,12 +757,12 @@ function lockSelectedDice() {
     updateGameState();
     updateGameControlsState();
     
-    console.log(`Locked dice at indices: ${lockedDiceIndices}, Remaining dice: ${availableDiceCount}`);
+    // console.log(`Locked dice at indices: ${lockedDiceIndices}, Remaining dice: ${availableDiceCount}`);
 }
 
 function clearDiceSelection() {
     if (!canPlayerAct()) {
-        console.log('Cannot clear selection - not your turn!');
+        // console.log('Cannot clear selection - not your turn!');
         return;
     }
     
@@ -762,80 +772,29 @@ function clearDiceSelection() {
     updateSelectionControls();
 }
 
+// Note: clearAllDiceLockedStyling is already defined globally at the top of the file
+// Removed duplicate const declaration to prevent shadowing
+
 // Reset all dice for a new turn (both visual and physical)
-function resetAllDiceForNewTurn() {
-    console.log('🔄 Resetting all dice for new turn');
-    
-    // Reset dice state
-    selectedDiceIndices = [];
-    lockedDiceIndices = [];
-    availableDiceCount = 6;
-    currentDiceResults = [];
-    
-    // Broadcast that all dice are now unlocked to other players in multiplayer mode
-    if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
-        broadcastLockedDice(myPlayerId, [], []); // Empty arrays indicate no locked dice
-        // Also clear the stored state for this player
-        playerLockedDiceStates[myPlayerId] = [];
-    }
-    
-    // Reset 3D dice positions and make them visible
-    diceBodies.forEach((body, index) => {
-        // Reset position within the box dimensions
-        const safeArea = wallLength - wallThickness - 1.0;
-        body.position.set(
-            (Math.random() - 0.5) * safeArea,
-            1.0,
-            (Math.random() - 0.5) * safeArea
-        );
-        
-        // Reset rotation
-        body.quaternion.setFromEuler(
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2
-        );
-        
-        // Reset velocity
-        body.velocity.set(0, 0, 0);
-        body.angularVelocity.set(0, 0, 0);
-        
-        // Make dice visible again
-        if (diceModels[index]) {
-            diceModels[index].visible = true;
-        }
-    });
-    
-    // Clear dice display
-    diceResultsContainer.innerHTML = '<p class="text-muted">Click "Roll" to start your turn</p>';
-    
-    // Hide dice selection controls
-    const diceSelectionControls = document.getElementById('dice-selection-controls');
-    if (diceSelectionControls) {
-        diceSelectionControls.style.display = 'none';
-    }
-    
-    // Hide instruction text
-    updateInstructionTextVisibility(false);
-    
-    // Update selection controls
-    updateSelectionControls();
-}
+// This function has been removed - resetLockedDice() now handles all reset functionality
 
 // End turn function
 function endPlayerTurn() {
     if (!canPlayerAct()) {
-        console.log('Cannot end turn - not your turn!');
         return;
     }
     
     // Save current player's material preferences
-    if (isInMultiplayerRoom && myPlayerId) {
-        savePlayerMaterialPreferences(myPlayerId, currentDiceMaterial, currentFloorMaterial);
-    }
+    // if (isInMultiplayerRoom && myPlayerId) {
+    //     savePlayerMaterialPreferences(myPlayerId, currentDiceMaterial, currentFloorMaterial);
+    // }
     
-    // Reset dice state for next player - use comprehensive reset function
-    resetAllDiceForNewTurn();
+    // Reset dice state for next player - use reset locked dice function
+    console.log('Ending turn, resetting locked dice and clearing selections');
+    resetLockedDice();
+    
+    // Update game state to ensure Firebase synchronization (same as admin button)
+    updateGameState();
     
     // Clear any pending points for the next player
     if (typeof clearPendingPoints === 'function') {
@@ -861,14 +820,14 @@ function endPlayerTurn() {
     const nextPlayer = nextTurn();
     updateGameControlsState();
     
-    console.log(`Turn ended. Next player: ${nextPlayer}`);
+    // console.log(`Turn ended. Next player: ${nextPlayer}`);
     
     // Broadcast turn change to other players if in multiplayer
     if (isInMultiplayerRoom) {
         if (typeof broadcastTurnChange === 'function') {
             broadcastTurnChange(nextPlayer);
         } else {
-            console.warn('broadcastTurnChange function not available');
+            // console.warn('broadcastTurnChange function not available');
         }
     }
 }
@@ -892,8 +851,8 @@ function initializeMultiplayerMode(roomId, playerId, playerList) {
     
     updateGameControlsState();
     
-    console.log(`Multiplayer mode initialized for room ${roomId}, player: ${myPlayerId}`);
-    console.log(`Players in room: ${playerList.join(', ')}`);
+    // console.log(`Multiplayer mode initialized for room ${roomId}, player: ${myPlayerId}`);
+    // console.log(`Players in room: ${playerList.join(', ')}`);
 }
 
 function exitMultiplayerMode() {
@@ -905,7 +864,7 @@ function exitMultiplayerMode() {
     initializeTurnSystem([myPlayerId], false);
     updateGameControlsState();
     
-    console.log('Exited multiplayer mode, returned to single player');
+    // console.log('Exited multiplayer mode, returned to single player');
 }
 
 function resetLockedDice() {
@@ -966,8 +925,6 @@ function resetLockedDice() {
     if (selectionControls) {
         selectionControls.style.display = 'none';
     }
-    
-    console.log('All dice have been unlocked and restored to the playing area');
 }
 
 function updateGameState() {
@@ -979,7 +936,7 @@ function updateGameState() {
             rollButton.disabled = false;
         } else {
             // Hot dice scenario - all 6 dice are locked!
-            console.log('🔥 HOT DICE! All 6 dice are locked - resetting and allowing player to continue');
+            // console.log('🔥 HOT DICE! All 6 dice are locked - resetting and allowing player to continue');
             
             // Show hot dice message
             showHotDiceMessage();
@@ -1011,7 +968,7 @@ function showHotDiceMessage() {
             hotDiceMessage.style.display = 'none';
         }, 3000);
         
-        console.log(`🔥 Hot dice message displayed for ${playerName}`);
+        // console.log(`🔥 Hot dice message displayed for ${playerName}`);
     }
 }
 
@@ -1400,32 +1357,7 @@ frontRightCornerBody.addShape(verticalCornerShape);
 frontRightCornerBody.position.set(wallLength / 2 - wallThickness / 2, wallHeight / 2, wallLength / 2 - wallThickness / 2);
 world.addBody(frontRightCornerBody);
 
-// Get camera control sliders
-const cameraHeightSlider = document.getElementById('camera-height');
-const cameraDistanceSlider = document.getElementById('camera-distance');
-const cameraAngleSlider = document.getElementById('camera-angle');
-
-// Update camera position and orientation based on slider values
-function updateCamera() {
-    const height = parseFloat(cameraHeightSlider.value);
-    const distance = parseFloat(cameraDistanceSlider.value);
-    const angle = parseFloat(cameraAngleSlider.value) * (Math.PI / 180); // Convert to radians
-
-    camera.position.set(
-        distance * Math.sin(angle), // X position based on angle
-        height,                     // Y position (height)
-        distance * Math.cos(angle)  // Z position based on angle
-    );
-    camera.lookAt(0, 0, 0); // Always look at the center of the dice area
-}
-
-// Add event listeners to sliders
-cameraHeightSlider.addEventListener('input', updateCamera);
-cameraDistanceSlider.addEventListener('input', updateCamera);
-cameraAngleSlider.addEventListener('input', updateCamera);
-
-// Don't initialize camera position here - use the mouse-based top-down system instead
-// updateCamera();
+// Camera system now uses fixed positioning - camera control sliders removed
 
 // Map dice face-up results to dice values
 function getDiceResult(quaternion) {
@@ -1466,9 +1398,22 @@ function getDiceResult(quaternion) {
 let isRolling = false;
 let lastDicePositions = [];
 let settlementCheckInterval = null;
+let rollingAnimationInterval = null;
+let otherPlayerAnimationInterval = null;
 let settlementStartTime = null;
 let isSettled = false;
 const SETTLEMENT_DELAY = 1000; // 1 second
+
+// Dice rolling animation variables
+let rollingAnimationFrame = 0;
+const ROLLING_ANIMATION_SPEED = 150; // milliseconds between frame changes
+
+// Track other players' rolling states
+let otherPlayersRolling = new Set();
+
+// Make animation tracking variables globally accessible
+window.otherPlayersRolling = otherPlayersRolling;
+window.otherPlayerAnimationInterval = null; // Initialize as null
 
 // Function to check if dice have settled
 function checkDiceSettlement() {
@@ -1477,7 +1422,7 @@ function checkDiceSettlement() {
     const velocityThreshold = 0.02; // Minimum velocity to consider settled
     
     diceBodies.forEach((body, index) => {
-        if (lockedDiceIndices.includes(index)) return; // Skip locked dice
+        if (safeIncludes(lockedDiceIndices, index)) return; // Skip locked dice
         
         const angularSpeed = body.angularVelocity.length();
         const linearSpeed = body.velocity.length();
@@ -1499,7 +1444,7 @@ function checkDiceSettlement() {
     
     // Update positions for next check
     diceBodies.forEach((body, index) => {
-        if (!lockedDiceIndices.includes(index)) {
+        if (!safeIncludes(lockedDiceIndices, index)) {
             lastDicePositions[index] = body.position.clone();
         }
     });
@@ -1507,29 +1452,174 @@ function checkDiceSettlement() {
     return hasSettled;
 }
 
+// Function to display rolling dice animation
+function displayRollingDiceAnimation() {
+    // Cycle through dice faces for rolling animation
+    rollingAnimationFrame++;
+    const currentDiceValue = (rollingAnimationFrame % 6) + 1;
+    
+    // Check if we need to create the initial container and images
+    let diceContainer = diceResultsContainer.querySelector('.dice-container');
+    if (!diceContainer) {
+        // Create container only once
+        diceResultsContainer.innerHTML = '';
+        diceContainer = document.createElement('div');
+        diceContainer.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2 dice-container';
+        
+        // Create all 6 dice images once
+        for (let index = 0; index < 6; index++) {
+            const diceImage = document.createElement('img');
+            diceImage.style.width = '60px';
+            diceImage.style.height = '60px';
+            diceImage.style.margin = '2px';
+            diceImage.style.border = '2px solid #ddd';
+            diceImage.style.borderRadius = '8px';
+            diceImage.style.cursor = 'default';
+            diceImage.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            diceImage.dataset.diceIndex = index;
+            
+            // Add error handling for missing images
+            diceImage.onerror = function() {
+                this.style.display = 'none';
+                console.warn(`Could not load dice image: ${this.src}`);
+            };
+            
+            diceContainer.appendChild(diceImage);
+        }
+        
+        diceResultsContainer.appendChild(diceContainer);
+    }
+    
+    // Update existing dice images
+    const diceImages = diceContainer.querySelectorAll('img');
+    diceImages.forEach((diceImage, index) => {
+        const offsetValue = ((currentDiceValue + index) % 6) + 1;
+        
+        if (safeIncludes(lockedDiceIndices, index)) {
+            // Show locked dice with their actual values and locked styling
+            const lockedValue = currentDiceResults[index] || 1;
+            diceImage.src = `assets/dice${lockedValue}.png`;
+            diceImage.alt = `Locked Dice ${index + 1}: ${lockedValue}`;
+            diceImage.className = 'locked'; // Reset classes
+            diceImage.title = `Dice ${index + 1} is locked (value: ${lockedValue})`;
+        } else {
+            // Show cycling animation for dice being rolled
+            diceImage.src = `assets/dice${offsetValue}.png`;
+            diceImage.alt = `Rolling Dice ${index + 1}: ${offsetValue}`;
+            diceImage.className = 'rolling'; // Reset classes
+            diceImage.title = `Dice ${index + 1} is rolling`;
+        }
+        
+        // Update data attributes
+        diceImage.dataset.diceValue = safeIncludes(lockedDiceIndices, index) ? 
+            (currentDiceResults[index] || 1) : offsetValue;
+    });
+}
+
+// Function to display rolling animation for other players
+function displayOtherPlayerRollingAnimation(playerId) {
+    // Don't interrupt our own rolling animation
+    if (isRolling && (playerId === myPlayerId || playerId === window.myPlayerId)) {
+        return;
+    }
+    
+    const diceResultsContainer = document.getElementById('dice-results-container');
+    if (!diceResultsContainer) return;
+    
+    // Create a cycling animation similar to our own, but offset differently
+    const animationFrame = Math.floor(Date.now() / 150) % 6; // Use time-based animation
+    
+    // Check if we need to create the initial container and images for this player
+    let header = diceResultsContainer.querySelector('.player-header');
+    let diceContainer = diceResultsContainer.querySelector('.dice-container');
+    
+    if (!header || !header.textContent.includes(playerId) || !diceContainer) {
+        // Create container only once per player
+        diceResultsContainer.innerHTML = '';
+        
+        // Add a header showing whose turn it is
+        header = document.createElement('div');
+        header.className = 'w-100 text-center mb-2 player-header';
+        header.innerHTML = `<strong>${playerId} is rolling...</strong>`;
+        diceResultsContainer.appendChild(header);
+        
+        // Create dice container
+        diceContainer = document.createElement('div');
+        diceContainer.className = 'd-flex justify-content-center align-items-center flex-wrap gap-2 dice-container';
+        
+        // Get locked dice for this player
+        const playerLockedDice = playerLockedDiceStates[playerId] || [];
+        
+        // Create all 6 dice images once
+        for (let index = 0; index < 6; index++) {
+            const diceImage = document.createElement('img');
+            diceImage.style.width = '60px';
+            diceImage.style.height = '60px';
+            diceImage.style.margin = '2px';
+            diceImage.style.border = '2px solid #6c757d'; // Gray border to show it's not interactive
+            diceImage.style.borderRadius = '8px';
+            diceImage.style.opacity = '0.8'; // Slightly transparent to show it's not your turn
+            diceImage.style.cursor = 'default';
+            diceImage.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            diceImage.dataset.diceIndex = index;
+            
+            // Add error handling for missing images
+            diceImage.onerror = function() {
+                this.style.display = 'none';
+                console.warn(`Could not load dice image: ${this.src}`);
+            };
+            
+            diceContainer.appendChild(diceImage);
+        }
+        
+        diceResultsContainer.appendChild(diceContainer);
+    }
+    
+    // Update existing dice images
+    const diceImages = diceContainer.querySelectorAll('img');
+    const playerLockedDice = playerLockedDiceStates[playerId] || [];
+    
+    diceImages.forEach((diceImage, index) => {
+        if (safeIncludes(playerLockedDice, index)) {
+            // Show locked dice with their actual values and locked styling
+            // For other players, we might not have their current results, so use a default
+            const lockedValue = 1; // Default value since we may not have their results stored
+            diceImage.src = `assets/dice${lockedValue}.png`;
+            diceImage.alt = `${playerId}'s Locked Dice ${index + 1}: ${lockedValue}`;
+            diceImage.className = 'locked'; // Reset classes
+            diceImage.title = `${playerId}'s dice ${index + 1} is locked`;
+        } else {
+            // Show cycling animation for dice being rolled
+            // Offset each dice by its index so they don't all show the same face
+            const offsetValue = ((animationFrame + index * 2) % 6) + 1; // Different offset for other players
+            diceImage.src = `assets/dice${offsetValue}.png`;
+            diceImage.alt = `${playerId}'s Rolling Dice ${index + 1}: ${offsetValue}`;
+            diceImage.className = 'rolling'; // Reset classes
+            diceImage.title = `${playerId}'s dice ${index + 1} is rolling`;
+        }
+    });
+}
+
+// Make the function globally accessible
+window.displayOtherPlayerRollingAnimation = displayOtherPlayerRollingAnimation;
+
 // Function to continuously update dice results
 function updateDiceResults() {
     if (!isRolling) return;
     
-    // Only display results while rolling - don't show final results yet
-    if (!isSettled) {
-        // Show a rolling message instead of actual results
-        diceResultsContainer.innerHTML = '<div class="text-center text-muted"><em>Rolling dice...</em></div>';
-    }
-    
-    // Check if dice have settled
+    // Check if dice have settled (animation is handled by separate interval)
     const currentlySettled = checkDiceSettlement();
     
     if (currentlySettled && !isSettled) {
         // Dice just settled - start the timer
         isSettled = true;
         settlementStartTime = Date.now();
-        console.log('Dice settled. Starting 2-second timer...');
+        // console.log('Dice settled. Starting 2-second timer...');
     } else if (!currentlySettled && isSettled) {
         // Dice started moving again - reset the timer
         isSettled = false;
         settlementStartTime = null;
-        console.log('Dice moving again. Timer reset.');
+        // console.log('Dice moving again. Timer reset.');
     }
     
     // Check if settlement delay has passed
@@ -1539,6 +1629,10 @@ function updateDiceResults() {
         if (settlementCheckInterval) {
             clearInterval(settlementCheckInterval);
             settlementCheckInterval = null;
+        }
+        if (rollingAnimationInterval) {
+            clearInterval(rollingAnimationInterval);
+            rollingAnimationInterval = null;
         }
         
         // Reset settlement tracking
@@ -1550,7 +1644,7 @@ function updateDiceResults() {
         
         // Show final results
         const results = diceBodies.map((body, index) => {
-            if (lockedDiceIndices.includes(index)) {
+            if (safeIncludes(lockedDiceIndices, index)) {
                 // Keep the previous result for locked dice, default to 1 if undefined
                 return currentDiceResults[index] || 1;
             } else {
@@ -1565,7 +1659,7 @@ function updateDiceResults() {
         const rolledDiceValues = [];
         
         for (let i = 0; i < 6; i++) {
-            if (!lockedDiceIndices.includes(i)) {
+            if (!safeIncludes(lockedDiceIndices, i)) {
                 rolledDiceIndices.push(i);
                 rolledDiceValues.push(results[i]);
             }
@@ -1579,7 +1673,7 @@ function updateDiceResults() {
                 // Check if it's still our turn before processing Farkle
                 const isMyTurn = typeof canPlayerAct === 'function' ? canPlayerAct() : true;
                 if (!isMyTurn) {
-                    console.log('🎲 Farkle detected but no longer our turn - skipping Farkle processing');
+                    // console.log('🎲 Farkle detected but no longer our turn - skipping Farkle processing');
                     return; // Don't process Farkle if it's no longer our turn
                 }
                 
@@ -1588,11 +1682,18 @@ function updateDiceResults() {
                     // Double-check it's still our turn before executing Farkle logic
                     const stillMyTurn = typeof canPlayerAct === 'function' ? canPlayerAct() : true;
                     if (!stillMyTurn) {
-                        console.log('🎲 Turn changed during Farkle timeout - cancelling Farkle processing');
+                        // console.log('🎲 Turn changed during Farkle timeout - cancelling Farkle processing');
                         return;
                     }
                     
                     alert('🎲 FARKLE! No scoring dice in your roll. All pending points are lost and your turn ends.');
+                    
+                    // Immediately disable roll button to prevent double-clicking
+                    const rollButton = document.getElementById('roll-dice');
+                    if (rollButton) {
+                        rollButton.disabled = true;
+                        rollButton.textContent = 'Turn Ending...';
+                    }
                     
                     // Handle Farkle with persistent state management
                     if (typeof handlePlayerFarkle === 'function' && myPlayerId) {
@@ -1607,11 +1708,20 @@ function updateDiceResults() {
                     }
                     
                     // Reset all dice for the next player
-                    resetAllDiceForNewTurn();
+                    resetLockedDice();
                     
-                    if (typeof nextTurn === 'function') {
+                    // End the turn properly through Firebase state management if available
+                    if (isInMultiplayerRoom && typeof endMyTurn === 'function') {
+                        // console.log('🎲 Farkle - ending turn through Firebase state manager');
+                        endMyTurn();
+                        // Update game controls immediately after ending turn
+                        setTimeout(() => {
+                            updateGameControlsState();
+                        }, 100);
+                    } else if (typeof nextTurn === 'function') {
+                        // Fallback to local turn management
                         const nextPlayer = nextTurn();
-                        console.log('🎲 Farkle - turn passing to:', nextPlayer);
+                        // console.log('🎲 Farkle - turn passing to:', nextPlayer);
                         updateGameControlsState();
                         
                         // Broadcast turn change in multiplayer
@@ -1628,7 +1738,7 @@ function updateDiceResults() {
             broadcastDiceResults(myPlayerId, results);
         }
         
-        console.log('Settlement delay completed. Final results:', results);
+        // console.log('Settlement delay completed. Final results:', results);
     }
 }
 
@@ -1638,21 +1748,21 @@ const energySlider = document.getElementById('energy-slider');
 // Event listener for roll dice button
 if (rollDiceButton) {
     rollDiceButton.addEventListener('click', () => {
-        console.log('🎲 Roll dice button clicked!');
-        console.log('🎲 Debug info:', {
-            myPlayerId: myPlayerId,
-            isInMultiplayerRoom: isInMultiplayerRoom,
-            firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
-            canPlayerActResult: canPlayerAct()
-        });
+        // console.log('🎲 Roll dice button clicked!');
+        // console.log('🎲 Debug info:', {
+        //     myPlayerId: myPlayerId,
+        //     isInMultiplayerRoom: isInMultiplayerRoom,
+        //     firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
+        //     canPlayerActResult: canPlayerAct()
+        // });
         
         // Check if player can act first
         if (!canPlayerAct()) {
-            console.log('Cannot roll dice - not your turn!');
+            // console.log('Cannot roll dice - not your turn!');
             return;
         }
         
-        console.log('🎲 Player can act - proceeding with dice roll');
+        // console.log('🎲 Player can act - proceeding with dice roll');
         
         // If currently rolling, stop the rolling state
         if (isRolling) {
@@ -1664,11 +1774,15 @@ if (rollDiceButton) {
             clearInterval(settlementCheckInterval);
             settlementCheckInterval = null;
         }
+        if (rollingAnimationInterval) {
+            clearInterval(rollingAnimationInterval);
+            rollingAnimationInterval = null;
+        }
         rollDiceButton.textContent = 'Roll';
         
         // Force update the display to remove rolling class
         const results = diceBodies.map((body, index) => {
-            if (lockedDiceIndices.includes(index)) {
+            if (safeIncludes(lockedDiceIndices, index)) {
                 // Keep the previous result for locked dice, default to 1 if undefined
                 return currentDiceResults[index] || 1;
             } else {
@@ -1683,7 +1797,7 @@ if (rollDiceButton) {
             broadcastDiceResults(myPlayerId, results);
         }
         
-        console.log('Rolling stopped manually. Current results:', results);
+        // console.log('Rolling stopped manually. Current results:', results);
         return;
     }
     
@@ -1699,19 +1813,27 @@ if (rollDiceButton) {
     isSettled = false;
     settlementStartTime = null;
     lastDicePositions = []; // Reset position tracking
+    rollingAnimationFrame = 0; // Reset animation frame
     rollDiceButton.textContent = 'Stop Rolling';
     
-    // Clear any existing settlement check
+    // Clear any existing intervals
     if (settlementCheckInterval) {
         clearInterval(settlementCheckInterval);
     }
+    if (rollingAnimationInterval) {
+        clearInterval(rollingAnimationInterval);
+    }
 
-    // Show rolling message immediately
-    diceResultsContainer.innerHTML = '<div class="text-center text-muted"><em>Rolling dice...</em></div>';
+    // Show rolling animation immediately
+    displayRollingDiceAnimation();
+
+    // Start continuous result updates and animations
+    settlementCheckInterval = setInterval(updateDiceResults, 100); // Check settlement every 100ms
+    rollingAnimationInterval = setInterval(displayRollingDiceAnimation, ROLLING_ANIMATION_SPEED); // Animate every 150ms
 
     // Reset dice positions to random locations within the box before rolling
     diceBodies.forEach((body, index) => {
-        if (!lockedDiceIndices.includes(index)) {
+        if (!safeIncludes(lockedDiceIndices, index)) {
             // Reset to random position within the safe area
             const safeArea = wallLength - wallThickness - 1.0; // Account for dice size
             body.position.set(
@@ -1735,7 +1857,7 @@ if (rollDiceButton) {
 
     // Apply random forces to dice bodies based on energy (only to unlocked dice)
     diceBodies.forEach((body, index) => {
-        if (!lockedDiceIndices.includes(index)) {
+        if (!safeIncludes(lockedDiceIndices, index)) {
             body.velocity.set(
                 (Math.random() - 0.5) * energy,
                 Math.random() * energy,
@@ -1752,20 +1874,22 @@ if (rollDiceButton) {
     // Start continuous result updates
     settlementCheckInterval = setInterval(updateDiceResults, 100); // Update every 100ms
     
-    console.log('Dice rolling with energy:', energy);
+    // console.log('Dice rolling with energy:', energy);
 });
 } else {
-    console.error('Roll dice button not found in DOM');
+    // console.error('Roll dice button not found in DOM');
 }
 
-// Camera controls are already in the HTML, no need to move them
-// The sliders (cameraHeightSlider, cameraDistanceSlider, cameraAngleSlider) are already properly positioned
+// Camera system now uses fixed positioning - camera control UI removed
 
 // Declare resetDiceButton at the top of the file to ensure it is accessible
 let resetDiceButton;
 
 // Ensure the reset dice button is initialized after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize arrays to ensure they are always defined
+    ensureArraysInitialized();
+    
     resetDiceButton = document.getElementById('reset-dice');
     if (resetDiceButton) {
         // The reset button is already in the correct place in the HTML controls section
@@ -1773,7 +1897,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resetDiceButton.addEventListener('click', () => {
             diceBodies.forEach((body, index) => {
                 // Only reset unlocked dice
-                if (!lockedDiceIndices.includes(index)) {
+                if (!safeIncludes(lockedDiceIndices, index)) {
                     // Reset position within the box dimensions, accounting for dice size
                     const safeArea = wallLength - wallThickness - 1.0; // Account for dice size
                     body.position.set(
@@ -1791,36 +1915,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
-            // Show success status
-            const showAdminStatus = (buttonId, message, isSuccess = true, duration = 3000) => {
-                const statusElement = document.getElementById(`${buttonId}-status`);
-                if (statusElement) {
-                    statusElement.textContent = message;
-                    statusElement.className = `mt-2 small ${isSuccess ? 'text-success' : 'text-danger'}`;
-                    statusElement.style.display = 'block';
-                    
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, duration);
-                }
-            };
-            
-            showAdminStatus('reset-dice', '✅ Dice positions have been reset');
+            // Use the global showAdminStatus function from firebase-admin.js
+            if (typeof showAdminStatus === 'function') {
+                showAdminStatus('reset-dice', '✅ Dice positions have been reset');
+            }
         });
-    }
-    
-    // Utility function to show status messages for admin buttons
-    function showAdminStatus(buttonId, message, isSuccess = true, duration = 3000) {
-        const statusElement = document.getElementById(`${buttonId}-status`);
-        if (statusElement) {
-            statusElement.textContent = message;
-            statusElement.className = `mt-2 small ${isSuccess ? 'text-success' : 'text-danger'}`;
-            statusElement.style.display = 'block';
-            
-            setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, duration);
-        }
     }
     
     // Toggle 3D dice view visibility
@@ -1837,12 +1936,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     diceCanvas.style.display = 'block';
                     toggle3DViewButton.textContent = 'Hide 3D Dice View';
                     toggle3DViewButton.className = 'btn btn-warning me-2';
-                    console.log('🎲 3D dice view shown via admin toggle');
+                    
+                    // Small delay to ensure canvas is visible before WebGL operations
+                    setTimeout(() => {
+                        // Ensure renderer is properly sized when canvas becomes visible
+                        renderer.setSize(500, 500);
+                        
+                        // Ensure camera is positioned correctly
+                        setupDefaultCamera();
+                        
+                        // Force a render to make sure the scene is displayed
+                        renderScene();
+                    }, 10);
+                    
+                    // console.log('🎲 3D dice view shown via admin toggle');
                 } else {
                     diceCanvas.style.display = 'none';
                     toggle3DViewButton.textContent = 'Show 3D Dice View';
                     toggle3DViewButton.className = 'btn btn-info me-2';
-                    console.log('🎲 3D dice view hidden via admin toggle');
+                    // console.log('🎲 3D dice view hidden via admin toggle');
                 }
             }
         });
@@ -1853,13 +1965,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resetLockedDiceButton) {
         resetLockedDiceButton.addEventListener('click', () => {
             // Show confirmation message first
-            showAdminStatus('reset-locked-dice', 'Click again to confirm resetting locked dice', false, 5000);
+            if (typeof showAdminStatus === 'function') {
+                showAdminStatus('reset-locked-dice', 'Click again to confirm resetting locked dice', false, 5000);
+            }
             
             // Add temporary click handler for confirmation
             const confirmHandler = () => {
                 resetLockedDice();
                 updateGameState();
-                showAdminStatus('reset-locked-dice', '✅ Locked dice have been reset');
+                if (typeof showAdminStatus === 'function') {
+                    showAdminStatus('reset-locked-dice', '✅ Locked dice have been reset');
+                }
                 
                 // Remove the confirmation handler
                 resetLockedDiceButton.removeEventListener('click', confirmHandler);
@@ -1879,34 +1995,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const passTurnTestButton = document.getElementById('pass-turn-test');
     if (passTurnTestButton) {
         passTurnTestButton.addEventListener('click', () => {
-            console.log('🔄 PASS TURN TEST BUTTON CLICKED');
-            console.log('📊 Current game state:', {
-                myPlayerId,
-                isInMultiplayerRoom,
-                canAct: canPlayerAct(),
-                currentTurn: typeof getCurrentTurn === 'function' ? getCurrentTurn() : 'function not available'
-            });
+            // console.log('🔄 PASS TURN TEST BUTTON CLICKED');
+            // console.log('📊 Current game state:', {
+            //     myPlayerId,
+            //     isInMultiplayerRoom,
+            //     canAct: canPlayerAct(),
+            //     currentTurn: typeof getCurrentTurn === 'function' ? getCurrentTurn() : 'function not available'
+            // });
             
             if (typeof nextTurn === 'function') {
-                console.log('⏭️ Calling nextTurn()...');
+                // console.log('⏭️ Calling nextTurn()...');
                 const nextPlayer = nextTurn();
-                console.log('✅ nextTurn() returned:', nextPlayer);
+                // console.log('✅ nextTurn() returned:', nextPlayer);
                 
-                console.log('🔄 Calling updateGameControlsState()...');
+                // console.log('🔄 Calling updateGameControlsState()...');
                 updateGameControlsState();
                 
-                console.log('📡 Broadcasting turn change...');
+                // console.log('📡 Broadcasting turn change...');
                 if (isInMultiplayerRoom && typeof broadcastTurnChange === 'function') {
                     broadcastTurnChange(nextPlayer);
-                    console.log('✅ broadcastTurnChange() called with:', nextPlayer);
-                    showAdminStatus('pass-turn-test', '✅ Turn passed successfully');
+                    // console.log('✅ broadcastTurnChange() called with:', nextPlayer);
+                    if (typeof showAdminStatus === 'function') {
+                        showAdminStatus('pass-turn-test', '✅ Turn passed successfully');
+                    }
                 } else {
-                    console.warn('❌ Not in multiplayer room or broadcastTurnChange not available');
-                    showAdminStatus('pass-turn-test', 'Turn passed (single player mode)', true);
+                    // console.warn('❌ Not in multiplayer room or broadcastTurnChange not available');
+                    if (typeof showAdminStatus === 'function') {
+                        showAdminStatus('pass-turn-test', 'Turn passed (single player mode)', true);
+                    }
                 }
             } else {
-                console.error('❌ nextTurn function not available');
-                showAdminStatus('pass-turn-test', 'Error: nextTurn function not available', false);
+                // console.error('❌ nextTurn function not available');
+                if (typeof showAdminStatus === 'function') {
+                    showAdminStatus('pass-turn-test', 'Error: nextTurn function not available', false);
+                }
             }
         });
     }
@@ -1960,7 +2082,7 @@ function animate() {
     // Sync Three.js dice with Cannon.js bodies (only for unlocked dice)
     diceBodies.forEach((body, index) => {
         const dice = diceModels[index];
-        if (lockedDiceIndices.includes(index)) {
+        if (safeIncludes(lockedDiceIndices, index)) {
             // Hide locked dice by moving them far away and making them invisible
             dice.visible = false;
             body.position.set(1000, 1000, 1000); // Move physics body far away
@@ -1977,6 +2099,9 @@ function animate() {
 
 // Event listeners for dice selection controls
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize arrays to ensure they are always defined
+    ensureArraysInitialized();
+    
     const lockButton = document.getElementById('lock-selected-dice');
     const clearButton = document.getElementById('clear-selection');
     const bankPointsButton = document.getElementById('bank-points');
@@ -1992,19 +2117,53 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bankPointsButton) {
         bankPointsButton.addEventListener('click', () => {
             if (!canPlayerAct()) {
-                console.log('Cannot bank points - not your turn!');
                 return;
             }
             
             if (typeof bankPendingPoints === 'function') {
                 const bankedAmount = bankPendingPoints();
+                
                 if (bankedAmount > 0) {
-                    console.log(`Banked ${bankedAmount} points successfully`);
+                    // End the turn after banking points - bypass the canPlayerAct check
+                    // since we already confirmed the player can act before banking
                     
-                    // End the turn after banking points
-                    endPlayerTurn();
-                } else {
-                    console.log('No pending points to bank');
+                    // Reset dice state for next player - use reset locked dice function
+                    resetLockedDice();
+                    
+                    // Update game state to ensure Firebase synchronization (same as admin button)
+                    updateGameState();
+                    
+                    // Clear any pending points for the next player
+                    if (typeof clearPendingPoints === 'function') {
+                        clearPendingPoints();
+                    }
+                    
+                    // Clear dice display
+                    const diceResultsContainer = document.getElementById('dice-results-container');
+                    if (diceResultsContainer) {
+                        diceResultsContainer.innerHTML = '<p class="text-muted">Waiting for next player...</p>';
+                    }
+                    
+                    // Hide dice selection controls when no dice are displayed
+                    const diceSelectionControls = document.getElementById('dice-selection-controls');
+                    if (diceSelectionControls) {
+                        diceSelectionControls.style.display = 'none';
+                    }
+                    
+                    // Hide instruction text when no dice are displayed
+                    updateInstructionTextVisibility(false);
+                    
+                    // Update selection controls to reflect reset state
+                    updateSelectionControls();
+                    
+                    // Advance to next turn
+                    const nextPlayer = nextTurn();
+                    updateGameControlsState();
+                    
+                    // Broadcast turn change to other players if in multiplayer
+                    if (isInMultiplayerRoom && typeof broadcastTurnChange === 'function') {
+                        broadcastTurnChange(nextPlayer);
+                    }
                 }
             }
         });
@@ -2057,7 +2216,7 @@ function initializeMaterialsModal() {
                 });
                 
                 // Show preset info
-                console.log(`Applied preset: ${preset.name} - ${preset.description}`);
+                // console.log(`Applied preset: ${preset.name} - ${preset.description}`);
             }
         });
     });
@@ -2111,7 +2270,7 @@ function initializeMaterialsModal() {
                 // Update modal selections
                 updateModalSelections();
                 
-                console.log('Material preferences cleared and reset to defaults');
+                // console.log('Material preferences cleared and reset to defaults');
             }
         });
     }
@@ -2139,7 +2298,7 @@ function updateModalSelections() {
     // Show preference info in console
     if (hasSavedPreferences()) {
         const age = getPreferenceAge();
-        console.log(`Loaded saved material preferences (${age} days old): Dice=${currentDiceMaterial}, Floor=${currentFloorMaterial}`);
+        // console.log(`Loaded saved material preferences (${age} days old): Dice=${currentDiceMaterial}, Floor=${currentFloorMaterial}`);
     }
 }
 
@@ -2180,7 +2339,7 @@ function changeDiceMaterial(materialType) {
         saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
     }
     
-    console.log(`Dice material changed to: ${materialType} (bounce: ${config.restitution}, friction: ${config.friction})`);
+    // console.log(`Dice material changed to: ${materialType} (bounce: ${config.restitution}, friction: ${config.friction})`);
 }
 
 // Function to change floor material
@@ -2219,8 +2378,8 @@ function changeFloorMaterial(materialType) {
         saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
     }
     
-    console.log(`Floor material changed to: ${materialType} (bounce: ${config.restitution}, friction: ${config.friction})`);
-    console.log(`Wall color updated to complement floor: #${wallColor.toString(16).padStart(6, '0').toUpperCase()}`);
+    // console.log(`Floor material changed to: ${materialType} (bounce: ${config.restitution}, friction: ${config.friction})`);
+    // console.log(`Wall color updated to complement floor: #${wallColor.toString(16).padStart(6, '0').toUpperCase()}`);
 }
 
 // Function to change background material
@@ -2238,13 +2397,13 @@ function changeBackgroundMaterial(materialType) {
         saveMaterialPreferences(currentDiceMaterial, currentFloorMaterial, currentBackgroundMaterial);
     }
     
-    console.log(`Background changed to: ${materialType} (color: #${config.color.toString(16).padStart(6, '0').toUpperCase()})`);
+    // console.log(`Background changed to: ${materialType} (color: #${config.color.toString(16).padStart(6, '0').toUpperCase()})`);
 }
 
 // WebRTC callback function to handle received dice results from other players
 function onDiceResultsReceived(data) {
     const { playerId, diceResults } = data;
-    console.log(`Received dice results from ${playerId}:`, diceResults);
+    // console.log(`Received dice results from ${playerId}:`, diceResults);
     
     // Only display other players' results if it's not your turn
     if (playerId !== myPlayerId) {
