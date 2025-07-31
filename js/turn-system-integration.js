@@ -686,10 +686,10 @@ function onDiceResultsReceived(data) {
         }
     }
     
-    // Only show other players' results if it's not our turn
-    const isMyTurn = typeof canPlayerAct === 'function' ? canPlayerAct() : false;
+    // Show other players' results if it's not our own roll
+    const myId = typeof myPlayerId !== 'undefined' ? myPlayerId : (typeof window.myPlayerId !== 'undefined' ? window.myPlayerId : null);
     
-    if (!isMyTurn && playerId !== (typeof myPlayerId !== 'undefined' ? myPlayerId : null)) {
+    if (playerId !== myId) {
         // Update the dice display to show the other player's results
         if (typeof displayOtherPlayerResults === 'function') {
             displayOtherPlayerResults(playerId, diceResults);

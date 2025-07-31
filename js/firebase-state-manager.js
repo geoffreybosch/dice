@@ -237,19 +237,17 @@ function handlePlayersStateChange(players) {
     // Initialize Farkle indicator states for all players
     initializeFarkleStatesForPlayers(players);
     
-    // Check if it's my turn using multiple methods for reliability
-    const firebaseIsMyTurn = window.firebaseCurrentTurnPlayer === currentPlayerId;
-    const canActResult = typeof canPlayerAct === 'function' ? canPlayerAct() : false;
-    const isMyTurn = firebaseIsMyTurn || canActResult || currentTurnPlayer === currentPlayerId;
+    // FIXED: Use only Firebase turn state for consistency
+    // This prevents conflicts when multiple players are involved
+    const isMyTurn = window.firebaseCurrentTurnPlayer === currentPlayerId;
     
     // console.log('👥 Players state analysis:', {
     //     totalPlayers: playerList.length,
     //     currentTurnPlayer,
     //     myState,
     //     firebaseCurrentTurnPlayer: window.firebaseCurrentTurnPlayer,
-    //     firebaseIsMyTurn,
-    //     canActResult,
-    //     isMyTurn
+    //     isMyTurn: isMyTurn,
+    //     myPlayerId: currentPlayerId
     // });
     
     // Update player list UI
@@ -466,11 +464,42 @@ function getCurrentTurnPlayer(players) {
     }
     
     // If no one is rolling, find the next player who should go
-    // (this handles turn advancement logic)
-    const playerIds = Object.keys(connectedPlayers);
+    // FIXED: Use join order instead of alphabetical sorting for more predictable turn rotation
+    // Sort by joinedAt timestamp if available, otherwise fall back to alphabetical
+    const playerIds = Object.keys(connectedPlayers).sort((a, b) => {
+        const playerA = connectedPlayers[a];
+        const playerB = connectedPlayers[b];
+        
+        // Use joinedAt timestamp if both players have it
+        if (playerA.joinedAt && playerB.joinedAt) {
+            return playerA.joinedAt - playerB.joinedAt;
+        }
+        
+        // If only one has joinedAt, prioritize the one with timestamp
+        if (playerA.joinedAt && !playerB.joinedAt) return -1;
+        if (!playerA.joinedAt && playerB.joinedAt) return 1;
+        
+        // Fallback to alphabetical if neither has joinedAt
+        return a.localeCompare(b);
+    });
     
-    // Simple round-robin: find first player in waiting state
-    // In a more complex implementation, you'd track turn order
+    // Check if we can use the cached Firebase current turn to determine next player
+    if (window.firebaseCurrentTurnPlayer && playerIds.includes(window.firebaseCurrentTurnPlayer)) {
+        // Find the next player in rotation after the current turn player
+        const currentIndex = playerIds.indexOf(window.firebaseCurrentTurnPlayer);
+        
+        // Look for the next player in waiting state, cycling through all players
+        for (let i = 1; i <= playerIds.length; i++) {
+            const nextIndex = (currentIndex + i) % playerIds.length;
+            const nextPlayer = playerIds[nextIndex];
+            
+            if (connectedPlayers[nextPlayer] && connectedPlayers[nextPlayer].state === PLAYER_STATES.WAITING) {
+                return nextPlayer;
+            }
+        }
+    }
+    
+    // Fallback: find first player in waiting state (in join order)
     for (const playerId of playerIds) {
         if (connectedPlayers[playerId].state === PLAYER_STATES.WAITING) {
             return playerId;
@@ -525,10 +554,38 @@ function checkAndAdvanceTurn(players) {
         
         // Set timeout to start new round after 2 seconds
         window.autoTurnTimeout = setTimeout(() => {
-            const connectedPlayerIds = Object.keys(connectedPlayers);
-            const firstPlayer = connectedPlayerIds[0]; // First connected player in the list
+            // FIXED: Use consistent player ordering (join order, not alphabetical)
+            const connectedPlayerIds = Object.keys(connectedPlayers).sort((a, b) => {
+                const playerA = connectedPlayers[a];
+                const playerB = connectedPlayers[b];
+                
+                // Use joinedAt timestamp if both players have it
+                if (playerA.joinedAt && playerB.joinedAt) {
+                    return playerA.joinedAt - playerB.joinedAt;
+                }
+                
+                // If only one has joinedAt, prioritize the one with timestamp
+                if (playerA.joinedAt && !playerB.joinedAt) return -1;
+                if (!playerA.joinedAt && playerB.joinedAt) return 1;
+                
+                // Fallback to alphabetical if neither has joinedAt
+                return a.localeCompare(b);
+            });
             
-            // console.log('🎮 Starting new round - first connected player:', firstPlayer);
+            let firstPlayer;
+            
+            // For new rounds, advance to next player in rotation from last round
+            if (window.firebaseCurrentTurnPlayer && connectedPlayerIds.includes(window.firebaseCurrentTurnPlayer)) {
+                const currentIndex = connectedPlayerIds.indexOf(window.firebaseCurrentTurnPlayer);
+                const nextIndex = (currentIndex + 1) % connectedPlayerIds.length;
+                firstPlayer = connectedPlayerIds[nextIndex];
+            } else {
+                // Fallback: use host or first player
+                const connectedHostPlayer = connectedPlayerIds.find(playerId => connectedPlayers[playerId].isHost);
+                firstPlayer = connectedHostPlayer || connectedPlayerIds[0];
+            }
+            
+            // console.log('🎮 Starting new round - next player in rotation:', firstPlayer);
             
             // Set all connected players to waiting state
             const updates = {};
@@ -567,11 +624,38 @@ function checkAndAdvanceTurn(players) {
         
         // Set timeout to start next turn after 2 seconds
         window.autoTurnTimeout = setTimeout(() => {
-            // Determine the host among connected players (they go first when all are waiting)
-            const connectedHostPlayer = Object.keys(connectedPlayers).find(playerId => connectedPlayers[playerId].isHost);
-            const nextPlayer = connectedHostPlayer || Object.keys(connectedPlayers)[0];
+            // FIXED: Use consistent player ordering (join order, not alphabetical)
+            const connectedPlayerIds = Object.keys(connectedPlayers).sort((a, b) => {
+                const playerA = connectedPlayers[a];
+                const playerB = connectedPlayers[b];
+                
+                // Use joinedAt timestamp if both players have it
+                if (playerA.joinedAt && playerB.joinedAt) {
+                    return playerA.joinedAt - playerB.joinedAt;
+                }
+                
+                // If only one has joinedAt, prioritize the one with timestamp
+                if (playerA.joinedAt && !playerB.joinedAt) return -1;
+                if (!playerA.joinedAt && playerB.joinedAt) return 1;
+                
+                // Fallback to alphabetical if neither has joinedAt
+                return a.localeCompare(b);
+            });
             
-            // console.log('🎮 Auto-starting turn for connected host:', nextPlayer);
+            let nextPlayer;
+            
+            // If we have a previous turn player, advance to next in rotation
+            if (window.firebaseCurrentTurnPlayer && connectedPlayerIds.includes(window.firebaseCurrentTurnPlayer)) {
+                const currentIndex = connectedPlayerIds.indexOf(window.firebaseCurrentTurnPlayer);
+                const nextIndex = (currentIndex + 1) % connectedPlayerIds.length;
+                nextPlayer = connectedPlayerIds[nextIndex];
+            } else {
+                // Fallback: use host or first player
+                const connectedHostPlayer = connectedPlayerIds.find(playerId => connectedPlayers[playerId].isHost);
+                nextPlayer = connectedHostPlayer || connectedPlayerIds[0];
+            }
+            
+            // console.log('🎮 Auto-starting turn for next player in rotation:', nextPlayer);
             
             // Clear all locked dice data for the new turn
             clearAllLockedDiceFromFirebase();
@@ -1334,6 +1418,12 @@ window.isPlayerTurnFirebase = function(playerId) {
     //     typeOfPlayerId: typeof playerId,
     //     typeOfFirebasePlayer: typeof window.firebaseCurrentTurnPlayer
     // });
+    
+    // FIXED: Add validation to handle undefined/null values properly
+    if (!playerId) {
+        // console.log('🔥 No playerId provided - returning false');
+        return false;
+    }
     
     // This will be set by the Firebase state manager when game state changes
     if (window.firebaseCurrentTurnPlayer) {

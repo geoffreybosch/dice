@@ -141,16 +141,19 @@ const diceCanvas = document.getElementById('dice-canvas');
 function canPlayerAct(playerId = myPlayerId) {
     if (!isInMultiplayerRoom) return true; // Single player mode - always allow
     
-    // For Firebase state management, check if this player is the current turn player
+    // FIXED: For Firebase state management, rely primarily on Firebase turn state
+    // This ensures consistency across all clients, especially with 3+ players
     if (typeof currentRoomId !== 'undefined' && currentRoomId && typeof currentPlayerId !== 'undefined' && currentPlayerId) {
-        // Use Firebase state management
-        // console.log('🔥 Checking turn via Firebase state management');
-        // We'll rely on the game state to determine if it's the player's turn
-        // The Firebase state manager will call updateGameControlsState when needed
+        // Use Firebase current turn player as the primary source of truth
+        if (typeof window.firebaseCurrentTurnPlayer !== 'undefined') {
+            return window.firebaseCurrentTurnPlayer === playerId;
+        }
+        
+        // Fallback to isPlayerTurn function if Firebase state not yet available
         return isPlayerTurn(playerId);
     }
     
-    // Fallback to original turn system
+    // Fallback to original turn system for non-Firebase scenarios
     return isPlayerTurn(playerId);
 }
 
@@ -1070,7 +1073,7 @@ function updateDice3D(results) {
 
 // Import Cannon.js for physics simulation
 const world = new CANNON.World();
-world.gravity.set(0, -9.82, 0); // Set gravity
+world.gravity.set(0, -29.82, 0); // Set gravity
 
 // Set restitution (bounciness) for dice and walls
 let diceMaterial = createDicePhysicsMaterial(currentDiceMaterial);
@@ -1402,7 +1405,7 @@ let rollingAnimationInterval = null;
 let otherPlayerAnimationInterval = null;
 let settlementStartTime = null;
 let isSettled = false;
-const SETTLEMENT_DELAY = 1000; // 1 second
+const SETTLEMENT_DELAY = 50; // 0.05 seconds - much faster settlement for quick gameplay
 
 // Dice rolling animation variables
 let rollingAnimationFrame = 0;
@@ -1418,8 +1421,8 @@ window.otherPlayerAnimationInterval = null; // Initialize as null
 // Function to check if dice have settled
 function checkDiceSettlement() {
     let hasSettled = true;
-    const settlementThreshold = 0.01; // Minimum movement to consider settled
-    const velocityThreshold = 0.02; // Minimum velocity to consider settled
+    const settlementThreshold = 0.15; // Balanced threshold for good settling detection
+    const velocityThreshold = 0.15; // Balanced threshold for good settling detection
     
     diceBodies.forEach((body, index) => {
         if (safeIncludes(lockedDiceIndices, index)) return; // Skip locked dice
@@ -1639,6 +1642,15 @@ function updateDiceResults() {
         isSettled = false;
         settlementStartTime = null;
         
+        // Reset damping back to normal material values
+        diceBodies.forEach((body, index) => {
+            if (!safeIncludes(lockedDiceIndices, index)) {
+                const config = getDiceMaterialProperties(currentDiceMaterial);
+                body.linearDamping = config.linearDamping;
+                body.angularDamping = config.angularDamping;
+            }
+        });
+        
         // Reset button text
         rollDiceButton.textContent = 'Roll';
         
@@ -1828,7 +1840,7 @@ if (rollDiceButton) {
     displayRollingDiceAnimation();
 
     // Start continuous result updates and animations
-    settlementCheckInterval = setInterval(updateDiceResults, 100); // Check settlement every 100ms
+    settlementCheckInterval = setInterval(updateDiceResults, 50); // Check settlement more frequently for faster response
     rollingAnimationInterval = setInterval(displayRollingDiceAnimation, ROLLING_ANIMATION_SPEED); // Animate every 150ms
 
     // Reset dice positions to random locations within the box before rolling
@@ -1858,6 +1870,10 @@ if (rollDiceButton) {
     // Apply random forces to dice bodies based on energy (only to unlocked dice)
     diceBodies.forEach((body, index) => {
         if (!safeIncludes(lockedDiceIndices, index)) {
+            // Moderate damping for natural but faster settling
+            body.linearDamping = 0.01; // Moderate damping for good balance
+            body.angularDamping = 0.01; // Moderate damping for good balance
+            
             body.velocity.set(
                 (Math.random() - 0.5) * energy,
                 Math.random() * energy,
@@ -1872,7 +1888,7 @@ if (rollDiceButton) {
     });
 
     // Start continuous result updates
-    settlementCheckInterval = setInterval(updateDiceResults, 100); // Update every 100ms
+    settlementCheckInterval = setInterval(updateDiceResults, 50); // Check more frequently for faster response
     
     // console.log('Dice rolling with energy:', energy);
 });
@@ -2076,8 +2092,16 @@ world.addBody(ceilingBody);
 function animate() {
     requestAnimationFrame(animate);
 
-    // Step the physics world
-    world.step(1 / 60);
+    // Step the physics world - use moderate acceleration for natural but faster settling
+    if (isRolling) {
+        // During rolling, run physics faster but not too fast to maintain natural movement
+        for (let i = 0; i < 3; i++) {
+            world.step(1 / 180); // Moderate timestep acceleration for natural movement
+        }
+    } else {
+        // Normal physics rate when not rolling
+        world.step(1 / 60);
+    }
 
     // Sync Three.js dice with Cannon.js bodies (only for unlocked dice)
     diceBodies.forEach((body, index) => {
