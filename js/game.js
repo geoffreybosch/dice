@@ -235,11 +235,18 @@ function updateGameControlsState() {
         materialsButton.disabled = newDisabled;
     }
     
-    // Enable/disable roll button based on turn
+    // Enable/disable roll button based on turn AND whether they need to lock dice first
     if (rollButton) {
-        const newDisabled = !canAct;
+        const newDisabled = !canAct || hasRolledThisTurn;
         // console.log(`🎮 Setting roll button disabled: ${rollButton.disabled} → ${newDisabled}`);
         rollButton.disabled = newDisabled;
+        
+        // Update button text to indicate why it's disabled
+        if (hasRolledThisTurn && canAct) {
+            rollButton.textContent = 'Lock Dice First';
+        } else if (canAct) {
+            rollButton.textContent = 'Roll';
+        }
     }
     
     // Show/hide dice selection controls based on turn AND whether there are dice to select
@@ -727,7 +734,7 @@ function lockSelectedDice() {
     }
     
     if (selectedDiceIndices.length === 0) {
-        alert('Please select at least one dice to lock.');
+        showGameAlert('⚠️ Please select at least one dice to lock', 'warning');
         return;
     }
     
@@ -738,9 +745,9 @@ function lockSelectedDice() {
     // Prevent locking dice unless ALL selected dice contribute to the score
     if (!scoreResult.isValid) {
         if (scoreResult.points === 0) {
-            alert(`You can only lock dice that score points. Selected dice: ${scoreResult.description || 'No scoring combination'}`);
+            showGameAlert(`❌ You can only lock dice that score points<br><small>Selected dice: ${scoreResult.description || 'No scoring combination'}</small>`, 'danger');
         } else {
-            alert(`All selected dice must contribute to the score. Some of your selected dice don't score points.`);
+            showGameAlert(`❌ All selected dice must contribute to the score<br><small>Some of your selected dice don't score points</small>`, 'danger');
         }
         return;
     }
@@ -773,6 +780,14 @@ function lockSelectedDice() {
     
     // Clear selection
     selectedDiceIndices = [];
+    
+    // Re-enable roll button after locking dice
+    const rollButton = document.getElementById('roll-dice');
+    if (rollButton && hasRolledThisTurn) {
+        rollButton.disabled = false;
+        hasRolledThisTurn = false; // Reset the flag
+        console.log('🎲 Roll button re-enabled after locking dice');
+    }
     
     // Broadcast locked dice state to other players in multiplayer mode
     if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
@@ -933,6 +948,7 @@ function resetLockedDice() {
     lockedDiceIndices = [];
     selectedDiceIndices = [];
     availableDiceCount = 6;
+    hasRolledThisTurn = false; // Reset roll state for new turn
     
     // Broadcast that all dice are now unlocked to other players in multiplayer mode
     if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
@@ -945,7 +961,7 @@ function resetLockedDice() {
     const rollButton = document.getElementById('roll-dice');
     if (rollButton) {
         rollButton.textContent = 'Roll';
-        rollButton.disabled = false;
+        rollButton.disabled = false; // Enable for new turn
     }
     
     // Update selection controls to reflect empty selection
@@ -1007,6 +1023,134 @@ function showHotDiceMessage() {
         }, 3000);
         
         // console.log(`🔥 Hot dice message displayed for ${playerName}`);
+    }
+}
+
+// Function to show general game alerts
+function showGameAlert(message, type = 'warning', duration = 3000) {
+    const gameAlert = document.getElementById('game-alert');
+    if (gameAlert) {
+        // Remove existing alert type classes
+        gameAlert.className = 'alert fw-bold text-center';
+        // Add the new alert type class
+        gameAlert.classList.add(`alert-${type}`);
+        
+        gameAlert.innerHTML = message;
+        gameAlert.style.display = 'block';
+        
+        // Hide the message after specified duration
+        setTimeout(() => {
+            gameAlert.style.display = 'none';
+        }, duration);
+    }
+}
+
+// Function to handle farkle turn ending
+function handleFarkleEndTurn() {
+    console.log('🎲 Handling farkle turn end');
+    
+    // Restore button states for next player
+    const rollButton = document.getElementById('roll-dice');
+    const bankButton = document.getElementById('bank-points');
+    
+    if (rollButton) {
+        rollButton.style.display = 'inline-block';
+        rollButton.disabled = false;
+        rollButton.textContent = 'Roll';
+        hasRolledThisTurn = false; // Reset roll state
+        console.log('🎲 Roll button restored');
+    }
+    
+    if (bankButton) {
+        bankButton.disabled = false;
+        // Bank button visibility will be handled by updateGameControlsState()
+        console.log('🎲 Bank button enabled');
+    }
+    
+    // Reset all dice for the next player
+    resetLockedDice();
+    
+    // End the turn properly through Firebase state management if available
+    if (isInMultiplayerRoom && typeof endMyTurn === 'function') {
+        console.log('🎲 Farkle - ending turn through Firebase state manager');
+        endMyTurn();
+        // Update game controls immediately after ending turn
+        setTimeout(() => {
+            updateGameControlsState();
+        }, 100);
+    } else if (typeof nextTurn === 'function') {
+        // Fallback to local turn management
+        const nextPlayer = nextTurn();
+        console.log('🎲 Farkle - turn passing to:', nextPlayer);
+        updateGameControlsState();
+        
+        // Broadcast turn change in multiplayer
+        if (isInMultiplayerRoom && typeof broadcastTurnChange === 'function') {
+            broadcastTurnChange(nextPlayer);
+        }
+    }
+}
+
+// Function to show farkle message
+function showFarkleMessage() {
+    console.log('🎲 showFarkleMessage() called');
+    const farkleMessage = document.getElementById('farkle-message');
+    console.log('🎲 farkleMessage element:', farkleMessage);
+    
+    if (farkleMessage) {
+        farkleMessage.innerHTML = `🎲 FARKLE! 💥<br><small>No scoring dice - all pending points lost!</small><br><button id="farkle-end-turn" class="btn btn-danger btn-sm mt-2">End Turn Now</button>`;
+        farkleMessage.style.display = 'block';
+        
+        console.log('🎲 Farkle message displayed, innerHTML:', farkleMessage.innerHTML);
+        console.log('🎲 Farkle message display style:', farkleMessage.style.display);
+        
+        // Hide roll button and disable bank button immediately
+        const rollButton = document.getElementById('roll-dice');
+        const bankButton = document.getElementById('bank-points');
+        
+        if (rollButton) {
+            rollButton.style.display = 'none';
+            console.log('🎲 Roll button hidden');
+        }
+        
+        if (bankButton) {
+            bankButton.disabled = true;
+            bankButton.style.display = 'none';
+            console.log('🎲 Bank button disabled and hidden');
+        }
+        
+        // Add event listener to the end turn button
+        const endTurnButton = document.getElementById('farkle-end-turn');
+        console.log('🎲 End turn button:', endTurnButton);
+        if (endTurnButton) {
+            endTurnButton.addEventListener('click', () => {
+                console.log('🎲 User clicked End Turn Now button');
+                // Clear any existing timeout
+                const timeoutId = farkleMessage.dataset.hideTimeout;
+                if (timeoutId) {
+                    clearTimeout(parseInt(timeoutId));
+                }
+                // Hide the farkle message immediately
+                farkleMessage.style.display = 'none';
+                // End the player's turn
+                handleFarkleEndTurn();
+            });
+        }
+        
+        // Hide the message after 5 seconds if user doesn't click the button
+        const hideTimeout = setTimeout(() => {
+            if (farkleMessage.style.display !== 'none') {
+                console.log('🎲 Farkle message timeout - auto-ending turn');
+                farkleMessage.style.display = 'none';
+                // Automatically end turn after timeout
+                handleFarkleEndTurn();
+            }
+        }, 5000);
+        
+        // Store the timeout ID so we can clear it if the button is clicked
+        farkleMessage.dataset.hideTimeout = hideTimeout.toString();
+    } else {
+        console.error('🎲 ERROR: farkle-message element not found!');
     }
 }
 
@@ -1440,6 +1584,7 @@ let rollingAnimationInterval = null;
 let otherPlayerAnimationInterval = null;
 let settlementStartTime = null;
 let isSettled = false;
+let hasRolledThisTurn = false; // Track if player has rolled without locking dice
 const SETTLEMENT_DELAY = 50; // 0.05 seconds - much faster settlement for quick gameplay
 
 // Dice rolling animation variables
@@ -1699,8 +1844,9 @@ function updateDiceResults() {
             }
         });
         
-        // Reset button text
-        rollDiceButton.textContent = 'Roll';
+        // Reset button text and keep it disabled until dice are locked
+        rollDiceButton.textContent = 'Lock Dice First';
+        rollDiceButton.disabled = true; // Keep disabled until player locks dice
         
         // Show final results
         const results = diceBodies.map((body, index) => {
@@ -1737,7 +1883,7 @@ function updateDiceResults() {
                     return; // Don't process Farkle if it's no longer our turn
                 }
                 
-                // It's a Farkle! Clear pending points and end turn
+                // It's a Farkle! Clear pending points and show farkle message
                 setTimeout(() => {
                     // Double-check it's still our turn before executing Farkle logic
                     const stillMyTurn = typeof canPlayerAct === 'function' ? canPlayerAct() : true;
@@ -1746,13 +1892,14 @@ function updateDiceResults() {
                         return;
                     }
                     
-                    alert('🎲 FARKLE! No scoring dice in your roll. All pending points are lost and your turn ends.');
+                    // Show farkle message in UI instead of popup (this will handle turn ending)
+                    showFarkleMessage();
                     
-                    // Immediately disable roll button to prevent double-clicking
-                    const rollButton = document.getElementById('roll-dice');
-                    if (rollButton) {
-                        rollButton.disabled = true;
-                        rollButton.textContent = 'Turn Ending...';
+                    // Note: Roll button hiding is now handled by showFarkleMessage() function
+                    
+                    // Clear pending points immediately
+                    if (typeof clearPendingPoints === 'function') {
+                        clearPendingPoints();
                     }
                     
                     // Handle Farkle with persistent state management
@@ -1763,32 +1910,8 @@ function updateDiceResults() {
                         showFarkleIndicator(myPlayerId);
                     }
                     
-                    if (typeof clearPendingPoints === 'function') {
-                        clearPendingPoints();
-                    }
-                    
-                    // Reset all dice for the next player
-                    resetLockedDice();
-                    
-                    // End the turn properly through Firebase state management if available
-                    if (isInMultiplayerRoom && typeof endMyTurn === 'function') {
-                        // console.log('🎲 Farkle - ending turn through Firebase state manager');
-                        endMyTurn();
-                        // Update game controls immediately after ending turn
-                        setTimeout(() => {
-                            updateGameControlsState();
-                        }, 100);
-                    } else if (typeof nextTurn === 'function') {
-                        // Fallback to local turn management
-                        const nextPlayer = nextTurn();
-                        // console.log('🎲 Farkle - turn passing to:', nextPlayer);
-                        updateGameControlsState();
-                        
-                        // Broadcast turn change in multiplayer
-                        if (isInMultiplayerRoom && typeof broadcastTurnChange === 'function') {
-                            broadcastTurnChange(nextPlayer);
-                        }
-                    }
+                    // Note: Turn ending is now handled by showFarkleMessage() function
+                    // Either when user clicks "End Turn Now" or after 5 second timeout
                 }, 500); // Small delay to show the dice first
             }
         }
@@ -1830,52 +1953,12 @@ if (rollDiceButton) {
             return;
         }
         
+        // Don't allow rolling if already rolling or if already rolled this turn
+        if (isRolling || hasRolledThisTurn) {
+            return;
+        }
+        
         // console.log('🎲 Player can act - proceeding with dice roll');
-        
-        // If currently rolling, stop the rolling state
-        if (isRolling) {
-        isRolling = false;
-        isSettled = false;
-        settlementStartTime = null;
-        
-        if (settlementCheckInterval) {
-            clearInterval(settlementCheckInterval);
-            settlementCheckInterval = null;
-        }
-        if (rollingAnimationInterval) {
-            clearInterval(rollingAnimationInterval);
-            rollingAnimationInterval = null;
-        }
-        rollDiceButton.textContent = 'Roll';
-        
-        // Force update the display to remove rolling class
-        const results = diceBodies.map((body, index) => {
-            if (safeIncludes(lockedDiceIndices, index)) {
-                // Keep the previous result for locked dice, default to 1 if undefined
-                return currentDiceResults[index] || 1;
-            } else {
-                // Calculate new result for unlocked dice
-                return getDiceResult(body.quaternion);
-            }
-        });
-        displayDiceResults(results);
-        
-        // Broadcast dice results to other players if in multiplayer room
-        if (isInMultiplayerRoom && typeof broadcastDiceResults === 'function' && myPlayerId) {
-            console.log('🎲 Broadcasting manual stop dice results:', results);
-            broadcastDiceResults(myPlayerId, results);
-        } else {
-            console.log('🎲 Not broadcasting manual stop dice results - conditions not met:', {
-                isInMultiplayerRoom,
-                hasBroadcastFunction: typeof broadcastDiceResults === 'function',
-                myPlayerId,
-                results
-            });
-        }
-        
-        console.log('🎲 Rolling stopped manually. Current results:', results);
-        return;
-    }
     
     // Set Firebase state to rolling when starting to roll
     if (typeof startMyTurn === 'function') {
@@ -1902,7 +1985,9 @@ if (rollDiceButton) {
     settlementStartTime = null;
     lastDicePositions = []; // Reset position tracking
     rollingAnimationFrame = 0; // Reset animation frame
-    rollDiceButton.textContent = 'Stop Rolling';
+    hasRolledThisTurn = true; // Mark that player has rolled immediately
+    rollDiceButton.textContent = 'Rolling...';
+    rollDiceButton.disabled = true; // Disable immediately when rolling starts
     
     // Clear any existing intervals
     if (settlementCheckInterval) {

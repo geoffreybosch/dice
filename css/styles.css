@@ -1,22 +1,77 @@
+/* Enhanced Main Game Container */
+.container-fluid {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    min-height: 100vh;
+}
+
+/* Enhanced Main Game Card */
+.card.bg-dark {
+    background: linear-gradient(135deg, #343a40, #495057) !important;
+    border: 2px solid #007bff;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
+}
+
+.card.bg-dark .card-body {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 13px; /* Slightly smaller than parent card's 15px to account for border */
+}
+
+/* Enhanced Dice Results Container */
+#dice-results-container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Enhanced Body Background */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
 }
 
-#game-container {
-    text-align: center;
-}
-
+/* Enhanced Canvas */
 canvas {
-    border: 1px solid #000;
+    border: 3px solid #007bff;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
     display: block;
     margin: 0 auto;
+}
+
+/* Enhanced Form Check (Radio buttons, checkboxes) */
+.form-check {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.form-check:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-check-label {
+    cursor: pointer;
+    font-weight: 500;
 }
 
 /* Responsive dice results styling */
@@ -298,39 +353,94 @@ canvas {
     }
 }
 
-/* Welcome Modal Styling */
-#welcomeModal .modal-content {
+/* Global Modal Styling - Applied to all modals */
+.modal-content {
     border-radius: 15px;
     border: none;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
 }
 
-#welcomeModal .modal-header {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: white;
-    border-radius: 15px 15px 0 0;
+.modal-header {
     border-bottom: none;
     padding: 1.5rem;
+    position: relative;
 }
 
-#welcomeModal .modal-title {
-    font-size: 1.8rem;
+.modal-title {
     font-weight: 600;
     margin: 0;
 }
 
-#welcomeModal .modal-body {
+.modal-body {
     padding: 2rem;
     background-color: #f8f9fa;
 }
 
-#welcomeModal .form-label {
+.modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem;
+}
+
+/* Individual Modal Color Schemes */
+#welcomeModal .modal-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+#welcomeModal .modal-title {
+    font-size: 1.8rem;
+}
+
+#adminModal .modal-header {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+    border-radius: 15px 15px 0 0;
+}
+
+#materialsModal .modal-header {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+#scoringModal .modal-header {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+#gameSettingsModal .modal-header {
+    background: linear-gradient(135deg, #6f42c1, #5a32a3);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+/* Enhanced Form Controls - Applied globally */
+.form-label {
     font-size: 1.1rem;
     color: #495057;
     margin-bottom: 0.5rem;
+    font-weight: 600;
 }
 
-#welcomeModal .form-control-lg {
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.form-control-lg {
     border-radius: 10px;
     border: 2px solid #e9ecef;
     padding: 0.75rem 1rem;
@@ -338,37 +448,184 @@ canvas {
     transition: all 0.3s ease;
 }
 
-#welcomeModal .form-control-lg:focus {
+.form-control-lg:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     transform: translateY(-1px);
 }
 
-#welcomeModal .btn-success {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    border: none;
-    border-radius: 25px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    padding: 0.75rem 2rem;
+.form-select-lg {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
     transition: all 0.3s ease;
+}
+
+.form-select-lg:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Modern Button Styling - Applied globally */
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Primary Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Success Buttons */
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Warning Buttons */
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background: linear-gradient(135deg, #e0a800, #d39e00);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+/* Danger Buttons */
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Info Buttons */
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+    background: linear-gradient(135deg, #138496, #117a8b);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+/* Secondary Buttons */
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a6268, #495057);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* Outline Buttons */
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-danger {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Large Buttons */
+.btn-lg {
+    border-radius: 12px;
+    font-size: 1.2rem;
+    padding: 0.75rem 2rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-#welcomeModal .btn-success:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-    background: linear-gradient(135deg, #218838, #1e7e34);
+/* Small Buttons */
+.btn-sm {
+    border-radius: 6px;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
 }
 
-#welcomeModal .btn-success:disabled {
-    background: #6c757d;
+/* Disabled Button States */
+.btn:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
-/* Choice buttons styling */
+/* Special Rounded Buttons */
+.btn-rounded {
+    border-radius: 25px;
+}
+
+/* Enhanced Welcome Modal Choice Buttons */
 #host-game-btn, #join-game-btn {
     min-height: 120px;
     border-radius: 15px;
@@ -400,7 +657,7 @@ canvas {
     background: linear-gradient(135deg, #218838, #1e7e34);
 }
 
-/* Form buttons styling */
+/* Welcome Modal Form Buttons */
 #welcome-host-room, #welcome-join-room {
     border-radius: 25px;
     font-weight: 600;
@@ -413,62 +670,434 @@ canvas {
     min-width: 80px;
 }
 
-#welcomeModal .alert-info {
-    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-    border: 1px solid #bee5eb;
+/* Enhanced Game UI Elements */
+#roll-dice {
+    border-radius: 15px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    font-size: 1.3rem;
+    padding: 1rem 2rem;
+}
+
+#roll-dice:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+}
+
+/* Energy Slider Enhancement */
+#energy-slider-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
     border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+#energy-slider {
+    accent-color: #007bff;
+}
+
+/* Hot Dice Message Enhancement */
+#hot-dice-message {
+    border-radius: 10px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Dice Selection Controls Enhancement */
+#dice-selection-controls {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+#dice-selection-controls > div:first-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+#dice-selection-controls button {
+    border-radius: 8px;
+    flex: 0 0 auto;
+}
+
+#dice-selection-controls .mt-2 {
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem;
+    margin: 0;
+}
+
+#dice-selection-controls small {
+    border-radius: 4px;
+}
+
+/* Enhanced Sidebar Styling */
+.bg-dark {
+    background: linear-gradient(135deg, #343a40, #495057) !important;
+    border-radius: 15px 0 0 15px;
+}
+
+#admin-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+#player-list {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+#room-name-display, #player-list-title, #player-list-title-mobile {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Room Name Subtitle Styling */
+.room-subtitle {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+    border-left: 3px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.room-subtitle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(2px);
+}
+
+.room-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.room-name {
     font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-#welcomeModal .form-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    font-style: italic;
+/* Enhanced Material Preview Buttons */
+.material-option {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
 }
 
-/* Welcome modal animations */
-#welcomeModal.fade .modal-dialog {
+.material-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.material-option.active {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.material-preview {
+    transition: all 0.3s ease;
+}
+
+.material-option:hover .material-preview {
+    transform: scale(1.1);
+}
+
+/* Preset Option Buttons */
+.preset-option {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #007bff;
+    min-height: 60px;
+}
+
+.preset-option:hover {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Enhanced Alert Styling */
+.alert {
+    border-radius: 10px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+/* Enhanced Card Styling */
+.card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Enhanced Table Styling */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.table th {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+/* Enhanced List Group Styling */
+.list-group {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.list-group-item-success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
+    border-left: 4px solid #28a745 !important;
+    color: #155724 !important;
+}
+
+.list-group-item-secondary {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+    border-left: 4px solid #6c757d !important;
+    color: #495057 !important;
+}
+
+/* Enhanced Modal Animations */
+.modal.fade .modal-dialog {
     transition: transform 0.4s ease-out, opacity 0.4s ease-out;
     transform: translate(0, -50px) scale(0.9);
 }
 
-#welcomeModal.show .modal-dialog {
+.modal.show .modal-dialog {
     transform: translate(0, 0) scale(1);
 }
 
-/* Error message styling in welcome modal */
-#welcome-name-error {
+/* Enhanced Error Message Styling */
+.text-danger, #welcome-name-error, #welcome-join-name-error {
     background-color: #f8d7da;
     color: #721c24;
     padding: 0.5rem;
-    border-radius: 5px;
+    border-radius: 8px;
     border: 1px solid #f5c6cb;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* Enhanced Status Messages */
+.small {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
     font-weight: 500;
 }
 
-/* Loading state for join button */
-#welcome-join-room .spinner-border-sm {
+/* Loading Spinner Enhancement */
+.spinner-border-sm {
     width: 1rem;
     height: 1rem;
+    border-width: 0.1em;
 }
 
-/* Mobile responsiveness for welcome modal */
+/* Enhanced Range Slider */
+.form-range {
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.form-range::-webkit-slider-track {
+    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    height: 8px;
+    border-radius: 4px;
+}
+
+.form-range::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.form-range::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.5);
+}
+
+.form-range::-moz-range-track {
+    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    height: 8px;
+    border-radius: 4px;
+    border: none;
+}
+
+.form-range::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+}
+
+/* Mobile responsiveness for enhanced styling */
 @media (max-width: 576px) {
-    #welcomeModal .modal-dialog {
+    .modal-dialog {
         margin: 0.5rem;
     }
     
-    #welcomeModal .modal-body {
+    .modal-body {
         padding: 1.5rem;
     }
     
-    #welcomeModal .modal-title {
+    .modal-title {
         font-size: 1.5rem;
     }
     
-    #welcomeModal .btn-success {
+    .btn-lg {
         font-size: 1rem;
         padding: 0.65rem 1.5rem;
+    }
+    
+    .card {
+        margin: 0.5rem;
+    }
+    
+    #dice-results-container {
+        padding: 1rem;
+        min-height: 100px;
+    }
+    
+    #energy-slider-container {
+        padding: 0.75rem;
+    }
+    
+    .bg-dark {
+        border-radius: 15px 15px 0 0;
+    }
+}
+
+/* Medium screens */
+@media (max-width: 768px) {
+    .card.bg-dark {
+        margin: 1rem 0.5rem;
+    }
+    
+    #admin-section, #player-list {
+        padding: 0.75rem;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+    }
+}
+
+/* Large screens enhancements */
+@media (min-width: 992px) {
+    .bg-dark {
+        border-radius: 15px 0 0 15px;
+    }
+    
+    #admin-section, #player-list {
+        margin-bottom: 1.5rem;
+    }
+    
+    .card.bg-dark {
+        margin: 2rem;
     }
 }
 
