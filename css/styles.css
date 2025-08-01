@@ -284,6 +284,7 @@ canvas {
     #player-list .list-group-item {
         padding: 0.5rem !important;
         font-size: 0.9rem !important;
+        min-height: 50px !important;
     }
     
     /* Smaller dice for mobile */
@@ -950,6 +951,47 @@ canvas {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
     border-left: 4px solid #6c757d !important;
     color: #495057 !important;
+}
+
+/* Enhanced Player List Styles */
+#player-list .list-group-item {
+    /* Allow wrapping and increase height */
+    flex-wrap: wrap !important;
+    align-content: flex-start !important;
+    min-height: 60px !important;
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+}
+
+#player-list .list-group-item .d-flex:first-child {
+    /* Player name container - allow it to wrap */
+    flex: 1 1 auto;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+}
+
+#player-list .badge.bg-primary.rounded-pill {
+    /* Make score badge bigger */
+    font-size: 1rem !important;
+    padding: 0.5rem 0.75rem !important;
+    min-width: 45px !important;
+    text-align: center !important;
+    flex-shrink: 0 !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 767.98px) {
+    #player-list .list-group-item {
+        min-height: 50px !important;
+        padding: 0.5rem !important;
+    }
+    
+    #player-list .badge.bg-primary.rounded-pill {
+        font-size: 0.9rem !important;
+        padding: 0.375rem 0.625rem !important;
+        min-width: 40px !important;
+    }
 }
 
 /* Enhanced Modal Animations */
