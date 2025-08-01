@@ -237,15 +237,26 @@ function updateGameControlsState() {
     
     // Enable/disable roll button based on turn AND whether they need to lock dice first
     if (rollButton) {
-        const newDisabled = !canAct || hasRolledThisTurn;
-        // console.log(`🎮 Setting roll button disabled: ${rollButton.disabled} → ${newDisabled}`);
+        const newDisabled = !canAct || hasRolledThisTurn || isRolling;
+        console.log('🎮 Roll button state check:', {
+            canAct,
+            hasRolledThisTurn,
+            isRolling,
+            newDisabled,
+            currentText: rollButton.textContent
+        });
         rollButton.disabled = newDisabled;
         
-        // Update button text to indicate why it's disabled
-        if (hasRolledThisTurn && canAct) {
+        // Update button text to indicate current state
+        if (isRolling && canAct) {
+            rollButton.textContent = 'Rolling...';
+            console.log('🎮 Setting button to: Rolling...');
+        } else if (hasRolledThisTurn && canAct) {
             rollButton.textContent = 'Lock Dice First';
+            console.log('🎮 Setting button to: Lock Dice First');
         } else if (canAct) {
             rollButton.textContent = 'Roll';
+            console.log('🎮 Setting button to: Roll');
         }
     }
     
@@ -786,7 +797,7 @@ function lockSelectedDice() {
     if (rollButton && hasRolledThisTurn) {
         rollButton.disabled = false;
         hasRolledThisTurn = false; // Reset the flag
-        console.log('🎲 Roll button re-enabled after locking dice');
+        console.log('🎲 Roll button re-enabled after locking dice - hasRolledThisTurn = false');
     }
     
     // Broadcast locked dice state to other players in multiplayer mode
@@ -949,6 +960,7 @@ function resetLockedDice() {
     selectedDiceIndices = [];
     availableDiceCount = 6;
     hasRolledThisTurn = false; // Reset roll state for new turn
+    console.log('🎲 resetLockedDice() - hasRolledThisTurn = false');
     
     // Broadcast that all dice are now unlocked to other players in multiplayer mode
     if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
@@ -1058,7 +1070,7 @@ function handleFarkleEndTurn() {
         rollButton.disabled = false;
         rollButton.textContent = 'Roll';
         hasRolledThisTurn = false; // Reset roll state
-        console.log('🎲 Roll button restored');
+        console.log('🎲 Roll button restored after farkle - hasRolledThisTurn = false');
     }
     
     if (bankButton) {
@@ -1847,6 +1859,8 @@ function updateDiceResults() {
         // Reset button text and keep it disabled until dice are locked
         rollDiceButton.textContent = 'Lock Dice First';
         rollDiceButton.disabled = true; // Keep disabled until player locks dice
+        hasRolledThisTurn = true; // Mark that player has rolled after dice settle
+        console.log('🎲 Dice settled - setting hasRolledThisTurn = true');
         
         // Show final results
         const results = diceBodies.map((body, index) => {
@@ -1985,7 +1999,6 @@ if (rollDiceButton) {
     settlementStartTime = null;
     lastDicePositions = []; // Reset position tracking
     rollingAnimationFrame = 0; // Reset animation frame
-    hasRolledThisTurn = true; // Mark that player has rolled immediately
     rollDiceButton.textContent = 'Rolling...';
     rollDiceButton.disabled = true; // Disable immediately when rolling starts
     
