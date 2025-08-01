@@ -518,9 +518,15 @@ function fetchCurrentScoresFromFirebase(callback) {
 
 // Win Detection Functions
 function checkWinCondition(playerId, newScore) {
-    // Get current game settings
-    const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { winningScore: 10000 };
-    const winningScore = gameSettings.winningScore || 10000;
+    // Always fetch the latest winning score from a reliable source (not from possibly stale local data)
+    let winningScore = 10000;
+    if (typeof getGameSettings === 'function') {
+        const gameSettings = getGameSettings();
+        // If the host has changed the settings, ensure we get the latest value
+        if (gameSettings && typeof gameSettings.winningScore === 'number' && gameSettings.winningScore > 0) {
+            winningScore = gameSettings.winningScore;
+        }
+    }
     
     console.log(`🏆 Checking win condition for ${playerId} with score ${newScore} (winning score: ${winningScore})`);
     
@@ -544,14 +550,14 @@ function checkWinCondition(playerId, newScore) {
         if (typeof showGameAlert === 'function') {
             // Check if the current client is the player who reached the winning score
             const myPlayerIdValue = (typeof window.myPlayerId !== 'undefined' && window.myPlayerId) || 
-                                   (typeof myPlayerId !== 'undefined' && myPlayerId);
+                                    (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId);
             const currentPlayerIdValue = (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId) ||
-                                        (typeof getCurrentPlayerId === 'function' && getCurrentPlayerId());
+                                        (typeof getCurrentPlayer === 'function' && getCurrentPlayer());
             
             console.log(`🏆 Player ID comparison debug:`);
             console.log(`🏆   - winning player: "${playerId}"`);
             console.log(`🏆   - window.myPlayerId: "${window.myPlayerId}"`);
-            console.log(`🏆   - myPlayerId: "${typeof myPlayerId !== 'undefined' ? myPlayerId : 'undefined'}"`);
+            console.log(`🏆   - myPlayerId: "${typeof window.myPlayerId !== 'undefined' ? window.myPlayerId : 'undefined'}"`);
             console.log(`🏆   - currentPlayerId: "${currentPlayerIdValue}"`);
             console.log(`🏆   - final comparison value: "${myPlayerIdValue}"`);
             
@@ -577,7 +583,7 @@ function checkWinCondition(playerId, newScore) {
         // console.log('🏆 Final round tracker initialized:', finalRoundTracker);
         
         // Broadcast game state in multiplayer mode
-        if (isInMultiplayerRoom && typeof broadcastGameState === 'function') {
+        if (typeof isInMultiplayerRoom !== 'undefined' && isInMultiplayerRoom && typeof broadcastGameState === 'function') {
             broadcastGameState(gameState, winTriggerPlayer, finalRoundTracker);
         }
         
@@ -590,9 +596,9 @@ function checkWinCondition(playerId, newScore) {
                 console.log(`🏆 Ending ${playerId}'s turn after reaching winning score`);
                 
                 // Use Firebase state management if available
-                if (isInMultiplayerRoom && typeof endMyTurn === 'function' && 
+                if (typeof isInMultiplayerRoom !== 'undefined' && isInMultiplayerRoom && typeof endMyTurn === 'function' && 
                     ((typeof window.myPlayerId !== 'undefined' && window.myPlayerId === playerId) ||
-                     (typeof myPlayerId !== 'undefined' && myPlayerId === playerId))) {
+                    (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId === playerId))) {
                     console.log(`🏆 Using Firebase to end ${playerId}'s winning turn`);
                     endMyTurn();
                 } else if (typeof nextTurn === 'function') {
