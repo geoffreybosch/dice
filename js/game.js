@@ -167,12 +167,11 @@ function updateGameControlsState() {
     const diceSelectionControls = document.getElementById('dice-selection-controls');
     const diceCanvas = document.getElementById('dice-canvas');
     const diceResultsContainer = document.getElementById('dice-results-container');
-    const energySliderContainer = document.getElementById('energy-slider-container');
     
     const canAct = canPlayerAct();
     const hasPendingPoints = typeof getPendingPoints === 'function' ? getPendingPoints() > 0 : false;
     
-    // Find the dice rolling container (the card containing roll button and energy slider)
+    // Find the dice rolling container (the card containing roll button)
     const diceRollingContainer = rollButton ? rollButton.closest('.card') : null;
     
     // console.log('🎮 Control state info:', {
@@ -1034,7 +1033,44 @@ function showHotDiceMessage() {
             hotDiceMessage.style.display = 'none';
         }, 3000);
         
+        // Broadcast hot dice event to other players in multiplayer mode
+        if (isInMultiplayerRoom && typeof broadcastHotDice === 'function' && myPlayerId) {
+            console.log('🔥 Calling broadcastHotDice for:', myPlayerId);
+            broadcastHotDice(myPlayerId);
+        } else {
+            console.log('🔥 Not broadcasting hot dice:', {
+                isInMultiplayerRoom,
+                broadcastHotDiceExists: typeof broadcastHotDice === 'function',
+                myPlayerId
+            });
+        }
+        
         // console.log(`🔥 Hot dice message displayed for ${playerName}`);
+    }
+}
+
+// Function to show hot dice message for spectators
+function showSpectatorHotDiceMessage(playerId) {
+    console.log('🔥 showSpectatorHotDiceMessage called for:', playerId);
+    const hotDiceMessage = document.getElementById('hot-dice-message');
+    console.log('🔥 hotDiceMessage element:', hotDiceMessage);
+    
+    if (hotDiceMessage) {
+        const playerName = playerId || 'Player';
+        hotDiceMessage.innerHTML = `🔥 ${playerName} has hot dice! 🔥<br><small>All 6 dice scored - rolling again!</small>`;
+        hotDiceMessage.style.display = 'block';
+        
+        console.log('🔥 Spectator hot dice message displayed:', hotDiceMessage.innerHTML);
+        
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+            hotDiceMessage.style.display = 'none';
+            console.log('🔥 Spectator hot dice message hidden');
+        }, 3000);
+        
+        console.log(`🔥 Spectator hot dice message displayed for ${playerName}`);
+    } else {
+        console.error('🔥 ERROR: hot-dice-message element not found for spectator!');
     }
 }
 
@@ -1131,6 +1167,18 @@ function showFarkleMessage() {
             console.log('🎲 Bank button disabled and hidden');
         }
         
+        // Broadcast farkle alert to other players in multiplayer mode
+        if (isInMultiplayerRoom && typeof broadcastFarkleAlert === 'function' && myPlayerId) {
+            console.log('💥 Calling broadcastFarkleAlert for:', myPlayerId);
+            broadcastFarkleAlert(myPlayerId);
+        } else {
+            console.log('💥 Not broadcasting farkle alert:', {
+                isInMultiplayerRoom,
+                broadcastFarkleAlertExists: typeof broadcastFarkleAlert === 'function',
+                myPlayerId
+            });
+        }
+        
         // Add event listener to the end turn button
         const endTurnButton = document.getElementById('farkle-end-turn');
         console.log('🎲 End turn button:', endTurnButton);
@@ -1163,6 +1211,31 @@ function showFarkleMessage() {
         farkleMessage.dataset.hideTimeout = hideTimeout.toString();
     } else {
         console.error('🎲 ERROR: farkle-message element not found!');
+    }
+}
+
+// Function to show farkle message for spectators
+function showSpectatorFarkleMessage(playerId) {
+    console.log('💥 showSpectatorFarkleMessage() called for:', playerId);
+    const farkleMessage = document.getElementById('farkle-message');
+    console.log('💥 farkleMessage element:', farkleMessage);
+    
+    if (farkleMessage) {
+        const playerName = playerId || 'Player';
+        farkleMessage.innerHTML = `💥 ${playerName} FARKLED! 💥<br><small>No scoring dice - turn ended!</small>`;
+        farkleMessage.style.display = 'block';
+        
+        console.log('💥 Spectator farkle message displayed:', farkleMessage.innerHTML);
+        
+        // Hide the message after 3 seconds for spectators
+        setTimeout(() => {
+            farkleMessage.style.display = 'none';
+            console.log('💥 Spectator farkle message hidden');
+        }, 3000);
+        
+        console.log(`💥 Spectator farkle message displayed for ${playerName}`);
+    } else {
+        console.error('💥 ERROR: farkle-message element not found for spectator!');
     }
 }
 
@@ -1947,9 +2020,6 @@ function updateDiceResults() {
     }
 }
 
-// Get the energy slider element
-const energySlider = document.getElementById('energy-slider');
-
 // Event listener for roll dice button
 if (rollDiceButton) {
     rollDiceButton.addEventListener('click', () => {
@@ -1991,7 +2061,7 @@ if (rollDiceButton) {
         });
     }
     
-    const energy = parseFloat(energySlider.value); // Get energy from slider
+    const energy = 12; // Fixed energy value
 
     // Start rolling state and reset settlement tracking
     isRolling = true;
@@ -2608,6 +2678,10 @@ function onDiceResultsReceived(data) {
         displayOtherPlayerResults(playerId, diceResults);
     }
 }
+
+// Make spectator message functions globally accessible for Firebase listeners
+window.showSpectatorHotDiceMessage = showSpectatorHotDiceMessage;
+window.showSpectatorFarkleMessage = showSpectatorFarkleMessage;
 
 // Reinitialize the animation loop
 animate();

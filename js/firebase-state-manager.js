@@ -43,6 +43,8 @@ let diceSelectionsListener = null;
 let lockedDiceListener = null;
 let materialChangesListener = null;
 let farkleStatesListener = null;
+let hotDiceListener = null;
+let farkleAlertListener = null;
 
 // Persistent Farkle indicator state for all players
 let farkleIndicatorStates = {};
@@ -114,9 +116,10 @@ function initializeFirebaseStateManager(roomId, playerId, playerName) {
     setupLockedDiceListener();
     setupMaterialChangesListener();
     setupFarkleStatesListener();
+    setupHotDiceListener();
+    setupFarkleAlertListener();
     
     // Initialize player state and mark as connected
-    setPlayerState(PLAYER_STATES.WAITING);
     markPlayerAsConnected(true);
     
     // Set up automatic disconnection handling
@@ -757,12 +760,6 @@ function showDiceRollingUI() {
         rollButton.disabled = false;
     }
     
-    // Show energy slider
-    const energySliderContainer = document.getElementById('energy-slider-container');
-    if (energySliderContainer) {
-        energySliderContainer.style.display = 'block';
-    }
-    
     // Show dice canvas
     const canvas = document.getElementById('dice-canvas');
     if (canvas) {
@@ -792,12 +789,6 @@ function hideDiceRollingUI() {
     if (rollButton) {
         rollButton.disabled = true;
         // Don't hide the button - just disable it so players can see it
-    }
-    
-    // Hide energy slider
-    const energySliderContainer = document.getElementById('energy-slider-container');
-    if (energySliderContainer) {
-        energySliderContainer.style.display = 'none';
     }
     
     // Disable dice canvas interaction but keep display controlled by admin toggle
@@ -1180,6 +1171,66 @@ function setupFarkleStatesListener() {
     });
 }
 
+// Set up listener for hot dice events
+function setupHotDiceListener() {
+    if (!currentRoomId) return;
+    
+    const hotDiceRef = database.ref(`rooms/${currentRoomId}/hotDiceEvents`);
+    
+    hotDiceListener = hotDiceRef.on('child_added', (snapshot) => {
+        const hotDiceData = snapshot.val();
+        console.log('🔥 Hot dice listener triggered:', hotDiceData);
+        
+        if (hotDiceData && hotDiceData.playerId !== currentPlayerId) {
+            console.log('🔥 Hot dice event received for other player:', hotDiceData.playerId);
+            console.log('🔥 Current player ID:', currentPlayerId);
+            console.log('🔥 showSpectatorHotDiceMessage function exists:', typeof showSpectatorHotDiceMessage === 'function');
+            console.log('🔥 window.showSpectatorHotDiceMessage exists:', typeof window.showSpectatorHotDiceMessage === 'function');
+            
+            // Show hot dice message for spectator
+            if (typeof showSpectatorHotDiceMessage === 'function') {
+                showSpectatorHotDiceMessage(hotDiceData.playerId);
+            } else if (typeof window.showSpectatorHotDiceMessage === 'function') {
+                window.showSpectatorHotDiceMessage(hotDiceData.playerId);
+            } else {
+                console.error('🔥 showSpectatorHotDiceMessage function not found!');
+            }
+        } else {
+            console.log('🔥 Ignoring hot dice event - same player or invalid data');
+        }
+    });
+}
+
+// Set up listener for farkle alerts
+function setupFarkleAlertListener() {
+    if (!currentRoomId) return;
+    
+    const farkleAlertRef = database.ref(`rooms/${currentRoomId}/farkleAlerts`);
+    
+    farkleAlertListener = farkleAlertRef.on('child_added', (snapshot) => {
+        const farkleData = snapshot.val();
+        console.log('💥 Farkle alert listener triggered:', farkleData);
+        
+        if (farkleData && farkleData.playerId !== currentPlayerId) {
+            console.log('💥 Farkle alert received for other player:', farkleData.playerId);
+            console.log('💥 Current player ID:', currentPlayerId);
+            console.log('💥 showSpectatorFarkleMessage function exists:', typeof showSpectatorFarkleMessage === 'function');
+            console.log('💥 window.showSpectatorFarkleMessage exists:', typeof window.showSpectatorFarkleMessage === 'function');
+            
+            // Show farkle message for spectator
+            if (typeof showSpectatorFarkleMessage === 'function') {
+                showSpectatorFarkleMessage(farkleData.playerId);
+            } else if (typeof window.showSpectatorFarkleMessage === 'function') {
+                window.showSpectatorFarkleMessage(farkleData.playerId);
+            } else {
+                console.error('💥 showSpectatorFarkleMessage function not found!');
+            }
+        } else {
+            console.log('💥 Ignoring farkle alert - same player or invalid data');
+        }
+    });
+}
+
 // Broadcast dice results via Firebase
 function broadcastDiceResults(playerId, diceResults) {
     if (!currentRoomId || !database) return;
@@ -1294,6 +1345,50 @@ function broadcastGameSettings(gameSettings) {
     });
 }
 
+// Broadcast hot dice event to all players in the room
+function broadcastHotDice(playerId) {
+    console.log(`🔥 broadcastHotDice called for ${playerId}, roomId: ${currentRoomId}, database exists: ${!!database}`);
+    
+    if (!currentRoomId || !database) {
+        console.error('🔥 Cannot broadcast hot dice - missing roomId or database');
+        return;
+    }
+    
+    console.log(`🔥 Broadcasting hot dice event via Firebase for ${playerId}`);
+    
+    const hotDiceRef = database.ref(`rooms/${currentRoomId}/hotDiceEvents`);
+    hotDiceRef.push({
+        playerId: playerId,
+        timestamp: Date.now()
+    }).then(() => {
+        console.log('🔥 Hot dice event broadcast successfully');
+    }).catch((error) => {
+        console.error('❌ Error broadcasting hot dice event:', error);
+    });
+}
+
+// Broadcast farkle alert to all players in the room
+function broadcastFarkleAlert(playerId) {
+    console.log(`💥 broadcastFarkleAlert called for ${playerId}, roomId: ${currentRoomId}, database exists: ${!!database}`);
+    
+    if (!currentRoomId || !database) {
+        console.error('💥 Cannot broadcast farkle alert - missing roomId or database');
+        return;
+    }
+    
+    console.log(`💥 Broadcasting farkle alert via Firebase for ${playerId}`);
+    
+    const farkleAlertRef = database.ref(`rooms/${currentRoomId}/farkleAlerts`);
+    farkleAlertRef.push({
+        playerId: playerId,
+        timestamp: Date.now()
+    }).then(() => {
+        console.log('💥 Farkle alert broadcast successfully');
+    }).catch((error) => {
+        console.error('❌ Error broadcasting farkle alert:', error);
+    });
+}
+
 // Reset all scores in the multiplayer room
 function resetAllScores() {
     if (!currentRoomId || !database) {
@@ -1404,6 +1499,16 @@ function cleanupFirebaseStateManager() {
         farkleStatesListener = null;
     }
     
+    if (hotDiceListener && currentRoomId) {
+        database.ref(`rooms/${currentRoomId}/hotDiceEvents`).off('child_added', hotDiceListener);
+        hotDiceListener = null;
+    }
+    
+    if (farkleAlertListener && currentRoomId) {
+        database.ref(`rooms/${currentRoomId}/farkleAlerts`).off('child_added', farkleAlertListener);
+        farkleAlertListener = null;
+    }
+    
     currentRoomId = null;
     currentPlayerId = null;
     currentPlayerName = null;
@@ -1442,6 +1547,8 @@ window.broadcastDiceResults = broadcastDiceResults;
 window.broadcastRollingStart = broadcastRollingStart;
 window.broadcastMaterialChange = broadcastMaterialChange;
 window.broadcastGameSettings = broadcastGameSettings;
+window.broadcastHotDice = broadcastHotDice;
+window.broadcastFarkleAlert = broadcastFarkleAlert;
 window.resetAllScores = resetAllScores;
 window.cleanupFirebaseStateManager = cleanupFirebaseStateManager;
 window.handlePlayerFarkle = handlePlayerFarkle;
@@ -1540,6 +1647,8 @@ if (typeof module !== 'undefined' && module.exports) {
         broadcastRollingStart,
         broadcastMaterialChange,
         broadcastGameSettings,
+        broadcastHotDice,
+        broadcastFarkleAlert,
         resetAllScores,
         cleanupFirebaseStateManager,
         clearAllLockedDiceFromFirebase,
