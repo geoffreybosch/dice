@@ -12,7 +12,17 @@
         <div class="row flex-grow-1">
             <!-- Responsive Sidebar -->
             <div class="col-12 col-lg-3 bg-dark text-white p-3 order-1 order-lg-1"> 
-                <div id="admin-section" class="mb-3">
+                <!-- Mobile Hamburger Menu Button -->
+                <button id="mobile-menu-toggle" class="btn btn-outline-light w-100 mb-3 d-lg-none" type="button">
+                    <div class="hamburger-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span class="ms-2">Menu</span>
+                </button>
+                
+                <div id="admin-section" class="mb-3 mobile-collapsible">
                     <div class="row g-2">
                         <div class="col-4 col-lg-12 mb-lg-2">
                             <button id="admin-button" class="btn btn-warning w-100 btn-sm btn-lg-normal" data-bs-toggle="modal" data-bs-target="#adminModal">Admin</button>
@@ -30,10 +40,10 @@
                         </div>
                     </div>
                 </div>
-                <div id="room-setup" class="mb-3" style="display: none;">
+                <div id="room-setup" class="mb-3 mobile-collapsible" style="display: none;">
                     <input type="text" id="room-name" class="form-control form-control-sm" placeholder="Enter room name">
                 </div>
-                <div id="player-setup" class="mb-3" style="display: none;">
+                <div id="player-setup" class="mb-3 mobile-collapsible" style="display: none;">
                     <input type="text" id="player-name" class="form-control form-control-sm mb-2" placeholder="Enter your name">
                     <div id="name-error" class="text-danger small mb-2" style="display: none;"></div>
                     <button id="join-room" class="btn btn-success w-100 btn-sm">Join Room</button>

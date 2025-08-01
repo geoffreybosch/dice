@@ -2683,5 +2683,38 @@ function onDiceResultsReceived(data) {
 window.showSpectatorHotDiceMessage = showSpectatorHotDiceMessage;
 window.showSpectatorFarkleMessage = showSpectatorFarkleMessage;
 
+    // Mobile hamburger menu functionality
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+            // Toggle the 'show' class on all mobile-collapsible sections
+            const collapsibleSections = document.querySelectorAll('.mobile-collapsible');
+            const hamburgerIcon = this.querySelector('.hamburger-icon');
+            
+            // Check if any section is currently visible
+            const isAnyVisible = Array.from(collapsibleSections).some(section => 
+                section.classList.contains('show')
+            );
+            
+            // Toggle all sections
+            collapsibleSections.forEach(section => {
+                if (isAnyVisible) {
+                    section.classList.remove('show');
+                } else {
+                    section.classList.add('show');
+                }
+            });
+            
+            // Toggle hamburger icon animation
+            if (hamburgerIcon) {
+                if (isAnyVisible) {
+                    hamburgerIcon.classList.remove('active');
+                } else {
+                    hamburgerIcon.classList.add('active');
+                }
+            }
+        });
+    }
+
 // Reinitialize the animation loop
 animate();
