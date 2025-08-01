@@ -478,15 +478,25 @@ class WelcomeModal {
     }
     
     showModalIfNeeded() {
-        // Always show the modal on page load unless explicitly dismissed in this session
+        // Check if player is actually connected to a room
+        const isConnectedToRoom = window.myPlayerId && window.roomId;
+        
+        // If not connected to a room, clear any previous dismissal
+        if (!isConnectedToRoom) {
+            sessionStorage.removeItem('welcomeModalDismissed');
+        }
+        
         // Check if the modal was already dismissed in this session
         const wasModalDismissed = sessionStorage.getItem('welcomeModalDismissed');
         
-        // Also check if user is clearly already in a room
+        // Also check if user is clearly already in a room (UI state)
         const playerListElement = document.querySelector('#player-list ul');
         const hasPlayersInList = playerListElement && playerListElement.children.length > 0;
         
-        if (!wasModalDismissed && !hasPlayersInList) {
+        // Show modal if:
+        // 1. Not dismissed in this session AND
+        // 2. Not connected to a room OR no players visible in UI
+        if (!wasModalDismissed && (!isConnectedToRoom || !hasPlayersInList)) {
             // Show the modal after a slight delay to ensure DOM is ready
             setTimeout(() => {
                 this.showChoiceScreen();
