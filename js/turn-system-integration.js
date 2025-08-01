@@ -736,25 +736,231 @@ function showWinModal(winner, winnerScore, sortedPlayers, scores) {
 }
 
 function setupWinModalHandlers() {
-    const newGameBtn = document.getElementById('new-game-btn');
-    const closeGameBtn = document.getElementById('close-game-btn');
+    const restartGameBtn = document.getElementById('restart-game-btn');
+    const leaveGameBtn = document.getElementById('leave-game-btn');
     
-    if (newGameBtn) {
-        newGameBtn.onclick = () => {
-            // Reload the page to start a new game
-            window.location.reload();
+    if (restartGameBtn) {
+        restartGameBtn.onclick = () => {
+            console.log('🔄 Restart Game button clicked');
+            restartMultiplayerGame();
         };
     }
     
-    if (closeGameBtn) {
-        closeGameBtn.onclick = () => {
-            // Close the modal (or redirect to a different page)
-            const winModal = bootstrap.Modal.getInstance(document.getElementById('winModal'));
-            if (winModal) {
-                winModal.hide();
+    if (leaveGameBtn) {
+        leaveGameBtn.onclick = () => {
+            console.log('🚪 Leave Game button clicked');
+            leaveMultiplayerGame();
+        };
+    }
+}
+
+function cleanupWinModal() {
+    console.log('🧹 Cleaning up win modal and backdrop');
+    
+    const winModal = bootstrap.Modal.getInstance(document.getElementById('winModal'));
+    if (winModal) {
+        winModal.hide();
+        
+        // Ensure backdrop is fully removed after modal is hidden
+        document.getElementById('winModal').addEventListener('hidden.bs.modal', function (event) {
+            // Remove any lingering backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+                console.log('🧹 Removed modal backdrop');
             }
-        };
+            // Restore body scroll
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            console.log('🧹 Restored body state');
+        }, { once: true });
+    } else {
+        // Fallback: force remove modal backdrop and restore body state
+        console.log('🧹 Modal instance not found, using fallback cleanup');
+        
+        const modalElement = document.getElementById('winModal');
+        if (modalElement) {
+            modalElement.style.display = 'none';
+            modalElement.classList.remove('show');
+            modalElement.setAttribute('aria-hidden', 'true');
+        }
+        
+        // Remove any lingering backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+            console.log('🧹 Removed modal backdrop (fallback)');
+        }
+        
+        // Restore body scroll
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        console.log('🧹 Restored body state (fallback)');
     }
+}
+
+function restartMultiplayerGame() {
+    console.log('🔄 === restartMultiplayerGame() START ===');
+    
+    // Check if we're in a multiplayer room
+    if (typeof roomId !== 'undefined' && roomId && typeof database !== 'undefined') {
+        const firebaseRoomId = (typeof currentRoomId !== 'undefined' && currentRoomId) ? currentRoomId : roomId;
+        const roomRef = database.ref(`rooms/${firebaseRoomId}/players`);
+        
+        console.log('🔄 Resetting all player scores in Firebase room:', firebaseRoomId);
+        
+        // Reset all player scores to 0 in Firebase
+        roomRef.once('value', (snapshot) => {
+            const players = snapshot.val();
+            if (players) {
+                const updates = {};
+                
+                // Reset score for all players in the room
+                for (const playerId in players) {
+                    updates[`${playerId}/score`] = 0;
+                    console.log(`🔄 Resetting score for player ${playerId}/${players[playerId].name}`);
+                }
+                
+                // Apply all score resets at once
+                roomRef.update(updates).then(() => {
+                    console.log('🔄 All player scores reset successfully in Firebase');
+                    
+                    // Reset local game state
+                    resetGameState();
+                    
+                    // Reset local player scores
+                    Object.keys(playerScores).forEach(playerName => {
+                        playerScores[playerName] = 0;
+                    });
+                    
+                    // Clear pending points
+                    pendingPoints = 0;
+                    currentTurnPoints = [];
+                    
+                    // Update UI
+                    updateScoreDisplayUI();
+                    updatePendingPointsDisplay();
+                    
+                    // Reset Firebase game state for the room
+                    const gameStateRef = database.ref(`rooms/${firebaseRoomId}/gameState`);
+                    gameStateRef.remove().then(() => {
+                        console.log('🔄 Firebase game state cleared');
+                    }).catch((error) => {
+                        console.warn('🔄 Could not clear Firebase game state:', error);
+                    });
+                    
+                    // Close the win modal properly with a small delay
+                    setTimeout(() => {
+                        cleanupWinModal();
+                        
+                        // Show success message after modal is closed
+                        setTimeout(() => {
+                            if (typeof showGameAlert === 'function') {
+                                showGameAlert(
+                                    '🔄 Game restarted! All scores have been reset to 0.',
+                                    'success',
+                                    4000
+                                );
+                            }
+                        }, 500);
+                    }, 100);
+                    
+                    console.log('🔄 Game restart completed successfully');
+                }).catch((error) => {
+                    console.error('🔄 Error resetting player scores:', error);
+                    if (typeof showGameAlert === 'function') {
+                        showGameAlert(
+                            '❌ Error restarting game. Please try again.',
+                            'danger',
+                            4000
+                        );
+                    }
+                });
+            } else {
+                console.error('🔄 No players found in Firebase room');
+            }
+        }).catch((error) => {
+            console.error('🔄 Error fetching players for restart:', error);
+            if (typeof showGameAlert === 'function') {
+                showGameAlert(
+                    '❌ Error restarting game. Please try again.',
+                    'danger',
+                    4000
+                );
+            }
+        });
+    } else {
+        // Single player mode - just reload the page
+        console.log('🔄 Single player mode - reloading page');
+        window.location.reload();
+    }
+    
+    console.log('🔄 === restartMultiplayerGame() END ===');
+}
+
+function leaveMultiplayerGame() {
+    console.log('🚪 === leaveMultiplayerGame() START ===');
+    
+    // Check if we're in a multiplayer room
+    if (typeof roomId !== 'undefined' && roomId && typeof database !== 'undefined') {
+        const firebaseRoomId = (typeof currentRoomId !== 'undefined' && currentRoomId) ? currentRoomId : roomId;
+        const myPlayerIdValue = (typeof window.myPlayerId !== 'undefined' && window.myPlayerId) || 
+                               (typeof myPlayerId !== 'undefined' && myPlayerId) ||
+                               (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId);
+        
+        if (myPlayerIdValue) {
+            console.log(`🚪 Removing player ${myPlayerIdValue} from Firebase room: ${firebaseRoomId}`);
+            
+            // Remove this player from Firebase
+            const playerRef = database.ref(`rooms/${firebaseRoomId}/players/${myPlayerIdValue}`);
+            
+            playerRef.remove().then(() => {
+                console.log('🚪 Player successfully removed from Firebase room');
+                
+                // Close the win modal properly
+                cleanupWinModal();
+                
+                // Clear local state
+                resetGameState();
+                playerScores = {};
+                pendingPoints = 0;
+                currentTurnPoints = [];
+                
+                // Use Firebase room manager to leave the room if available
+                if (typeof leaveRoom === 'function') {
+                    console.log('🚪 Using Firebase room manager to leave room');
+                    leaveRoom();
+                } else {
+                    // Fallback: redirect to welcome page or reload
+                    console.log('🚪 Fallback: reloading page to exit room');
+                    window.location.reload();
+                }
+                
+                console.log('🚪 Successfully left the game');
+            }).catch((error) => {
+                console.error('🚪 Error removing player from Firebase room:', error);
+                if (typeof showGameAlert === 'function') {
+                    showGameAlert(
+                        '❌ Error leaving game. Please try again.',
+                        'danger',
+                        4000
+                    );
+                }
+            });
+        } else {
+            console.error('🚪 No player ID found for leaving game');
+            // Fallback: just reload the page
+            window.location.reload();
+        }
+    } else {
+        // Single player mode or no Firebase - just reload the page
+        console.log('🚪 Single player mode or no Firebase - reloading page');
+        window.location.reload();
+    }
+    
+    console.log('🚪 === leaveMultiplayerGame() END ===');
 }
 
 function resetGameState() {
@@ -1241,6 +1447,10 @@ if (typeof module !== 'undefined' && module.exports) {
         checkFinalRoundProgress,
         endGame,
         showWinModal,
+        setupWinModalHandlers,
+        cleanupWinModal,
+        restartMultiplayerGame,
+        leaveMultiplayerGame,
         resetGameState,
         updateWinGameState,
         checkIfGameEndedAndShowModal,

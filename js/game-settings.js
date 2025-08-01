@@ -4,7 +4,7 @@
 // Default game settings
 const DEFAULT_GAME_SETTINGS = {
     threeOnesRule: 300,    // Points for three 1s (300 or 1000)
-    winningScore: 50,    // Points needed to win
+    winningScore: 10000,    // Points needed to win
     minimumScore: 500       // Minimum score to get "on the board"
 };
 
