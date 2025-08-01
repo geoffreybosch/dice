@@ -986,6 +986,21 @@ function setupDiceResultsListener() {
         
         if (diceData && diceData.playerId !== currentPlayerId) {
             console.log(`🎲 Processing dice results from other player ${diceData.playerId}`);
+            
+            // Stop rolling animation for this player since dice results are now available
+            if (typeof window.otherPlayersRolling !== 'undefined') {
+                window.otherPlayersRolling.delete(diceData.playerId);
+                console.log(`🎲 Removed ${diceData.playerId} from rolling players - dice results received`);
+                
+                // Stop animation interval if no players are rolling
+                if (window.otherPlayerAnimationInterval !== null && 
+                    window.otherPlayersRolling.size === 0) {
+                    clearInterval(window.otherPlayerAnimationInterval);
+                    window.otherPlayerAnimationInterval = null;
+                    console.log('🎲 Stopped rolling animation - no more players rolling');
+                }
+            }
+            
             // Call the existing onDiceResultsReceived function
             if (typeof onDiceResultsReceived === 'function') {
                 onDiceResultsReceived({
