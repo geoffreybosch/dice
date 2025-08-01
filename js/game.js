@@ -43,6 +43,7 @@ ensureArraysInitialized();
 
 // Store locked dice state for each player (for spectating functionality)
 let playerLockedDiceStates = {};
+let playerLockedDiceValues = {}; // Store actual dice values for locked dice
 // Make it accessible globally for debugging
 window.playerLockedDiceStates = playerLockedDiceStates;
 
@@ -410,11 +411,12 @@ function displayDiceResults(results) {
 
 // Function to display other players' dice results
 function displayOtherPlayerResults(playerId, diceResults) {
-    // console.log(`🎲 [displayOtherPlayerResults] Called for ${playerId} with results:`, diceResults);
-    // console.log(`🎲 [displayOtherPlayerResults] Current stored locked states:`, JSON.stringify(playerLockedDiceStates));
+    console.log(`🎲 [displayOtherPlayerResults] Called for ${playerId} with results:`, diceResults);
+    console.log(`🎲 [displayOtherPlayerResults] Current stored locked states:`, JSON.stringify(playerLockedDiceStates));
     
     // Don't interrupt our own rolling animation
     if (isRolling && (playerId === myPlayerId || playerId === window.myPlayerId)) {
+        console.log(`🎲 [displayOtherPlayerResults] Skipping - currently rolling for same player`);
         return;
     }
     
@@ -448,11 +450,9 @@ function displayOtherPlayerResults(playerId, diceResults) {
         
         // Check if this dice is locked for this player and apply red glow
         const playerLockedDice = playerLockedDiceStates[playerId] || [];
-        // console.log(`🔒 [displayOtherPlayerResults] Checking dice ${index} for ${playerId}, locked dice:`, playerLockedDice);
         if (safeIncludes(playerLockedDice, index)) {
             diceImage.classList.add('locked');
             diceImage.title = `${playerId}'s dice ${index + 1} (value: ${result}) - LOCKED`;
-            // console.log(`🔒 [displayOtherPlayerResults] Applied locked styling to dice ${index} for ${playerId}`);
         }
         
         // Add error handling for missing images
@@ -466,7 +466,7 @@ function displayOtherPlayerResults(playerId, diceResults) {
     
     diceResultsContainer.appendChild(diceContainer);
     
-    // console.log(`🎲 Displayed dice results for ${playerId} with locked dice:`, playerLockedDiceStates[playerId] || []);
+    console.log(`🎲 [displayOtherPlayerResults] Displayed dice results for ${playerId} with locked dice:`, playerLockedDiceStates[playerId] || []);
     
     // Hide dice selection controls when showing other player's results (not interactive)
     const diceSelectionControls = document.getElementById('dice-selection-controls');
@@ -539,7 +539,7 @@ window.lockedDiceStylingDisabled = false;
 function displayOtherPlayerLockedDice(data) {
     // Check if locked dice styling is temporarily disabled
     if (window.lockedDiceStylingDisabled) {
-        // console.log('🔒 [displayOtherPlayerLockedDice] Locked dice styling is temporarily disabled, skipping');
+        console.log('🔒 [displayOtherPlayerLockedDice] Locked dice styling is temporarily disabled, skipping');
         return;
     }
     
@@ -549,26 +549,41 @@ function displayOtherPlayerLockedDice(data) {
     ensureArraysInitialized();
     const validLockedDiceIndices = Array.isArray(lockedDiceIndices) ? lockedDiceIndices : [];
     
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, validLockedDiceIndices);
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
+    console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, validLockedDiceIndices);
+    console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
     
     // Store the locked dice state for this player
     playerLockedDiceStates[playerId] = validLockedDiceIndices;
     window.playerLockedDiceStates = playerLockedDiceStates;
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
+    
+    // Store the dice values for locked dice
+    if (diceResults && Array.isArray(diceResults)) {
+        if (!playerLockedDiceValues[playerId]) {
+            playerLockedDiceValues[playerId] = {};
+        }
+        validLockedDiceIndices.forEach(index => {
+            if (diceResults[index]) {
+                playerLockedDiceValues[playerId][index] = diceResults[index];
+            }
+        });
+        window.playerLockedDiceValues = playerLockedDiceValues;
+        console.log(`🔒 [displayOtherPlayerLockedDice] Stored dice values for ${playerId}:`, playerLockedDiceValues[playerId]);
+    }
+    
+    console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
+    console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
     
     // Only show locked indicators if the dice results are currently displayed for this player
     const diceResultsContainer = document.getElementById('dice-results-container');
     if (!diceResultsContainer) {
-        // console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
+        console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
         return;
     }
     
     // Check if we're currently showing this player's results
     const header = diceResultsContainer.querySelector('div strong');
     if (!header || !header.textContent.includes(playerId)) {
-        // console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
+        console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
         // console.log(`🔒 [displayOtherPlayerLockedDice] Header text:`, header?.textContent);
         return;
     }
@@ -658,22 +673,31 @@ function updateSelectionControls() {
     
     // Update lock button
     if (lockButton) {
-        lockButton.disabled = !hasSelection;
-        
         if (!hasSelection) {
+            lockButton.disabled = true;
             lockButton.textContent = 'Lock Selected Dice';
             lockButton.className = 'btn btn-secondary me-2'; // Grey out when disabled
         } else {
-            lockButton.className = 'btn btn-success me-2'; // Green when enabled
-            
             // Calculate potential points for selected dice using comprehensive scoring
             const selectedDiceValues = selectedDiceIndices.map(index => currentDiceResults[index]);
             const scoreResult = calculateSelectedDiceScore(selectedDiceValues);
             
-            if (scoreResult.points > 0) {
+            // Check if selection is valid (all dice contribute to score)
+            const canLockSelection = scoreResult.isValid;
+            
+            lockButton.disabled = !canLockSelection;
+            
+            if (canLockSelection) {
+                lockButton.className = 'btn btn-success me-2'; // Green when valid
                 lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (${scoreResult.points} pts)`;
             } else {
-                lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (0 pts)`;
+                lockButton.className = 'btn btn-danger me-2'; // Red when invalid
+                
+                if (scoreResult.points === 0) {
+                    lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (No Points)`;
+                } else {
+                    lockButton.textContent = `Lock ${selectedDiceIndices.length} Dice (Some Don't Score)`;
+                }
             }
         }
     }
@@ -711,9 +735,13 @@ function lockSelectedDice() {
     const selectedDiceValues = selectedDiceIndices.map(index => currentDiceResults[index]);
     const scoreResult = calculateSelectedDiceScore(selectedDiceValues);
     
-    // Prevent locking dice that don't score any points
-    if (!scoreResult.isValid || scoreResult.points === 0) {
-        alert(`You can only lock dice that score points. Selected dice: ${scoreResult.description || 'No scoring combination'}`);
+    // Prevent locking dice unless ALL selected dice contribute to the score
+    if (!scoreResult.isValid) {
+        if (scoreResult.points === 0) {
+            alert(`You can only lock dice that score points. Selected dice: ${scoreResult.description || 'No scoring combination'}`);
+        } else {
+            alert(`All selected dice must contribute to the score. Some of your selected dice don't score points.`);
+        }
         return;
     }
     
@@ -748,9 +776,16 @@ function lockSelectedDice() {
     
     // Broadcast locked dice state to other players in multiplayer mode
     if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
+        console.log('🔒 Broadcasting locked dice:', myPlayerId, lockedDiceIndices, currentDiceResults);
         broadcastLockedDice(myPlayerId, lockedDiceIndices, currentDiceResults);
         // Also store the state locally for consistency
         playerLockedDiceStates[myPlayerId] = lockedDiceIndices;
+    } else {
+        console.log('🔒 Not broadcasting locked dice - conditions not met:', {
+            isInMultiplayerRoom,
+            hasBroadcastFunction: typeof broadcastLockedDice === 'function',
+            myPlayerId
+        });
     }
     
     // Re-display results without locked dice
@@ -1521,6 +1556,13 @@ function displayRollingDiceAnimation() {
 
 // Function to display rolling animation for other players
 function displayOtherPlayerRollingAnimation(playerId) {
+    // Only log once per player when animation starts, not every frame
+    if (!this.loggedPlayers) this.loggedPlayers = new Set();
+    if (!this.loggedPlayers.has(playerId)) {
+        console.log(`🎲 [displayOtherPlayerRollingAnimation] Starting animation for player: ${playerId}`);
+        this.loggedPlayers.add(playerId);
+    }
+    
     // Don't interrupt our own rolling animation
     if (isRolling && (playerId === myPlayerId || playerId === window.myPlayerId)) {
         return;
@@ -1581,16 +1623,22 @@ function displayOtherPlayerRollingAnimation(playerId) {
     // Update existing dice images
     const diceImages = diceContainer.querySelectorAll('img');
     const playerLockedDice = playerLockedDiceStates[playerId] || [];
+    // Only log locked dice state once per player, not every animation frame
+    if (!this.loggedLockedDice) this.loggedLockedDice = new Set();
+    if (!this.loggedLockedDice.has(playerId)) {
+        console.log(`🎲 [displayOtherPlayerRollingAnimation] Player ${playerId} locked dice:`, playerLockedDice);
+        this.loggedLockedDice.add(playerId);
+    }
     
     diceImages.forEach((diceImage, index) => {
         if (safeIncludes(playerLockedDice, index)) {
-            // Show locked dice with their actual values and locked styling
-            // For other players, we might not have their current results, so use a default
-            const lockedValue = 1; // Default value since we may not have their results stored
+            // Show locked dice with their actual values if available
+            const playerDiceValues = playerLockedDiceValues[playerId] || {};
+            const lockedValue = playerDiceValues[index] || 1; // Use stored value or default to 1
             diceImage.src = `assets/dice${lockedValue}.png`;
             diceImage.alt = `${playerId}'s Locked Dice ${index + 1}: ${lockedValue}`;
             diceImage.className = 'locked'; // Reset classes
-            diceImage.title = `${playerId}'s dice ${index + 1} is locked`;
+            diceImage.title = `${playerId}'s dice ${index + 1} is locked (value: ${lockedValue})`;
         } else {
             // Show cycling animation for dice being rolled
             // Offset each dice by its index so they don't all show the same face
@@ -1747,7 +1795,15 @@ function updateDiceResults() {
         
         // Broadcast dice results to other players if in multiplayer room
         if (isInMultiplayerRoom && typeof broadcastDiceResults === 'function' && myPlayerId) {
+            console.log('🎲 Broadcasting final dice results:', results);
             broadcastDiceResults(myPlayerId, results);
+        } else {
+            console.log('🎲 Not broadcasting dice results - conditions not met:', {
+                isInMultiplayerRoom,
+                hasBroadcastFunction: typeof broadcastDiceResults === 'function',
+                myPlayerId,
+                results
+            });
         }
         
         // console.log('Settlement delay completed. Final results:', results);
@@ -1806,16 +1862,36 @@ if (rollDiceButton) {
         
         // Broadcast dice results to other players if in multiplayer room
         if (isInMultiplayerRoom && typeof broadcastDiceResults === 'function' && myPlayerId) {
+            console.log('🎲 Broadcasting manual stop dice results:', results);
             broadcastDiceResults(myPlayerId, results);
+        } else {
+            console.log('🎲 Not broadcasting manual stop dice results - conditions not met:', {
+                isInMultiplayerRoom,
+                hasBroadcastFunction: typeof broadcastDiceResults === 'function',
+                myPlayerId,
+                results
+            });
         }
         
-        // console.log('Rolling stopped manually. Current results:', results);
+        console.log('🎲 Rolling stopped manually. Current results:', results);
         return;
     }
     
     // Set Firebase state to rolling when starting to roll
     if (typeof startMyTurn === 'function') {
         startMyTurn();
+    }
+    
+    // Broadcast rolling start to other players for spectator animation
+    if (isInMultiplayerRoom && typeof broadcastRollingStart === 'function' && myPlayerId) {
+        console.log('🎲 Broadcasting rolling start for player:', myPlayerId);
+        broadcastRollingStart(myPlayerId);
+    } else {
+        console.log('🎲 Not broadcasting rolling start - conditions not met:', {
+            isInMultiplayerRoom,
+            hasBroadcastFunction: typeof broadcastRollingStart === 'function',
+            myPlayerId
+        });
     }
     
     const energy = parseFloat(energySlider.value); // Get energy from slider

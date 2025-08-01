@@ -672,15 +672,25 @@ function broadcastMaterialChange(playerId, diceType, floorType) {
 function onDiceResultsReceived(data) {
     const { playerId, diceResults } = data;
     
-    // console.log(`Received dice results from ${playerId}:`, diceResults);
+    console.log(`🎲 onDiceResultsReceived - Player ${playerId}:`, diceResults);
     
     // Stop rolling animation for this player when they finish rolling
     if (typeof window.otherPlayersRolling !== 'undefined') {
+        console.log('🎲 Stopping rolling animation for player:', playerId);
         window.otherPlayersRolling.delete(playerId);
+        
+        // Clear logged players when animation stops
+        if (typeof displayOtherPlayerRollingAnimation.loggedPlayers !== 'undefined') {
+            displayOtherPlayerRollingAnimation.loggedPlayers.delete(playerId);
+        }
+        if (typeof displayOtherPlayerRollingAnimation.loggedLockedDice !== 'undefined') {
+            displayOtherPlayerRollingAnimation.loggedLockedDice.delete(playerId);
+        }
         
         // Stop animation interval if no players are rolling
         if (window.otherPlayerAnimationInterval !== null && 
             window.otherPlayersRolling.size === 0) {
+            console.log('🎲 Clearing animation interval - no more rolling players');
             clearInterval(window.otherPlayerAnimationInterval);
             window.otherPlayerAnimationInterval = null;
         }
@@ -690,10 +700,12 @@ function onDiceResultsReceived(data) {
     const myId = typeof myPlayerId !== 'undefined' ? myPlayerId : (typeof window.myPlayerId !== 'undefined' ? window.myPlayerId : null);
     
     if (playerId !== myId) {
+        console.log('🎲 Displaying other player results');
         // Update the dice display to show the other player's results
         if (typeof displayOtherPlayerResults === 'function') {
             displayOtherPlayerResults(playerId, diceResults);
         } else {
+            console.log('🎲 displayOtherPlayerResults function not available, using fallback');
             // Fallback: update the dice results container with a simple display
             const diceResultsContainer = document.getElementById('dice-results-container');
             if (diceResultsContainer) {

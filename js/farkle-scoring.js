@@ -2,6 +2,26 @@
 // This file contains all official Farkle scoring rules and calculations
 
 /**
+ * Calculate score for selected dice and validate that ALL dice contribute
+ * @param {Array} selectedDice - Array of selected dice values
+ * @returns {Object} - {points: number, description: string, isValid: boolean, scoringDice: Array}
+ */
+function calculateSelectedDiceScore(selectedDice) {
+    const result = calculateFarkleScore(selectedDice);
+    
+    // For selected dice, we need to ensure ALL selected dice contribute to the score
+    // Not just that the total points > 0, but that every die contributes
+    const isValid = result.points > 0 && result.scoringDice.length === selectedDice.length;
+    
+    return {
+        points: result.points,
+        description: result.description,
+        isValid: isValid,
+        scoringDice: result.scoringDice
+    };
+}
+
+/**
  * Calculate points for a set of dice using complete Farkle rules
  * @param {Array} diceValues - Array of dice values (1-6)
  * @returns {Object} - {points: number, description: string, scoringDice: Array}
@@ -164,23 +184,7 @@ function calculateFarkleScore(diceValues) {
     };
 }
 
-/**
- * Calculate points for selected dice (subset of roll)
- * @param {Array} selectedDice - Array of selected dice values
- * @returns {Object} - {points: number, description: string, isValid: boolean}
- */
-function calculateSelectedDiceScore(selectedDice) {
-    const result = calculateFarkleScore(selectedDice);
-    
-    // For selected dice, we need to ensure they actually score points
-    const isValid = result.points > 0;
-    
-    return {
-        points: result.points,
-        description: result.description,
-        isValid: isValid
-    };
-}
+
 
 /**
  * Check if a roll is a Farkle (no scoring dice)

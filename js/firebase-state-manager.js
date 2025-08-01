@@ -38,6 +38,7 @@ let gameStateListener = null;
 let playersStateListener = null;
 let gameSettingsListener = null;
 let diceResultsListener = null;
+let rollingStartListener = null;
 let diceSelectionsListener = null;
 let lockedDiceListener = null;
 let materialChangesListener = null;
@@ -108,6 +109,7 @@ function initializeFirebaseStateManager(roomId, playerId, playerName) {
     setupPlayersStateListener();
     setupGameSettingsListener();
     setupDiceResultsListener();
+    setupRollingStartListener();
     setupDiceSelectionsListener();
     setupLockedDiceListener();
     setupMaterialChangesListener();
@@ -337,30 +339,7 @@ function updatePlayerListUI(players) {
             case PLAYER_STATES.ROLLING:
                 stateIndicator.classList.add('bg-success');
                 stateIndicator.textContent = '🎲 Rolling';
-                
-                // Show rolling animation for other players (not the current player)
-                if (playerId !== currentPlayerId) {
-                    if (typeof displayOtherPlayerRollingAnimation === 'function') {
-                        displayOtherPlayerRollingAnimation(playerId);
-                    }
-                    
-                    // Add to rolling players set and start animation interval if needed
-                    if (typeof window.otherPlayersRolling !== 'undefined') {
-                        window.otherPlayersRolling.add(playerId);
-                        
-                        // Start animation interval if not already running
-                        if (window.otherPlayerAnimationInterval === null && 
-                            window.otherPlayersRolling.size > 0) {
-                            window.otherPlayerAnimationInterval = setInterval(() => {
-                                if (window.otherPlayersRolling.size > 0 && typeof displayOtherPlayerRollingAnimation === 'function') {
-                                    // Get the first rolling player (in a real game you might want to track who's currently active)
-                                    const rollingPlayer = Array.from(window.otherPlayersRolling)[0];
-                                    displayOtherPlayerRollingAnimation(rollingPlayer);
-                                }
-                            }, 150);
-                        }
-                    }
-                }
+                // Note: Rolling animation now starts only when broadcastRollingStart is received
                 break;
             case PLAYER_STATES.ENDED_TURN:
                 stateIndicator.classList.add('bg-warning', 'text-dark');
@@ -1003,9 +982,10 @@ function setupDiceResultsListener() {
     
     diceResultsListener = diceResultsRef.on('child_added', (snapshot) => {
         const diceData = snapshot.val();
-        // console.log('🎲 Dice results received:', diceData);
+        console.log('🎲 Dice results received:', diceData);
         
         if (diceData && diceData.playerId !== currentPlayerId) {
+            console.log(`🎲 Processing dice results from other player ${diceData.playerId}`);
             // Call the existing onDiceResultsReceived function
             if (typeof onDiceResultsReceived === 'function') {
                 onDiceResultsReceived({
@@ -1013,6 +993,46 @@ function setupDiceResultsListener() {
                     diceResults: diceData.diceResults
                 });
             }
+        } else {
+            console.log('🎲 Ignoring dice results - same player or invalid data');
+        }
+    });
+}
+
+// Set up listener for rolling start events
+function setupRollingStartListener() {
+    if (!currentRoomId) return;
+    
+    const rollingStartRef = database.ref(`rooms/${currentRoomId}/rollingStart`);
+    
+    rollingStartListener = rollingStartRef.on('child_added', (snapshot) => {
+        const rollingData = snapshot.val();
+        console.log('🎲 Rolling start received:', rollingData);
+        
+        if (rollingData && rollingData.playerId !== currentPlayerId) {
+            console.log(`🎲 Starting animation for spectator - player ${rollingData.playerId} started rolling`);
+            // Start rolling animation for spectators
+            if (typeof window.otherPlayersRolling !== 'undefined') {
+                window.otherPlayersRolling.add(rollingData.playerId);
+                console.log('🎲 Added to otherPlayersRolling set:', window.otherPlayersRolling);
+                
+                // Start animation interval if not already running
+                if (window.otherPlayerAnimationInterval === null && 
+                    window.otherPlayersRolling.size > 0) {
+                    console.log('🎲 Starting animation interval for spectators');
+                    window.otherPlayerAnimationInterval = setInterval(() => {
+                        if (window.otherPlayersRolling.size > 0 && typeof displayOtherPlayerRollingAnimation === 'function') {
+                            // Get the first rolling player
+                            const rollingPlayer = Array.from(window.otherPlayersRolling)[0];
+                            displayOtherPlayerRollingAnimation(rollingPlayer);
+                        }
+                    }, 150);
+                } else {
+                    console.log('🎲 Animation interval already running or no rolling players');
+                }
+            }
+        } else {
+            console.log('🎲 Ignoring rolling start - same player or invalid data');
         }
     });
 }
@@ -1049,25 +1069,25 @@ function setupLockedDiceListener() {
     lockedDiceListener = lockedDiceRef.on('child_added', (snapshot) => {
         try {
             const lockedData = snapshot.val();
-            // console.log('🔒 Locked dice received:', lockedData);
-            // console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
+            console.log('🔒 Locked dice received:', lockedData);
+            console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
             
             if (lockedData && lockedData.playerId !== currentPlayerId) {
-                // console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
-                // console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
-                // console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
+                console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
+                console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
+                console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
                 
                 // Call function to display other players' locked dice
                 if (typeof displayOtherPlayerLockedDice === 'function') {
-                    // console.log('🔒 Calling displayOtherPlayerLockedDice...');
+                    console.log('🔒 Calling displayOtherPlayerLockedDice...');
                     displayOtherPlayerLockedDice({
                         playerId: lockedData.playerId,
                         lockedDiceIndices: lockedData.lockedDiceIndices,
                         diceResults: lockedData.diceResults
                     });
-                    // console.log('🔒 displayOtherPlayerLockedDice call completed');
+                    console.log('🔒 displayOtherPlayerLockedDice call completed');
                 } else {
-                    // console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
+                    console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
                     // console.error('🔒 Available functions in window:', Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('display')));
                 }
                 
@@ -1149,7 +1169,7 @@ function setupFarkleStatesListener() {
 function broadcastDiceResults(playerId, diceResults) {
     if (!currentRoomId || !database) return;
     
-    // console.log(`🎲 Broadcasting dice results via Firebase for ${playerId}:`, diceResults);
+    console.log(`🎲 Broadcasting dice results via Firebase for ${playerId}:`, diceResults);
     
     const diceResultsRef = database.ref(`rooms/${currentRoomId}/diceResults`);
     diceResultsRef.push({
@@ -1157,9 +1177,26 @@ function broadcastDiceResults(playerId, diceResults) {
         diceResults: diceResults,
         timestamp: Date.now()
     }).then(() => {
-        // console.log('🎲 Dice results broadcast successfully');
+        console.log('🎲 Dice results broadcast successfully');
     }).catch((error) => {
-        // console.error('❌ Error broadcasting dice results:', error);
+        console.error('❌ Error broadcasting dice results:', error);
+    });
+}
+
+// Broadcast when rolling starts via Firebase
+function broadcastRollingStart(playerId) {
+    if (!currentRoomId || !database) return;
+    
+    console.log(`🎲 Broadcasting rolling start via Firebase for ${playerId}`);
+    
+    const rollingStartRef = database.ref(`rooms/${currentRoomId}/rollingStart`);
+    rollingStartRef.push({
+        playerId: playerId,
+        timestamp: Date.now()
+    }).then(() => {
+        console.log('🎲 Rolling start broadcast successfully');
+    }).catch((error) => {
+        console.error('❌ Error broadcasting rolling start:', error);
     });
 }
 
@@ -1186,7 +1223,7 @@ function broadcastDiceSelection(playerId, selectedDiceIndices, diceResults) {
 function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
     if (!currentRoomId || !database) return;
     
-    // console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
+    console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
     
     const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
     lockedDiceRef.push({
@@ -1195,9 +1232,9 @@ function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
         diceResults: diceResults, // Include current dice results for context
         timestamp: Date.now()
     }).then(() => {
-        // console.log('🔒 Locked dice broadcast successfully');
+        console.log('🔒 Locked dice broadcast successfully');
     }).catch((error) => {
-        // console.error('❌ Error broadcasting locked dice:', error);
+        console.error('❌ Error broadcasting locked dice:', error);
     });
 }
 
@@ -1327,6 +1364,11 @@ function cleanupFirebaseStateManager() {
         diceResultsListener = null;
     }
     
+    if (rollingStartListener && currentRoomId) {
+        database.ref(`rooms/${currentRoomId}/rollingStart`).off('child_added', rollingStartListener);
+        rollingStartListener = null;
+    }
+    
     if (diceSelectionsListener && currentRoomId) {
         database.ref(`rooms/${currentRoomId}/diceSelections`).off('child_added', diceSelectionsListener);
         diceSelectionsListener = null;
@@ -1382,6 +1424,7 @@ window.startMyTurn = startMyTurn;
 window.endMyTurn = endMyTurn;
 window.handlePlayerBanking = handlePlayerBanking;
 window.broadcastDiceResults = broadcastDiceResults;
+window.broadcastRollingStart = broadcastRollingStart;
 window.broadcastMaterialChange = broadcastMaterialChange;
 window.broadcastGameSettings = broadcastGameSettings;
 window.resetAllScores = resetAllScores;
@@ -1479,6 +1522,7 @@ if (typeof module !== 'undefined' && module.exports) {
         endMyTurn,
         handlePlayerBanking,
         broadcastDiceResults,
+        broadcastRollingStart,
         broadcastMaterialChange,
         broadcastGameSettings,
         resetAllScores,
