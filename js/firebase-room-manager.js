@@ -229,10 +229,20 @@ function handleRoomJoinClick() {
             }
         }).catch((error) => {
             // console.error('Error adding player:', error);
+            // Dispatch failure event for welcome modal
+            document.dispatchEvent(new CustomEvent('roomJoinError', { 
+                detail: { error: error.message || 'Failed to join room' }
+            }));
+            throw error; // Re-throw so welcome modal can handle it
         });
 
         hideInputsShowDisplay(displayRoomName, playerName); // Use original capitalization for display
         createLeaveRoomButton();
+        
+        // Dispatch success event for welcome modal
+        document.dispatchEvent(new CustomEvent('roomJoined', { 
+            detail: { roomId, playerId: playerName, roomName: displayRoomName }
+        }));
 
         // Listen for player list changes
         roomRef.child('players').on('value', (snapshot) => {
@@ -338,15 +348,19 @@ function createLeaveRoomButton() {
     if (!leaveRoomButton) {
         leaveRoomButton = document.createElement('button');
         leaveRoomButton.id = 'leave-room';
-        leaveRoomButton.textContent = 'Leave Room';
-        leaveRoomButton.className = 'btn btn-danger w-100';
+        leaveRoomButton.textContent = '🚪 Leave Room';
+        leaveRoomButton.className = 'btn btn-danger w-100 btn-sm btn-lg-normal';
         leaveRoomButton.style.marginTop = '10px';
 
         leaveRoomButton.addEventListener('click', () => {
-            if (confirm('Are you sure you want to leave the room?')) {
-                leaveRoom();
-            }
+            leaveRoom();
         });
+        
+        // Add the button to the player list container
+        const playerListContainer = document.getElementById('player-list');
+        if (playerListContainer) {
+            playerListContainer.appendChild(leaveRoomButton);
+        }
     }
 }
 
@@ -357,25 +371,67 @@ function leaveRoom() {
     const roomRef = database.ref(`rooms/${roomId}`);
     const playerRef = roomRef.child(`players/${window.myPlayerId}`);
 
-    playerRef.remove().then(() => {
-        // Reset state
+    // Only update connection status, don't remove player data
+    playerRef.update({
+        isConnected: false,
+        lastConnectionUpdate: Date.now()
+    }).then(() => {
+        // Clean up Firebase state manager
+        if (typeof cleanupFirebaseStateManager === 'function') {
+            cleanupFirebaseStateManager();
+        }
+        
+        // Reset local state
         roomId = null;
         displayRoomName = null;
         isHost = false;
         hostId = null;
+        window.myPlayerId = null;
         
         // Clear room parameter from URL
         setURLParameter('room', null);
         
-        showInputsHideDisplay();
+        // Hide room display and player list
+        const roomNameDisplay = document.getElementById('room-name-display');
+        const playerListContainer = document.getElementById('player-list');
+        const playerListTitle = document.getElementById('player-list-title');
+        const playerListTitleMobile = document.getElementById('player-list-title-mobile');
+        
+        if (roomNameDisplay) roomNameDisplay.style.display = 'none';
+        if (playerListContainer) {
+            playerListContainer.style.display = 'none';
+            const playerListElement = playerListContainer.querySelector('ul');
+            if (playerListElement) {
+                playerListElement.innerHTML = '';
+            }
+        }
+        if (playerListTitle) playerListTitle.style.display = 'none';
+        if (playerListTitleMobile) playerListTitleMobile.style.display = 'none';
         
         // Remove the desktop leave button if it exists
         if (leaveRoomButton && leaveRoomButton.parentNode) {
             leaveRoomButton.parentNode.removeChild(leaveRoomButton);
             leaveRoomButton = null;
         }
+        
+        // Enable welcome modal to show again for the next room join
+        if (window.welcomeModal) {
+            window.welcomeModal.enableModalForNewSession();
+            // Reset the welcome modal's join button state
+            setTimeout(() => {
+                window.welcomeModal.validateInputs();
+            }, 100);
+            window.welcomeModal.forceShow();
+        }
+        
+        // Dispatch event for other components that might need to know about leaving
+        document.dispatchEvent(new CustomEvent('roomLeft', { 
+            detail: { playerId: window.myPlayerId }
+        }));
+        
     }).catch((error) => {
-        // console.error('Error leaving room:', error);
+        console.error('Error leaving room:', error);
+        alert('Failed to leave room. Please try refreshing the page.');
     });
 }
 

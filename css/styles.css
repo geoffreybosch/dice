@@ -297,3 +297,198 @@ canvas {
         display: none !important;
     }
 }
+
+/* Welcome Modal Styling */
+#welcomeModal .modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+#welcomeModal .modal-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+#welcomeModal .modal-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+#welcomeModal .modal-body {
+    padding: 2rem;
+    background-color: #f8f9fa;
+}
+
+#welcomeModal .form-label {
+    font-size: 1.1rem;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+#welcomeModal .form-control-lg {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+#welcomeModal .form-control-lg:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+#welcomeModal .btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#welcomeModal .btn-success:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    background: linear-gradient(135deg, #218838, #1e7e34);
+}
+
+#welcomeModal .btn-success:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Choice buttons styling */
+#host-game-btn, #join-game-btn {
+    min-height: 120px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#host-game-btn:hover, #join-game-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+#host-game-btn {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+}
+
+#host-game-btn:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+#join-game-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+}
+
+#join-game-btn:hover {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+}
+
+/* Form buttons styling */
+#welcome-host-room, #welcome-join-room {
+    border-radius: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#welcome-back-btn, #welcome-join-back-btn {
+    border-radius: 20px;
+    min-width: 80px;
+}
+
+#welcomeModal .alert-info {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    border: 1px solid #bee5eb;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+#welcomeModal .form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Welcome modal animations */
+#welcomeModal.fade .modal-dialog {
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+    transform: translate(0, -50px) scale(0.9);
+}
+
+#welcomeModal.show .modal-dialog {
+    transform: translate(0, 0) scale(1);
+}
+
+/* Error message styling in welcome modal */
+#welcome-name-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #f5c6cb;
+    font-weight: 500;
+}
+
+/* Loading state for join button */
+#welcome-join-room .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Mobile responsiveness for welcome modal */
+@media (max-width: 576px) {
+    #welcomeModal .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    #welcomeModal .modal-body {
+        padding: 1.5rem;
+    }
+    
+    #welcomeModal .modal-title {
+        font-size: 1.5rem;
+    }
+    
+    #welcomeModal .btn-success {
+        font-size: 1rem;
+        padding: 0.65rem 1.5rem;
+    }
+}
+
+/* Leave Room Button Styling */
+#leave-room {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+#leave-room:hover {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+#leave-room:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
