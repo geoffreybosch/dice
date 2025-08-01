@@ -736,15 +736,7 @@ function showWinModal(winner, winnerScore, sortedPlayers, scores) {
 }
 
 function setupWinModalHandlers() {
-    const restartGameBtn = document.getElementById('restart-game-btn');
     const leaveGameBtn = document.getElementById('leave-game-btn');
-    
-    if (restartGameBtn) {
-        restartGameBtn.onclick = () => {
-            console.log('🔄 Restart Game button clicked');
-            restartMultiplayerGame();
-        };
-    }
     
     if (leaveGameBtn) {
         leaveGameBtn.onclick = () => {
