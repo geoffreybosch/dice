@@ -1244,3 +1244,86 @@ canvas {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
+
+/* Win Modal Enhancements */
+#winModal .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+#winModal .modal-header {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    padding: 2rem;
+    position: relative;
+}
+
+#winModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="20">🎉</text></svg>') repeat;
+    opacity: 0.1;
+}
+
+#winModal .modal-title {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+#winModal .modal-body {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 2rem;
+}
+
+#winner-announcement {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    animation: bounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+
+#final-scores-table .table-success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(40, 167, 69, 0.3); }
+    100% { box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); }
+}
+
+#winModal .btn {
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#winModal .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+#winModal .btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+#winModal .btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+}

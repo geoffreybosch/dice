@@ -15,6 +15,11 @@ let playerScores = {}; // Banked/permanent scores for each player
 let pendingPoints = 0; // Points earned this turn but not yet banked
 let currentTurnPoints = []; // Array of point awards this turn for display
 
+// Win Detection Variables
+let gameState = 'playing'; // 'playing', 'final_round', 'ended'
+let winTriggerPlayer = null; // Player who first reached winning score
+let finalRoundTracker = {}; // Tracks which players have had their final turn
+
 // Core Turn System Functions
 function initializeTurnSystem(players, isMultiplayer = false, preserveCurrentTurn = false) {
     // console.log(`Turn system initialized for ${players.length} players. First turn: ${players[0]}`);
@@ -33,6 +38,11 @@ function initializeTurnSystem(players, isMultiplayer = false, preserveCurrentTur
     }
     
     isMultiplayerMode = isMultiplayer;
+    
+    // Reset game state when starting new game
+    if (!preserveCurrentTurn) {
+        resetGameState();
+    }
     
     // Initialize scoring system
     initializePlayerScores(players);
@@ -60,11 +70,11 @@ function isPlayerTurn(playerId) {
 }
 
 function nextTurn() {
-    // console.log(`🔄 === nextTurn() START ===`);
-    // console.log(`🔄 Current state - Player: ${currentPlayerTurn}, Index: ${currentPlayerIndex}, Players: [${turnSystemPlayerList.join(', ')}]`);
+    console.log(`🔄 === nextTurn() START ===`);
+    console.log(`🔄 Current state - Player: ${currentPlayerTurn}, Index: ${currentPlayerIndex}, Players: [${turnSystemPlayerList.join(', ')}]`);
     
     if (turnSystemPlayerList.length === 0) {
-        // console.log(`🔄 No players in list, returning null`);
+        console.log(`🔄 No players in list, returning null`);
         return null;
     }
     
@@ -77,9 +87,29 @@ function nextTurn() {
     const oldPlayerIndex = currentPlayerIndex;
     const oldPlayer = currentPlayerTurn;
     
+    // Check final round progress for the player whose turn is ending
+    if (gameState === 'final_round') {
+        console.log(`🔄 In final round, checking progress for ending player: ${oldPlayer}`);
+        
+        // Only check final round progress if the oldPlayer is actually in the final round tracker
+        // This prevents incorrectly marking players as finished when they haven't taken their turn
+        if (finalRoundTracker.hasOwnProperty(oldPlayer)) {
+            console.log(`🔄 ${oldPlayer} is in final round tracker - checking their progress`);
+            checkFinalRoundProgress(oldPlayer);
+        } else {
+            console.log(`🔄 ${oldPlayer} is not in final round tracker (probably the winning player) - skipping progress check`);
+        }
+        
+        // If game has ended, don't advance turn
+        if (gameState === 'ended') {
+            console.log(`🔄 Game has ended, not advancing turn`);
+            return currentPlayerTurn;
+        }
+    }
+    
     // Use Firebase state management instead of local turn tracking
     if (typeof endMyTurn === 'function') {
-        // console.log('🔄 Using Firebase state management to end turn');
+        console.log('🔄 Using Firebase state management to end turn');
         endMyTurn(); // This will trigger Firebase state updates
         return currentPlayerTurn; // Return current player since Firebase will handle the transition
     } else {
@@ -135,6 +165,21 @@ function applyPlayerMaterialPreferences(playerId) {
 function updateTurnDisplay() {
     // NOTE: Farkle indicator clearing is now handled by Firebase state manager 
     // in updateTurnIndicators() when a player's turn actually starts
+    
+    // Check if current player is starting their final turn and show alert
+    if (gameState === 'final_round' && currentPlayerTurn && finalRoundTracker.hasOwnProperty(currentPlayerTurn) && !finalRoundTracker[currentPlayerTurn]) {
+        // This is the current player's final turn - show them a persistent alert
+        if (typeof myPlayerId !== 'undefined' && currentPlayerTurn === myPlayerId) {
+            // Show persistent alert for the current player's final turn (no timeout)
+            if (typeof showGameAlert === 'function') {
+                showGameAlert(
+                    `⏳ This is your FINAL TURN! ⏳<br><small>Another player has reached the winning score - make it count!</small>`,
+                    'warning',
+                    0  // 0 means no timeout - alert stays visible for the entire turn
+                );
+            }
+        }
+    }
     
     // Update turn indicators in the player list instead of using alert box
     const playerListContainer = document.getElementById('player-list');
@@ -283,6 +328,23 @@ function bankPendingPoints(playerId = null) {
         return 0;
     }
 
+    // Check minimum score requirement for players with 0 points
+    const currentPlayerScore = getPlayerScore(playerId);
+    const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { minimumScore: 500 };
+    const minimumRequired = gameSettings.minimumScore || 500;
+    
+    if (currentPlayerScore === 0 && pendingPoints < minimumRequired) {
+        // Show error message and prevent banking
+        if (typeof showGameAlert === 'function') {
+            showGameAlert(
+                `❌ You need at least ${minimumRequired} points to get "on the board"<br><small>You currently have ${pendingPoints} pending points</small>`, 
+                'danger', 
+                4000
+            );
+        }
+        return 0;
+    }
+
     // Mark as critical operation to prevent connection cleanup during banking
     if (typeof startCriticalOperation === 'function') {
         startCriticalOperation();
@@ -319,6 +381,9 @@ function bankPendingPoints(playerId = null) {
         updateTurnDisplay();
         updatePendingPointsDisplay();
         updateScoreDisplay();
+
+        // Check for winning condition after banking
+        checkWinCondition(playerId, newScore);
 
         // Use Firebase state management for banking
         if (typeof handlePlayerBanking === 'function') {
@@ -410,6 +475,433 @@ function getPlayerScore(playerId) {
 
 function getAllPlayerScores() {
     return { ...playerScores };
+}
+
+// Fetch current scores from Firebase and execute callback with the scores
+function fetchCurrentScoresFromFirebase(callback) {
+    // Check if in multiplayer room
+    if (typeof roomId !== 'undefined' && roomId && typeof database !== 'undefined') {
+        // Use Firebase state manager's currentRoomId if available
+        const firebaseRoomId = (typeof currentRoomId !== 'undefined' && currentRoomId) ? currentRoomId : roomId;
+        const roomRef = database.ref(`rooms/${firebaseRoomId}/players`);
+        
+        console.log('🔍 Fetching current scores from Firebase for win modal...');
+        
+        roomRef.once('value', (snapshot) => {
+            const firebasePlayers = snapshot.val();
+            const currentScores = {};
+            
+            if (firebasePlayers) {
+                // Extract scores from Firebase data
+                for (const id in firebasePlayers) {
+                    const playerName = firebasePlayers[id].name;
+                    const playerScore = firebasePlayers[id].score || 0;
+                    currentScores[playerName] = playerScore;
+                    console.log(`🔍 Firebase score for ${playerName}: ${playerScore}`);
+                }
+            }
+            
+            console.log('🔍 Final scores from Firebase:', currentScores);
+            callback(currentScores);
+        }).catch((error) => {
+            console.error('🔍 Error fetching scores from Firebase:', error);
+            // Fallback to local scores if Firebase fails
+            console.log('🔍 Falling back to local scores:', playerScores);
+            callback({ ...playerScores });
+        });
+    } else {
+        // Single player mode or no Firebase - use local scores
+        console.log('🔍 No Firebase available, using local scores:', playerScores);
+        callback({ ...playerScores });
+    }
+}
+
+// Win Detection Functions
+function checkWinCondition(playerId, newScore) {
+    // Get current game settings
+    const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { winningScore: 10000 };
+    const winningScore = gameSettings.winningScore || 10000;
+    
+    console.log(`🏆 Checking win condition for ${playerId} with score ${newScore} (winning score: ${winningScore})`);
+    
+    // Check if this player has reached the winning score
+    if (newScore >= winningScore && gameState === 'playing') {
+        console.log(`🏆 ${playerId} has reached the winning score! Entering final round...`);
+        
+        // Enter final round mode
+        gameState = 'final_round';
+        winTriggerPlayer = playerId;
+        
+        // Initialize final round tracker - all players except the winning player need their final turn
+        finalRoundTracker = {};
+        turnSystemPlayerList.forEach(player => {
+            if (player !== playerId) {
+                finalRoundTracker[player] = false; // false = hasn't had final turn yet
+            }
+        });
+        
+        // Show different alerts for the winning player vs other players
+        if (typeof showGameAlert === 'function') {
+            // Check if the current client is the player who reached the winning score
+            const myPlayerIdValue = (typeof window.myPlayerId !== 'undefined' && window.myPlayerId) || 
+                                   (typeof myPlayerId !== 'undefined' && myPlayerId);
+            const currentPlayerIdValue = (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId) ||
+                                        (typeof getCurrentPlayerId === 'function' && getCurrentPlayerId());
+            
+            console.log(`🏆 Player ID comparison debug:`);
+            console.log(`🏆   - winning player: "${playerId}"`);
+            console.log(`🏆   - window.myPlayerId: "${window.myPlayerId}"`);
+            console.log(`🏆   - myPlayerId: "${typeof myPlayerId !== 'undefined' ? myPlayerId : 'undefined'}"`);
+            console.log(`🏆   - currentPlayerId: "${currentPlayerIdValue}"`);
+            console.log(`🏆   - final comparison value: "${myPlayerIdValue}"`);
+            
+            if (myPlayerIdValue === playerId) {
+                // Show congratulatory alert to the player who reached the winning score
+                console.log(`🏆 Showing congratulatory alert to winning player: ${playerId}`);
+                showGameAlert(
+                    `🎉 Congratulations! You've reached ${winningScore} points! 🎉<br><small>Your turn ends - other players get one final turn</small>`,
+                    'success',
+                    0  // Persistent alert for the winning player
+                );
+            } else {
+                // Show informational alert to other players
+                console.log(`🏆 Showing informational alert to other player: ${myPlayerIdValue} about winner: ${playerId}`);
+                showGameAlert(
+                    `🏆 ${playerId} has reached ${winningScore} points!<br><small>Final round - all other players get one more turn</small>`,
+                    'warning',
+                    6000
+                );
+            }
+        }
+        
+        // console.log('🏆 Final round tracker initialized:', finalRoundTracker);
+        
+        // Broadcast game state in multiplayer mode
+        if (isInMultiplayerRoom && typeof broadcastGameState === 'function') {
+            broadcastGameState(gameState, winTriggerPlayer, finalRoundTracker);
+        }
+        
+        // IMPORTANT: End the winning player's turn immediately after reaching the winning score
+        // This ensures they don't get to continue playing after winning
+        setTimeout(() => {
+            // Check if this is the winning player and it's their turn
+            const currentTurnPlayer = (typeof getCurrentTurn === 'function') ? getCurrentTurn() : currentPlayerTurn;
+            if (currentTurnPlayer === playerId) {
+                console.log(`🏆 Ending ${playerId}'s turn after reaching winning score`);
+                
+                // Use Firebase state management if available
+                if (isInMultiplayerRoom && typeof endMyTurn === 'function' && 
+                    ((typeof window.myPlayerId !== 'undefined' && window.myPlayerId === playerId) ||
+                     (typeof myPlayerId !== 'undefined' && myPlayerId === playerId))) {
+                    console.log(`🏆 Using Firebase to end ${playerId}'s winning turn`);
+                    endMyTurn();
+                } else if (typeof nextTurn === 'function') {
+                    // Fallback to local turn management
+                    console.log(`🏆 Using local turn management to end ${playerId}'s winning turn`);
+                    nextTurn();
+                }
+            }
+        }, 100); // Small delay to ensure all UI updates complete first
+    }
+}
+
+function checkFinalRoundProgress(playerId) {
+    if (gameState !== 'final_round') return;
+    
+    console.log(`🏆 checkFinalRoundProgress called for: ${playerId}`);
+    console.log(`🏆 Current finalRoundTracker:`, JSON.stringify(finalRoundTracker));
+    console.log(`🏆 winTriggerPlayer: ${winTriggerPlayer}`);
+    
+    // Mark this player as having completed their final turn
+    if (finalRoundTracker.hasOwnProperty(playerId)) {
+        // IMPORTANT: Only mark as completed if this player is not the current player
+        // This prevents marking a player as "finished" when they're just starting their turn
+        const currentTurnPlayer = (typeof getCurrentTurn === 'function') ? getCurrentTurn() : currentPlayerTurn;
+        
+        if (currentTurnPlayer === playerId) {
+            console.log(`🏆 ${playerId} is the current player - NOT marking as completed (they're just starting their final turn)`);
+            return; // Don't mark as completed if they're the current player
+        }
+        
+        finalRoundTracker[playerId] = true;
+        console.log(`🏆 ${playerId} has completed their final turn`);
+        console.log(`🏆 Updated finalRoundTracker:`, JSON.stringify(finalRoundTracker));
+    } else {
+        console.log(`🏆 ${playerId} is not in finalRoundTracker (probably the winning player)`);
+    }
+    
+    // Check if all players have had their final turn
+    const trackerValues = Object.values(finalRoundTracker);
+    const allPlayersFinished = trackerValues.length > 0 && trackerValues.every(finished => finished);
+    
+    console.log(`🏆 Final round check:`);
+    console.log(`🏆   - Players needing final turns: ${Object.keys(finalRoundTracker).length}`);
+    console.log(`🏆   - Tracker values: [${trackerValues.join(', ')}]`);
+    console.log(`🏆   - All players finished: ${allPlayersFinished}`);
+    
+    if (allPlayersFinished) {
+        console.log('🏆 All players have completed their final turns - ending game');
+        endGame();
+        
+        // Broadcast final game state in multiplayer mode
+        if (isInMultiplayerRoom && typeof broadcastGameState === 'function') {
+            broadcastGameState(gameState, winTriggerPlayer, finalRoundTracker);
+        }
+    } else {
+        console.log('🏆 Still waiting for players to complete final turns:', finalRoundTracker);
+    }
+}
+
+function endGame() {
+    gameState = 'ended';
+    
+    // Fetch current scores from Firebase before determining winner
+    fetchCurrentScoresFromFirebase((scores) => {
+        const players = Object.keys(scores);
+        
+        if (players.length === 0) {
+            console.error('🏆 No players found in scores for endGame');
+            return;
+        }
+        
+        // Sort players by score (highest first)
+        const sortedPlayers = players.sort((a, b) => scores[b] - scores[a]);
+        const winner = sortedPlayers[0];
+        const winnerScore = scores[winner];
+        
+        console.log('🏆 Game ended! Winner:', winner, 'Score:', winnerScore);
+        console.log('🏆 Final standings with Firebase scores:', sortedPlayers.map(p => `${p}: ${scores[p]}`));
+        
+        // Show win modal with Firebase scores
+        showWinModal(winner, winnerScore, sortedPlayers, scores);
+    });
+}
+
+function showWinModal(winner, winnerScore, sortedPlayers, scores) {
+    const winModal = document.getElementById('winModal');
+    if (!winModal) {
+        console.error('🏆 Win modal not found!');
+        return;
+    }
+    
+    // Update winner announcement
+    const winnerAnnouncement = document.getElementById('winner-announcement');
+    if (winnerAnnouncement) {
+        winnerAnnouncement.textContent = `🎉 ${winner} Wins! 🎉`;
+    }
+    
+    // Update winner score
+    const winnerScoreElement = document.getElementById('winner-score');
+    if (winnerScoreElement) {
+        winnerScoreElement.textContent = `Final Score: ${winnerScore.toLocaleString()} points`;
+    }
+    
+    // Update final scores table
+    const finalScoresTable = document.getElementById('final-scores-table');
+    if (finalScoresTable) {
+        finalScoresTable.innerHTML = '';
+        
+        sortedPlayers.forEach((player, index) => {
+            const row = document.createElement('tr');
+            const rank = index + 1;
+            let rankIcon = '';
+            
+            switch (rank) {
+                case 1: rankIcon = '🥇'; break;
+                case 2: rankIcon = '🥈'; break;
+                case 3: rankIcon = '🥉'; break;
+                default: rankIcon = `${rank}.`; break;
+            }
+            
+            row.innerHTML = `
+                <td class="fw-bold">${rankIcon}</td>
+                <td class="${rank === 1 ? 'fw-bold text-success' : ''}">${player}</td>
+                <td class="${rank === 1 ? 'fw-bold text-success' : ''}">${scores[player].toLocaleString()}</td>
+            `;
+            
+            if (rank === 1) {
+                row.classList.add('table-success');
+            }
+            
+            finalScoresTable.appendChild(row);
+        });
+    }
+    
+    // Set up modal event handlers
+    setupWinModalHandlers();
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(winModal);
+    modal.show();
+}
+
+function setupWinModalHandlers() {
+    const newGameBtn = document.getElementById('new-game-btn');
+    const closeGameBtn = document.getElementById('close-game-btn');
+    
+    if (newGameBtn) {
+        newGameBtn.onclick = () => {
+            // Reload the page to start a new game
+            window.location.reload();
+        };
+    }
+    
+    if (closeGameBtn) {
+        closeGameBtn.onclick = () => {
+            // Close the modal (or redirect to a different page)
+            const winModal = bootstrap.Modal.getInstance(document.getElementById('winModal'));
+            if (winModal) {
+                winModal.hide();
+            }
+        };
+    }
+}
+
+function resetGameState() {
+    gameState = 'playing';
+    winTriggerPlayer = null;
+    finalRoundTracker = {};
+}
+
+// Update game state from external source (e.g., multiplayer sync)
+function updateWinGameState(newGameState, newWinTriggerPlayer, newFinalRoundTracker) {
+    console.log('🏆 === updateGameState() CALLED ===');
+    console.log('🏆 Updating game state from external source:', { newGameState, newWinTriggerPlayer, newFinalRoundTracker });
+    
+    const oldGameState = gameState;
+    gameState = newGameState || 'playing';
+    winTriggerPlayer = newWinTriggerPlayer || null;
+    finalRoundTracker = newFinalRoundTracker || {};
+    
+    console.log(`🏆 updateGameState debug: oldGameState="${oldGameState}", newGameState="${gameState}", winTriggerPlayer="${winTriggerPlayer}"`);
+    
+    // Check if the current client is NOT the winning player
+    const myPlayerIdValue = (typeof window.myPlayerId !== 'undefined' && window.myPlayerId) || 
+                           (typeof myPlayerId !== 'undefined' && myPlayerId) ||
+                           (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId) ||
+                           (typeof getCurrentPlayerId === 'function' && getCurrentPlayerId());
+    
+    console.log(`🏆 Player ID values check:`);
+    console.log(`🏆   - window.myPlayerId: "${window.myPlayerId}"`);
+    console.log(`🏆   - myPlayerId: "${typeof myPlayerId !== 'undefined' ? myPlayerId : 'undefined'}"`);
+    console.log(`🏆   - window.currentPlayerId: "${window.currentPlayerId}"`);
+    console.log(`🏆   - final myPlayerIdValue: "${myPlayerIdValue}"`);
+    
+    // If entering final round for the first time, show alert to other players
+    if (gameState === 'final_round' && oldGameState !== 'final_round' && winTriggerPlayer) {
+        console.log(`🏆 Final round condition MET - showing alert check`);
+        console.log(`🏆 Final round started by ${winTriggerPlayer}, checking if I should show alert:`);
+        console.log(`🏆   - My player ID: "${myPlayerIdValue}"`);
+        console.log(`🏆   - Winning player: "${winTriggerPlayer}"`);
+        console.log(`🏆   - Should show alert: ${myPlayerIdValue !== winTriggerPlayer}`);
+        
+        if (myPlayerIdValue && myPlayerIdValue !== winTriggerPlayer) {
+            // Show alert to other players about the final round
+            if (typeof showGameAlert === 'function') {
+                console.log(`🏆 Showing final round alert to other player: ${myPlayerIdValue}`);
+                
+                // Get winning score for the alert
+                const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { winningScore: 10000 };
+                const winningScore = gameSettings.winningScore || 10000;
+                
+                showGameAlert(
+                    `🏆 ${winTriggerPlayer} has reached ${winningScore} points!<br><small>Final round - all other players get one more turn</small>`,
+                    'warning',
+                    6000
+                );
+            } else {
+                console.error(`🏆 showGameAlert function not available!`);
+            }
+        } else {
+            console.log(`🏆 Not showing alert - either no myPlayerIdValue (${myPlayerIdValue}) or I am the winning player (${winTriggerPlayer})`);
+        }
+    } else {
+        console.log(`🏆 updateGameState conditions not met:`);
+        console.log(`🏆   - gameState === 'final_round': ${gameState === 'final_round'}`);
+        console.log(`🏆   - oldGameState !== 'final_round': ${oldGameState !== 'final_round'}`);
+        console.log(`🏆   - winTriggerPlayer exists: ${!!winTriggerPlayer}`);
+    }
+    
+    console.log('🏆 === updateGameState() END ===');
+    
+    // If game has ended, show win modal (but only if we're not currently taking our turn)
+    if (gameState === 'ended') {
+        // Check if the current player is in the middle of their turn
+        const currentTurnPlayer = (typeof getCurrentTurn === 'function') ? getCurrentTurn() : currentPlayerTurn;
+        const myPlayerIdValue = (typeof window.myPlayerId !== 'undefined' && window.myPlayerId) || 
+                               (typeof myPlayerId !== 'undefined' && myPlayerId) ||
+                               (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId) ||
+                               (typeof getCurrentPlayerId === 'function' && getCurrentPlayerId());
+        
+        // Special case: If I'm the winning player and the turn has come back to me after the game ended,
+        // show the win modal immediately (don't wait for me to "end" my turn since the game is over)
+        if (myPlayerIdValue === winTriggerPlayer && myPlayerIdValue === currentTurnPlayer) {
+            console.log(`🏆 Game ended and turn came back to winning player (${myPlayerIdValue}) - showing win modal immediately`);
+            // Fetch current scores from Firebase before showing win modal
+            fetchCurrentScoresFromFirebase((scores) => {
+                const players = Object.keys(scores);
+                
+                if (players.length > 0) {
+                    const sortedPlayers = players.sort((a, b) => scores[b] - scores[a]);
+                    const winner = sortedPlayers[0];
+                    const winnerScore = scores[winner];
+                    
+                    console.log(`🏆 Showing win modal with Firebase scores:`, scores);
+                    showWinModal(winner, winnerScore, sortedPlayers, scores);
+                } else {
+                    console.error('🏆 No players found in scores for win modal');
+                }
+            });
+        }
+        // Only show win modal if I'm not the current player (i.e., not in the middle of my turn)
+        // This includes the winning player - they should wait for their next turn to see the modal
+        else if (myPlayerIdValue !== currentTurnPlayer) {
+            console.log(`🏆 Game ended - showing win modal (I'm not the current player)`);
+            // Fetch current scores from Firebase before showing win modal
+            fetchCurrentScoresFromFirebase((scores) => {
+                const players = Object.keys(scores);
+                
+                if (players.length > 0) {
+                    const sortedPlayers = players.sort((a, b) => scores[b] - scores[a]);
+                    const winner = sortedPlayers[0];
+                    const winnerScore = scores[winner];
+                    
+                    console.log(`🏆 Showing win modal with Firebase scores:`, scores);
+                    showWinModal(winner, winnerScore, sortedPlayers, scores);
+                } else {
+                    console.error('🏆 No players found in scores for win modal');
+                }
+            });
+        } else {
+            console.log(`🏆 Game ended but I'm the current player - will show win modal when my turn ends`);
+        }
+    }
+}
+
+function checkIfGameEndedAndShowModal() {
+    console.log('🏆 checkIfGameEndedAndShowModal called - gameState:', gameState);
+    
+    if (gameState === 'ended') {
+        console.log('🏆 Game has ended - showing win modal from checkIfGameEndedAndShowModal');
+        
+        // Fetch current scores from Firebase before showing win modal
+        fetchCurrentScoresFromFirebase((scores) => {
+            const players = Object.keys(scores);
+            
+            if (players.length > 0) {
+                const sortedPlayers = players.sort((a, b) => scores[b] - scores[a]);
+                const winner = sortedPlayers[0];
+                const winnerScore = scores[winner];
+                
+                console.log(`🏆 Showing win modal with Firebase scores from checkIfGameEndedAndShowModal:`, scores);
+                showWinModal(winner, winnerScore, sortedPlayers, scores);
+            } else {
+                console.error('🏆 No players found in scores for win modal from checkIfGameEndedAndShowModal');
+            }
+        });
+    } else {
+        console.log('🏆 Game has not ended yet - gameState:', gameState);
+    }
 }
 
 function updatePendingPointsDisplay() {
@@ -672,11 +1164,11 @@ function broadcastMaterialChange(playerId, diceType, floorType) {
 function onDiceResultsReceived(data) {
     const { playerId, diceResults } = data;
     
-    console.log(`🎲 onDiceResultsReceived - Player ${playerId}:`, diceResults);
+    // console.log(`🎲 onDiceResultsReceived - Player ${playerId}:`, diceResults);
     
     // Stop rolling animation for this player when they finish rolling
     if (typeof window.otherPlayersRolling !== 'undefined') {
-        console.log('🎲 Stopping rolling animation for player:', playerId);
+        // console.log('🎲 Stopping rolling animation for player:', playerId);
         window.otherPlayersRolling.delete(playerId);
         
         // Clear logged players when animation stops
@@ -690,7 +1182,7 @@ function onDiceResultsReceived(data) {
         // Stop animation interval if no players are rolling
         if (window.otherPlayerAnimationInterval !== null && 
             window.otherPlayersRolling.size === 0) {
-            console.log('🎲 Clearing animation interval - no more rolling players');
+            // console.log('🎲 Clearing animation interval - no more rolling players');
             clearInterval(window.otherPlayerAnimationInterval);
             window.otherPlayerAnimationInterval = null;
         }
@@ -700,12 +1192,12 @@ function onDiceResultsReceived(data) {
     const myId = typeof myPlayerId !== 'undefined' ? myPlayerId : (typeof window.myPlayerId !== 'undefined' ? window.myPlayerId : null);
     
     if (playerId !== myId) {
-        console.log('🎲 Displaying other player results');
+        // console.log('🎲 Displaying other player results');
         // Update the dice display to show the other player's results
         if (typeof displayOtherPlayerResults === 'function') {
             displayOtherPlayerResults(playerId, diceResults);
         } else {
-            console.log('🎲 displayOtherPlayerResults function not available, using fallback');
+            // console.log('🎲 displayOtherPlayerResults function not available, using fallback');
             // Fallback: update the dice results container with a simple display
             const diceResultsContainer = document.getElementById('dice-results-container');
             if (diceResultsContainer) {
@@ -740,9 +1232,18 @@ if (typeof module !== 'undefined' && module.exports) {
         getCurrentTurnPoints,
         getPlayerScore,
         getAllPlayerScores,
+        fetchCurrentScoresFromFirebase,
         updatePendingPointsDisplay,
         updateScoreDisplay,
         updateScoreDisplayUI,
+        // Win detection functions
+        checkWinCondition,
+        checkFinalRoundProgress,
+        endGame,
+        showWinModal,
+        resetGameState,
+        updateWinGameState,
+        checkIfGameEndedAndShowModal,
         // WebRTC integration functions
         onRoomJoined,
         onPlayerJoined,

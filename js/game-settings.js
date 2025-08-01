@@ -4,7 +4,7 @@
 // Default game settings
 const DEFAULT_GAME_SETTINGS = {
     threeOnesRule: 300,    // Points for three 1s (300 or 1000)
-    winningScore: 10000,    // Points needed to win
+    winningScore: 50,    // Points needed to win
     minimumScore: 500       // Minimum score to get "on the board"
 };
 
@@ -110,7 +110,7 @@ function applyGameSettings() {
         const threeOnes300 = document.getElementById('threeOnes300');
         const threeOnes1000 = document.getElementById('threeOnes1000');
         
-        let threeOnesRule = 1000; // default
+        let threeOnesRule = 300; // default
         if (threeOnes300 && threeOnes300.checked) {
             threeOnesRule = 300;
         } else if (threeOnes1000 && threeOnes1000.checked) {

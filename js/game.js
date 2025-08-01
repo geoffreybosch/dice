@@ -237,25 +237,25 @@ function updateGameControlsState() {
     // Enable/disable roll button based on turn AND whether they need to lock dice first
     if (rollButton) {
         const newDisabled = !canAct || hasRolledThisTurn || isRolling;
-        console.log('🎮 Roll button state check:', {
-            canAct,
-            hasRolledThisTurn,
-            isRolling,
-            newDisabled,
-            currentText: rollButton.textContent
-        });
+        // console.log('🎮 Roll button state check:', {
+        //     canAct,
+        //     hasRolledThisTurn,
+        //     isRolling,
+        //     newDisabled,
+        //     currentText: rollButton.textContent
+        // });
         rollButton.disabled = newDisabled;
         
         // Update button text to indicate current state
         if (isRolling && canAct) {
             rollButton.textContent = 'Rolling...';
-            console.log('🎮 Setting button to: Rolling...');
+            // console.log('🎮 Setting button to: Rolling...');
         } else if (hasRolledThisTurn && canAct) {
             rollButton.textContent = 'Lock Dice First';
-            console.log('🎮 Setting button to: Lock Dice First');
+            // console.log('🎮 Setting button to: Lock Dice First');
         } else if (canAct) {
             rollButton.textContent = 'Roll';
-            console.log('🎮 Setting button to: Roll');
+            // console.log('🎮 Setting button to: Roll');
         }
     }
     
@@ -281,16 +281,35 @@ function updateGameControlsState() {
     
     // Show/hide and enable bank points button
     if (bankPointsButton) {
-        const newDisabled = !canAct;
+        let newDisabled = !canAct;
         const newDisplay = (canAct && hasPendingPoints) ? 'inline-block' : 'none';
+        
+        if (hasPendingPoints) {
+            const currentPending = getPendingPoints();
+            
+            // Check minimum score requirement for players with 0 points
+            const currentPlayerId = (typeof getCurrentTurn === 'function') ? getCurrentTurn() : myPlayerId;
+            const currentPlayerScore = (typeof getPlayerScore === 'function') ? getPlayerScore(currentPlayerId) : 0;
+            const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { minimumScore: 500 };
+            const minimumRequired = gameSettings.minimumScore || 500;
+            
+            if (currentPlayerScore === 0 && currentPending < minimumRequired) {
+                newDisabled = true;
+                bankPointsButton.textContent = `Need ${minimumRequired - currentPending} More Points (${currentPending}/${minimumRequired})`;
+                bankPointsButton.classList.add('btn-secondary');
+                bankPointsButton.classList.remove('btn-warning');
+            } else {
+                bankPointsButton.textContent = `Bank ${currentPending} Points & End Turn`;
+                bankPointsButton.classList.add('btn-warning');
+                bankPointsButton.classList.remove('btn-secondary');
+            }
+            
+            // console.log(`🎮 💰 BANK BUTTON: Updating text with ${currentPending} pending points`);
+        }
+        
         // console.log(`🎮 Setting bank button - disabled: ${bankPointsButton.disabled} → ${newDisabled}, display: ${bankPointsButton.style.display} → ${newDisplay}`);
         bankPointsButton.disabled = newDisabled;
         bankPointsButton.style.display = newDisplay;
-        if (hasPendingPoints) {
-            const currentPending = getPendingPoints();
-            // console.log(`🎮 💰 BANK BUTTON: Updating text with ${currentPending} pending points`);
-            bankPointsButton.textContent = `Bank ${currentPending} Points & End Turn`;
-        }
     }
     
     // console.log('🎮 === updateGameControlsState() END ===');
@@ -428,12 +447,12 @@ function displayDiceResults(results) {
 
 // Function to display other players' dice results
 function displayOtherPlayerResults(playerId, diceResults) {
-    console.log(`🎲 [displayOtherPlayerResults] Called for ${playerId} with results:`, diceResults);
-    console.log(`🎲 [displayOtherPlayerResults] Current stored locked states:`, JSON.stringify(playerLockedDiceStates));
+    // console.log(`🎲 [displayOtherPlayerResults] Called for ${playerId} with results:`, diceResults);
+    // console.log(`🎲 [displayOtherPlayerResults] Current stored locked states:`, JSON.stringify(playerLockedDiceStates));
     
     // Don't interrupt our own rolling animation
     if (isRolling && (playerId === myPlayerId || playerId === window.myPlayerId)) {
-        console.log(`🎲 [displayOtherPlayerResults] Skipping - currently rolling for same player`);
+        // console.log(`🎲 [displayOtherPlayerResults] Skipping - currently rolling for same player`);
         return;
     }
     
@@ -483,7 +502,7 @@ function displayOtherPlayerResults(playerId, diceResults) {
     
     diceResultsContainer.appendChild(diceContainer);
     
-    console.log(`🎲 [displayOtherPlayerResults] Displayed dice results for ${playerId} with locked dice:`, playerLockedDiceStates[playerId] || []);
+    // console.log(`🎲 [displayOtherPlayerResults] Displayed dice results for ${playerId} with locked dice:`, playerLockedDiceStates[playerId] || []);
     
     // Hide dice selection controls when showing other player's results (not interactive)
     const diceSelectionControls = document.getElementById('dice-selection-controls');
@@ -556,7 +575,7 @@ window.lockedDiceStylingDisabled = false;
 function displayOtherPlayerLockedDice(data) {
     // Check if locked dice styling is temporarily disabled
     if (window.lockedDiceStylingDisabled) {
-        console.log('🔒 [displayOtherPlayerLockedDice] Locked dice styling is temporarily disabled, skipping');
+        // console.log('🔒 [displayOtherPlayerLockedDice] Locked dice styling is temporarily disabled, skipping');
         return;
     }
     
@@ -566,8 +585,8 @@ function displayOtherPlayerLockedDice(data) {
     ensureArraysInitialized();
     const validLockedDiceIndices = Array.isArray(lockedDiceIndices) ? lockedDiceIndices : [];
     
-    console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, validLockedDiceIndices);
-    console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, validLockedDiceIndices);
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
     
     // Store the locked dice state for this player
     playerLockedDiceStates[playerId] = validLockedDiceIndices;
@@ -584,23 +603,23 @@ function displayOtherPlayerLockedDice(data) {
             }
         });
         window.playerLockedDiceValues = playerLockedDiceValues;
-        console.log(`🔒 [displayOtherPlayerLockedDice] Stored dice values for ${playerId}:`, playerLockedDiceValues[playerId]);
+        // console.log(`🔒 [displayOtherPlayerLockedDice] Stored dice values for ${playerId}:`, playerLockedDiceValues[playerId]);
     }
     
-    console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
-    console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
+    // console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
     
     // Only show locked indicators if the dice results are currently displayed for this player
     const diceResultsContainer = document.getElementById('dice-results-container');
     if (!diceResultsContainer) {
-        console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
+        // console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
         return;
     }
     
     // Check if we're currently showing this player's results
     const header = diceResultsContainer.querySelector('div strong');
     if (!header || !header.textContent.includes(playerId)) {
-        console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
+        // console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
         // console.log(`🔒 [displayOtherPlayerLockedDice] Header text:`, header?.textContent);
         return;
     }
@@ -796,21 +815,21 @@ function lockSelectedDice() {
     if (rollButton && hasRolledThisTurn) {
         rollButton.disabled = false;
         hasRolledThisTurn = false; // Reset the flag
-        console.log('🎲 Roll button re-enabled after locking dice - hasRolledThisTurn = false');
+        // console.log('🎲 Roll button re-enabled after locking dice - hasRolledThisTurn = false');
     }
     
     // Broadcast locked dice state to other players in multiplayer mode
     if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
-        console.log('🔒 Broadcasting locked dice:', myPlayerId, lockedDiceIndices, currentDiceResults);
+        // console.log('🔒 Broadcasting locked dice:', myPlayerId, lockedDiceIndices, currentDiceResults);
         broadcastLockedDice(myPlayerId, lockedDiceIndices, currentDiceResults);
         // Also store the state locally for consistency
         playerLockedDiceStates[myPlayerId] = lockedDiceIndices;
     } else {
-        console.log('🔒 Not broadcasting locked dice - conditions not met:', {
-            isInMultiplayerRoom,
-            hasBroadcastFunction: typeof broadcastLockedDice === 'function',
-            myPlayerId
-        });
+        // console.log('🔒 Not broadcasting locked dice - conditions not met:', {
+        //     isInMultiplayerRoom,
+        //     hasBroadcastFunction: typeof broadcastLockedDice === 'function',
+        //     myPlayerId
+        // });
     }
     
     // Re-display results without locked dice
@@ -959,7 +978,7 @@ function resetLockedDice() {
     selectedDiceIndices = [];
     availableDiceCount = 6;
     hasRolledThisTurn = false; // Reset roll state for new turn
-    console.log('🎲 resetLockedDice() - hasRolledThisTurn = false');
+    // console.log('🎲 resetLockedDice() - hasRolledThisTurn = false');
     
     // Broadcast that all dice are now unlocked to other players in multiplayer mode
     if (isInMultiplayerRoom && typeof broadcastLockedDice === 'function' && myPlayerId) {
@@ -1035,14 +1054,14 @@ function showHotDiceMessage() {
         
         // Broadcast hot dice event to other players in multiplayer mode
         if (isInMultiplayerRoom && typeof broadcastHotDice === 'function' && myPlayerId) {
-            console.log('🔥 Calling broadcastHotDice for:', myPlayerId);
+            // console.log('🔥 Calling broadcastHotDice for:', myPlayerId);
             broadcastHotDice(myPlayerId);
         } else {
-            console.log('🔥 Not broadcasting hot dice:', {
-                isInMultiplayerRoom,
-                broadcastHotDiceExists: typeof broadcastHotDice === 'function',
-                myPlayerId
-            });
+            // console.log('🔥 Not broadcasting hot dice:', {
+            //     isInMultiplayerRoom,
+            //     broadcastHotDiceExists: typeof broadcastHotDice === 'function',
+            //     myPlayerId
+            // });
         }
         
         // console.log(`🔥 Hot dice message displayed for ${playerName}`);
@@ -1051,24 +1070,24 @@ function showHotDiceMessage() {
 
 // Function to show hot dice message for spectators
 function showSpectatorHotDiceMessage(playerId) {
-    console.log('🔥 showSpectatorHotDiceMessage called for:', playerId);
+    // console.log('🔥 showSpectatorHotDiceMessage called for:', playerId);
     const hotDiceMessage = document.getElementById('hot-dice-message');
-    console.log('🔥 hotDiceMessage element:', hotDiceMessage);
+    // console.log('🔥 hotDiceMessage element:', hotDiceMessage);
     
     if (hotDiceMessage) {
         const playerName = playerId || 'Player';
         hotDiceMessage.innerHTML = `🔥 ${playerName} has hot dice! 🔥<br><small>All 6 dice scored - rolling again!</small>`;
         hotDiceMessage.style.display = 'block';
         
-        console.log('🔥 Spectator hot dice message displayed:', hotDiceMessage.innerHTML);
+        // console.log('🔥 Spectator hot dice message displayed:', hotDiceMessage.innerHTML);
         
         // Hide the message after 3 seconds
         setTimeout(() => {
             hotDiceMessage.style.display = 'none';
-            console.log('🔥 Spectator hot dice message hidden');
+            // console.log('🔥 Spectator hot dice message hidden');
         }, 3000);
         
-        console.log(`🔥 Spectator hot dice message displayed for ${playerName}`);
+        // console.log(`🔥 Spectator hot dice message displayed for ${playerName}`);
     } else {
         console.error('🔥 ERROR: hot-dice-message element not found for spectator!');
     }
@@ -1086,16 +1105,19 @@ function showGameAlert(message, type = 'warning', duration = 3000) {
         gameAlert.innerHTML = message;
         gameAlert.style.display = 'block';
         
-        // Hide the message after specified duration
-        setTimeout(() => {
-            gameAlert.style.display = 'none';
-        }, duration);
+        // Only hide the message after specified duration if duration > 0
+        // Duration of 0 means the alert should stay visible (persistent)
+        if (duration > 0) {
+            setTimeout(() => {
+                gameAlert.style.display = 'none';
+            }, duration);
+        }
     }
 }
 
 // Function to handle farkle turn ending
 function handleFarkleEndTurn() {
-    console.log('🎲 Handling farkle turn end');
+    // console.log('🎲 Handling farkle turn end');
     
     // Restore button states for next player
     const rollButton = document.getElementById('roll-dice');
@@ -1106,13 +1128,13 @@ function handleFarkleEndTurn() {
         rollButton.disabled = false;
         rollButton.textContent = 'Roll';
         hasRolledThisTurn = false; // Reset roll state
-        console.log('🎲 Roll button restored after farkle - hasRolledThisTurn = false');
+        // console.log('🎲 Roll button restored after farkle - hasRolledThisTurn = false');
     }
     
     if (bankButton) {
         bankButton.disabled = false;
         // Bank button visibility will be handled by updateGameControlsState()
-        console.log('🎲 Bank button enabled');
+        // console.log('🎲 Bank button enabled');
     }
     
     // Reset all dice for the next player
@@ -1120,7 +1142,7 @@ function handleFarkleEndTurn() {
     
     // End the turn properly through Firebase state management if available
     if (isInMultiplayerRoom && typeof endMyTurn === 'function') {
-        console.log('🎲 Farkle - ending turn through Firebase state manager');
+        // console.log('🎲 Farkle - ending turn through Firebase state manager');
         endMyTurn();
         // Update game controls immediately after ending turn
         setTimeout(() => {
@@ -1129,7 +1151,7 @@ function handleFarkleEndTurn() {
     } else if (typeof nextTurn === 'function') {
         // Fallback to local turn management
         const nextPlayer = nextTurn();
-        console.log('🎲 Farkle - turn passing to:', nextPlayer);
+        // console.log('🎲 Farkle - turn passing to:', nextPlayer);
         updateGameControlsState();
         
         // Broadcast turn change in multiplayer
@@ -1141,16 +1163,16 @@ function handleFarkleEndTurn() {
 
 // Function to show farkle message
 function showFarkleMessage() {
-    console.log('🎲 showFarkleMessage() called');
+    // console.log('🎲 showFarkleMessage() called');
     const farkleMessage = document.getElementById('farkle-message');
-    console.log('🎲 farkleMessage element:', farkleMessage);
+    // console.log('🎲 farkleMessage element:', farkleMessage);
     
     if (farkleMessage) {
         farkleMessage.innerHTML = `🎲 FARKLE! 💥<br><small>No scoring dice - all pending points lost!</small><br><button id="farkle-end-turn" class="btn btn-danger btn-sm mt-2">End Turn Now</button>`;
         farkleMessage.style.display = 'block';
         
-        console.log('🎲 Farkle message displayed, innerHTML:', farkleMessage.innerHTML);
-        console.log('🎲 Farkle message display style:', farkleMessage.style.display);
+        // console.log('🎲 Farkle message displayed, innerHTML:', farkleMessage.innerHTML);
+        // console.log('🎲 Farkle message display style:', farkleMessage.style.display);
         
         // Hide roll button and disable bank button immediately
         const rollButton = document.getElementById('roll-dice');
@@ -1158,33 +1180,33 @@ function showFarkleMessage() {
         
         if (rollButton) {
             rollButton.style.display = 'none';
-            console.log('🎲 Roll button hidden');
+            // console.log('🎲 Roll button hidden');
         }
         
         if (bankButton) {
             bankButton.disabled = true;
             bankButton.style.display = 'none';
-            console.log('🎲 Bank button disabled and hidden');
+            // console.log('🎲 Bank button disabled and hidden');
         }
         
         // Broadcast farkle alert to other players in multiplayer mode
         if (isInMultiplayerRoom && typeof broadcastFarkleAlert === 'function' && myPlayerId) {
-            console.log('💥 Calling broadcastFarkleAlert for:', myPlayerId);
+            // console.log('💥 Calling broadcastFarkleAlert for:', myPlayerId);
             broadcastFarkleAlert(myPlayerId);
         } else {
-            console.log('💥 Not broadcasting farkle alert:', {
-                isInMultiplayerRoom,
-                broadcastFarkleAlertExists: typeof broadcastFarkleAlert === 'function',
-                myPlayerId
-            });
+            // console.log('💥 Not broadcasting farkle alert:', {
+            //     isInMultiplayerRoom,
+            //     broadcastFarkleAlertExists: typeof broadcastFarkleAlert === 'function',
+            //     myPlayerId
+            // });
         }
         
         // Add event listener to the end turn button
         const endTurnButton = document.getElementById('farkle-end-turn');
-        console.log('🎲 End turn button:', endTurnButton);
+        // console.log('🎲 End turn button:', endTurnButton);
         if (endTurnButton) {
             endTurnButton.addEventListener('click', () => {
-                console.log('🎲 User clicked End Turn Now button');
+                // console.log('🎲 User clicked End Turn Now button');
                 // Clear any existing timeout
                 const timeoutId = farkleMessage.dataset.hideTimeout;
                 if (timeoutId) {
@@ -1200,7 +1222,7 @@ function showFarkleMessage() {
         // Hide the message after 5 seconds if user doesn't click the button
         const hideTimeout = setTimeout(() => {
             if (farkleMessage.style.display !== 'none') {
-                console.log('🎲 Farkle message timeout - auto-ending turn');
+                // console.log('🎲 Farkle message timeout - auto-ending turn');
                 farkleMessage.style.display = 'none';
                 // Automatically end turn after timeout
                 handleFarkleEndTurn();
@@ -1216,24 +1238,24 @@ function showFarkleMessage() {
 
 // Function to show farkle message for spectators
 function showSpectatorFarkleMessage(playerId) {
-    console.log('💥 showSpectatorFarkleMessage() called for:', playerId);
+    // console.log('💥 showSpectatorFarkleMessage() called for:', playerId);
     const farkleMessage = document.getElementById('farkle-message');
-    console.log('💥 farkleMessage element:', farkleMessage);
+    // console.log('💥 farkleMessage element:', farkleMessage);
     
     if (farkleMessage) {
         const playerName = playerId || 'Player';
         farkleMessage.innerHTML = `💥 ${playerName} FARKLED! 💥<br><small>No scoring dice - turn ended!</small>`;
         farkleMessage.style.display = 'block';
         
-        console.log('💥 Spectator farkle message displayed:', farkleMessage.innerHTML);
+        // console.log('💥 Spectator farkle message displayed:', farkleMessage.innerHTML);
         
         // Hide the message after 3 seconds for spectators
         setTimeout(() => {
             farkleMessage.style.display = 'none';
-            console.log('💥 Spectator farkle message hidden');
+            // console.log('💥 Spectator farkle message hidden');
         }, 3000);
         
-        console.log(`💥 Spectator farkle message displayed for ${playerName}`);
+        // console.log(`💥 Spectator farkle message displayed for ${playerName}`);
     } else {
         console.error('💥 ERROR: farkle-message element not found for spectator!');
     }
@@ -1789,7 +1811,7 @@ function displayOtherPlayerRollingAnimation(playerId) {
     // Only log once per player when animation starts, not every frame
     if (!this.loggedPlayers) this.loggedPlayers = new Set();
     if (!this.loggedPlayers.has(playerId)) {
-        console.log(`🎲 [displayOtherPlayerRollingAnimation] Starting animation for player: ${playerId}`);
+        // console.log(`🎲 [displayOtherPlayerRollingAnimation] Starting animation for player: ${playerId}`);
         this.loggedPlayers.add(playerId);
     }
     
@@ -1856,7 +1878,7 @@ function displayOtherPlayerRollingAnimation(playerId) {
     // Only log locked dice state once per player, not every animation frame
     if (!this.loggedLockedDice) this.loggedLockedDice = new Set();
     if (!this.loggedLockedDice.has(playerId)) {
-        console.log(`🎲 [displayOtherPlayerRollingAnimation] Player ${playerId} locked dice:`, playerLockedDice);
+        // console.log(`🎲 [displayOtherPlayerRollingAnimation] Player ${playerId} locked dice:`, playerLockedDice);
         this.loggedLockedDice.add(playerId);
     }
     
@@ -1933,7 +1955,7 @@ function updateDiceResults() {
         rollDiceButton.textContent = 'Lock Dice First';
         rollDiceButton.disabled = true; // Keep disabled until player locks dice
         hasRolledThisTurn = true; // Mark that player has rolled after dice settle
-        console.log('🎲 Dice settled - setting hasRolledThisTurn = true');
+        // console.log('🎲 Dice settled - setting hasRolledThisTurn = true');
         
         // Show final results
         const results = diceBodies.map((body, index) => {
@@ -2005,15 +2027,15 @@ function updateDiceResults() {
         
         // Broadcast dice results to other players if in multiplayer room
         if (isInMultiplayerRoom && typeof broadcastDiceResults === 'function' && myPlayerId) {
-            console.log('🎲 Broadcasting final dice results:', results);
+            // console.log('🎲 Broadcasting final dice results:', results);
             broadcastDiceResults(myPlayerId, results);
         } else {
-            console.log('🎲 Not broadcasting dice results - conditions not met:', {
-                isInMultiplayerRoom,
-                hasBroadcastFunction: typeof broadcastDiceResults === 'function',
-                myPlayerId,
-                results
-            });
+            // console.log('🎲 Not broadcasting dice results - conditions not met:', {
+            //     isInMultiplayerRoom,
+            //     hasBroadcastFunction: typeof broadcastDiceResults === 'function',
+            //     myPlayerId,
+            //     results
+            // });
         }
         
         // console.log('Settlement delay completed. Final results:', results);
@@ -2289,6 +2311,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof showAdminStatus === 'function') {
                     showAdminStatus('pass-turn-test', 'Error: nextTurn function not available', false);
                 }
+            }
+        });
+    }
+    
+    // Add event listener for test win condition button
+    const testWinConditionButton = document.getElementById('test-win-condition');
+    if (testWinConditionButton) {
+        testWinConditionButton.addEventListener('click', () => {
+            // Get current player - use myPlayerId for the actual player, not the turn system player
+            let currentPlayer;
+            if (typeof window.myPlayerId !== 'undefined' && window.myPlayerId) {
+                currentPlayer = window.myPlayerId;
+            } else if (typeof myPlayerId !== 'undefined' && myPlayerId) {
+                currentPlayer = myPlayerId;
+            } else if (typeof getCurrentTurn === 'function') {
+                currentPlayer = getCurrentTurn();
+            } else {
+                currentPlayer = 'Player1'; // Fallback
+            }
+            
+            // Get winning score from settings
+            const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { winningScore: 10000 };
+            const winningScore = gameSettings.winningScore || 10000;
+            
+            // Set current player's score to winning score
+            if (typeof playerScores !== 'undefined' && playerScores) {
+                playerScores[currentPlayer] = winningScore;
+                
+                // Update score display
+                if (typeof updateScoreDisplay === 'function') {
+                    updateScoreDisplay();
+                }
+                
+                // Trigger win condition check
+                if (typeof checkWinCondition === 'function') {
+                    checkWinCondition(currentPlayer, winningScore);
+                    showAdminStatus('test-win-condition', `✅ Win condition triggered for ${currentPlayer} with ${winningScore} points`);
+                } else {
+                    showAdminStatus('test-win-condition', 'Error: checkWinCondition function not available', false);
+                }
+            } else {
+                showAdminStatus('test-win-condition', 'Error: playerScores not available', false);
             }
         });
     }

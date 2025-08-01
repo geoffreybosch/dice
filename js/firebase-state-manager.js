@@ -195,14 +195,37 @@ function setupGameSettingsListener() {
 
 // Handle changes to overall game state
 function handleGameStateChange(gameState) {
-    const { currentTurn, turnStartTime, gamePhase } = gameState;
+    const { currentTurn, turnStartTime, gamePhase, state: winState, winTriggerPlayer, finalRoundTracker } = gameState;
     
-    // console.log('🎮 Game state change:', {
-    //     currentTurn,
-    //     turnStartTime,
-    //     gamePhase,
-    //     isMyTurn: currentTurn === currentPlayerId
-    // });
+    console.log('🎮 Firebase game state change received:', {
+        currentTurn,
+        turnStartTime,
+        gamePhase,
+        winState,
+        winTriggerPlayer,
+        finalRoundTracker,
+        isMyTurn: currentTurn === currentPlayerId,
+        myPlayerId: currentPlayerId
+    });
+    
+    // Handle win condition state changes
+    if (winState && typeof updateWinGameState === 'function') {
+        console.log('🎮 Calling updateWinGameState with:', { winState, winTriggerPlayer, finalRoundTracker });
+        console.log('🎮 updateWinGameState function type:', typeof updateWinGameState);
+        console.log('🎮 updateWinGameState function:', updateWinGameState);
+        
+        try {
+            updateWinGameState(winState, winTriggerPlayer, finalRoundTracker);
+            console.log('🎮 updateWinGameState call completed successfully');
+        } catch (error) {
+            console.error('🎮 ERROR calling updateWinGameState:', error);
+            console.error('🎮 Error stack:', error.stack);
+        }
+    } else if (winState) {
+        console.warn('🎮 updateWinGameState function not available!');
+        console.warn('🎮 winState:', winState);
+        console.warn('🎮 typeof updateWinGameState:', typeof updateWinGameState);
+    }
     
     // Set the Firebase current turn player for the isPlayerTurn function
     window.firebaseCurrentTurnPlayer = currentTurn;
@@ -710,6 +733,23 @@ function updateTurnIndicators(currentTurnPlayerId) {
         // console.log(`🔄 Clearing Farkle indicator for ${currentTurnPlayerId} as their turn starts`);
         setFarkleIndicatorState(currentTurnPlayerId, false);
         
+        // Check if this player is starting their final turn and show alert
+        if (typeof gameState !== 'undefined' && gameState === 'final_round' && 
+            typeof finalRoundTracker !== 'undefined' && 
+            finalRoundTracker.hasOwnProperty(currentTurnPlayerId) && 
+            !finalRoundTracker[currentTurnPlayerId] &&
+            typeof currentPlayerId !== 'undefined' && currentTurnPlayerId === currentPlayerId) {
+            
+            // This is the current player's final turn - show them a persistent alert
+            if (typeof showGameAlert === 'function') {
+                showGameAlert(
+                    `⏳ This is your FINAL TURN! ⏳<br><small>Another player has reached the winning score - make it count!</small>`,
+                    'warning',
+                    0  // 0 means no timeout - alert stays visible for the entire turn
+                );
+            }
+        }
+        
         // Clear Farkle state from Firebase
         if (currentRoomId && database) {
             const farkleStateRef = database.ref(`rooms/${currentRoomId}/farkleStates/${currentTurnPlayerId}`);
@@ -914,8 +954,39 @@ function startMyTurn() {
 
 // End the current player's turn
 function endMyTurn() {
+    console.log('🎯 endMyTurn() called');
+    console.log('🎯 currentPlayerId at start of endMyTurn:', currentPlayerId);
+    
     // console.log('🎯 Ending my turn');
     setPlayerState(PLAYER_STATES.ENDED_TURN);
+    
+    // Check final round progress if we're in final round
+    if (typeof checkFinalRoundProgress === 'function' && currentPlayerId) {
+        console.log('🏆 Checking final round progress for', currentPlayerId, '(from endMyTurn)');
+        checkFinalRoundProgress(currentPlayerId);
+    }
+    
+    // Check if game has ended and show win modal if needed
+    // We need to check this via a function call since gameState might not be in scope
+    if (typeof checkIfGameEndedAndShowModal === 'function') {
+        console.log('🏆 Calling checkIfGameEndedAndShowModal after turn end');
+        checkIfGameEndedAndShowModal();
+    } else if (typeof gameState !== 'undefined' && gameState === 'ended') {
+        console.log('🏆 Game has ended - checking if we should show win modal after turn end');
+        if (typeof showWinModal === 'function' && typeof getAllPlayerScores === 'function') {
+            const scores = getAllPlayerScores();
+            const players = Object.keys(scores);
+            
+            if (players.length > 0) {
+                const sortedPlayers = players.sort((a, b) => scores[b] - scores[a]);
+                const winner = sortedPlayers[0];
+                const winnerScore = scores[winner];
+                
+                console.log('🏆 Showing win modal after turn end');
+                showWinModal(winner, winnerScore, sortedPlayers, scores);
+            }
+        }
+    }
     
     // End critical operation
     if (typeof endCriticalOperation === 'function') {
@@ -974,22 +1045,22 @@ function setupDiceResultsListener() {
     
     diceResultsListener = diceResultsRef.on('child_added', (snapshot) => {
         const diceData = snapshot.val();
-        console.log('🎲 Dice results received:', diceData);
+        // console.log('🎲 Dice results received:', diceData);
         
         if (diceData && diceData.playerId !== currentPlayerId) {
-            console.log(`🎲 Processing dice results from other player ${diceData.playerId}`);
+            // console.log(`🎲 Processing dice results from other player ${diceData.playerId}`);
             
             // Stop rolling animation for this player since dice results are now available
             if (typeof window.otherPlayersRolling !== 'undefined') {
                 window.otherPlayersRolling.delete(diceData.playerId);
-                console.log(`🎲 Removed ${diceData.playerId} from rolling players - dice results received`);
+                // console.log(`🎲 Removed ${diceData.playerId} from rolling players - dice results received`);
                 
                 // Stop animation interval if no players are rolling
                 if (window.otherPlayerAnimationInterval !== null && 
                     window.otherPlayersRolling.size === 0) {
                     clearInterval(window.otherPlayerAnimationInterval);
                     window.otherPlayerAnimationInterval = null;
-                    console.log('🎲 Stopped rolling animation - no more players rolling');
+                    // console.log('🎲 Stopped rolling animation - no more players rolling');
                 }
             }
             
@@ -1001,7 +1072,7 @@ function setupDiceResultsListener() {
                 });
             }
         } else {
-            console.log('🎲 Ignoring dice results - same player or invalid data');
+            // console.log('🎲 Ignoring dice results - same player or invalid data');
         }
     });
 }
@@ -1014,19 +1085,19 @@ function setupRollingStartListener() {
     
     rollingStartListener = rollingStartRef.on('child_added', (snapshot) => {
         const rollingData = snapshot.val();
-        console.log('🎲 Rolling start received:', rollingData);
+        // console.log('🎲 Rolling start received:', rollingData);
         
         if (rollingData && rollingData.playerId !== currentPlayerId) {
-            console.log(`🎲 Starting animation for spectator - player ${rollingData.playerId} started rolling`);
+            // console.log(`🎲 Starting animation for spectator - player ${rollingData.playerId} started rolling`);
             // Start rolling animation for spectators
             if (typeof window.otherPlayersRolling !== 'undefined') {
                 window.otherPlayersRolling.add(rollingData.playerId);
-                console.log('🎲 Added to otherPlayersRolling set:', window.otherPlayersRolling);
+                // console.log('🎲 Added to otherPlayersRolling set:', window.otherPlayersRolling);
                 
                 // Start animation interval if not already running
                 if (window.otherPlayerAnimationInterval === null && 
                     window.otherPlayersRolling.size > 0) {
-                    console.log('🎲 Starting animation interval for spectators');
+                    // console.log('🎲 Starting animation interval for spectators');
                     window.otherPlayerAnimationInterval = setInterval(() => {
                         if (window.otherPlayersRolling.size > 0 && typeof displayOtherPlayerRollingAnimation === 'function') {
                             // Get the first rolling player
@@ -1035,11 +1106,11 @@ function setupRollingStartListener() {
                         }
                     }, 150);
                 } else {
-                    console.log('🎲 Animation interval already running or no rolling players');
+                    // console.log('🎲 Animation interval already running or no rolling players');
                 }
             }
         } else {
-            console.log('🎲 Ignoring rolling start - same player or invalid data');
+            // console.log('🎲 Ignoring rolling start - same player or invalid data');
         }
     });
 }
@@ -1076,25 +1147,25 @@ function setupLockedDiceListener() {
     lockedDiceListener = lockedDiceRef.on('child_added', (snapshot) => {
         try {
             const lockedData = snapshot.val();
-            console.log('🔒 Locked dice received:', lockedData);
-            console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
+            // console.log('🔒 Locked dice received:', lockedData);
+            // console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
             
             if (lockedData && lockedData.playerId !== currentPlayerId) {
-                console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
-                console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
-                console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
+                // console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
+                // console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
+                // console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
                 
                 // Call function to display other players' locked dice
                 if (typeof displayOtherPlayerLockedDice === 'function') {
-                    console.log('🔒 Calling displayOtherPlayerLockedDice...');
+                    // console.log('🔒 Calling displayOtherPlayerLockedDice...');
                     displayOtherPlayerLockedDice({
                         playerId: lockedData.playerId,
                         lockedDiceIndices: lockedData.lockedDiceIndices,
                         diceResults: lockedData.diceResults
                     });
-                    console.log('🔒 displayOtherPlayerLockedDice call completed');
+                    // console.log('🔒 displayOtherPlayerLockedDice call completed');
                 } else {
-                    console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
+                    // console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
                     // console.error('🔒 Available functions in window:', Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('display')));
                 }
                 
@@ -1180,13 +1251,13 @@ function setupHotDiceListener() {
     
     hotDiceListener = hotDiceRef.on('child_added', (snapshot) => {
         const hotDiceData = snapshot.val();
-        console.log('🔥 Hot dice listener triggered:', hotDiceData);
+        // console.log('🔥 Hot dice listener triggered:', hotDiceData);
         
         if (hotDiceData && hotDiceData.playerId !== currentPlayerId) {
-            console.log('🔥 Hot dice event received for other player:', hotDiceData.playerId);
-            console.log('🔥 Current player ID:', currentPlayerId);
-            console.log('🔥 showSpectatorHotDiceMessage function exists:', typeof showSpectatorHotDiceMessage === 'function');
-            console.log('🔥 window.showSpectatorHotDiceMessage exists:', typeof window.showSpectatorHotDiceMessage === 'function');
+            // console.log('🔥 Hot dice event received for other player:', hotDiceData.playerId);
+            // console.log('🔥 Current player ID:', currentPlayerId);
+            // console.log('🔥 showSpectatorHotDiceMessage function exists:', typeof showSpectatorHotDiceMessage === 'function');
+            // console.log('🔥 window.showSpectatorHotDiceMessage exists:', typeof window.showSpectatorHotDiceMessage === 'function');
             
             // Show hot dice message for spectator
             if (typeof showSpectatorHotDiceMessage === 'function') {
@@ -1197,7 +1268,7 @@ function setupHotDiceListener() {
                 console.error('🔥 showSpectatorHotDiceMessage function not found!');
             }
         } else {
-            console.log('🔥 Ignoring hot dice event - same player or invalid data');
+            // console.log('🔥 Ignoring hot dice event - same player or invalid data');
         }
     });
 }
@@ -1210,13 +1281,13 @@ function setupFarkleAlertListener() {
     
     farkleAlertListener = farkleAlertRef.on('child_added', (snapshot) => {
         const farkleData = snapshot.val();
-        console.log('💥 Farkle alert listener triggered:', farkleData);
+        // console.log('💥 Farkle alert listener triggered:', farkleData);
         
         if (farkleData && farkleData.playerId !== currentPlayerId) {
-            console.log('💥 Farkle alert received for other player:', farkleData.playerId);
-            console.log('💥 Current player ID:', currentPlayerId);
-            console.log('💥 showSpectatorFarkleMessage function exists:', typeof showSpectatorFarkleMessage === 'function');
-            console.log('💥 window.showSpectatorFarkleMessage exists:', typeof window.showSpectatorFarkleMessage === 'function');
+            // console.log('💥 Farkle alert received for other player:', farkleData.playerId);
+            // console.log('💥 Current player ID:', currentPlayerId);
+            // console.log('💥 showSpectatorFarkleMessage function exists:', typeof showSpectatorFarkleMessage === 'function');
+            // console.log('💥 window.showSpectatorFarkleMessage exists:', typeof window.showSpectatorFarkleMessage === 'function');
             
             // Show farkle message for spectator
             if (typeof showSpectatorFarkleMessage === 'function') {
@@ -1227,7 +1298,7 @@ function setupFarkleAlertListener() {
                 console.error('💥 showSpectatorFarkleMessage function not found!');
             }
         } else {
-            console.log('💥 Ignoring farkle alert - same player or invalid data');
+            // console.log('💥 Ignoring farkle alert - same player or invalid data');
         }
     });
 }
@@ -1236,7 +1307,7 @@ function setupFarkleAlertListener() {
 function broadcastDiceResults(playerId, diceResults) {
     if (!currentRoomId || !database) return;
     
-    console.log(`🎲 Broadcasting dice results via Firebase for ${playerId}:`, diceResults);
+    // console.log(`🎲 Broadcasting dice results via Firebase for ${playerId}:`, diceResults);
     
     const diceResultsRef = database.ref(`rooms/${currentRoomId}/diceResults`);
     diceResultsRef.push({
@@ -1244,7 +1315,7 @@ function broadcastDiceResults(playerId, diceResults) {
         diceResults: diceResults,
         timestamp: Date.now()
     }).then(() => {
-        console.log('🎲 Dice results broadcast successfully');
+        // console.log('🎲 Dice results broadcast successfully');
     }).catch((error) => {
         console.error('❌ Error broadcasting dice results:', error);
     });
@@ -1254,14 +1325,14 @@ function broadcastDiceResults(playerId, diceResults) {
 function broadcastRollingStart(playerId) {
     if (!currentRoomId || !database) return;
     
-    console.log(`🎲 Broadcasting rolling start via Firebase for ${playerId}`);
+    // console.log(`🎲 Broadcasting rolling start via Firebase for ${playerId}`);
     
     const rollingStartRef = database.ref(`rooms/${currentRoomId}/rollingStart`);
     rollingStartRef.push({
         playerId: playerId,
         timestamp: Date.now()
     }).then(() => {
-        console.log('🎲 Rolling start broadcast successfully');
+        // console.log('🎲 Rolling start broadcast successfully');
     }).catch((error) => {
         console.error('❌ Error broadcasting rolling start:', error);
     });
@@ -1290,7 +1361,7 @@ function broadcastDiceSelection(playerId, selectedDiceIndices, diceResults) {
 function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
     if (!currentRoomId || !database) return;
     
-    console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
+    // console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
     
     const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
     lockedDiceRef.push({
@@ -1299,7 +1370,7 @@ function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
         diceResults: diceResults, // Include current dice results for context
         timestamp: Date.now()
     }).then(() => {
-        console.log('🔒 Locked dice broadcast successfully');
+        // console.log('🔒 Locked dice broadcast successfully');
     }).catch((error) => {
         console.error('❌ Error broadcasting locked dice:', error);
     });
@@ -1346,6 +1417,28 @@ function broadcastGameSettings(gameSettings) {
     });
 }
 
+// Broadcast game state (win conditions, final round) to all players in the room
+function broadcastGameState(gameState, winTriggerPlayer = null, finalRoundTracker = {}) {
+    if (!currentRoomId || !database) {
+        // console.warn('Cannot broadcast game state - no room or database connection');
+        return;
+    }
+    
+    // console.log('🏆 Broadcasting game state to all players:', { gameState, winTriggerPlayer, finalRoundTracker });
+    
+    database.ref(`rooms/${currentRoomId}/gameState`).set({
+        state: gameState,
+        winTriggerPlayer: winTriggerPlayer,
+        finalRoundTracker: finalRoundTracker,
+        updatedBy: currentPlayerId,
+        timestamp: Date.now()
+    }).then(() => {
+        // console.log('✅ Game state broadcast successfully');
+    }).catch((error) => {
+        // console.error('❌ Error broadcasting game state:', error);
+    });
+}
+
 // Broadcast hot dice event to all players in the room
 function broadcastHotDice(playerId) {
     console.log(`🔥 broadcastHotDice called for ${playerId}, roomId: ${currentRoomId}, database exists: ${!!database}`);
@@ -1355,14 +1448,14 @@ function broadcastHotDice(playerId) {
         return;
     }
     
-    console.log(`🔥 Broadcasting hot dice event via Firebase for ${playerId}`);
+    // console.log(`🔥 Broadcasting hot dice event via Firebase for ${playerId}`);
     
     const hotDiceRef = database.ref(`rooms/${currentRoomId}/hotDiceEvents`);
     hotDiceRef.push({
         playerId: playerId,
         timestamp: Date.now()
     }).then(() => {
-        console.log('🔥 Hot dice event broadcast successfully');
+        // console.log('🔥 Hot dice event broadcast successfully');
     }).catch((error) => {
         console.error('❌ Error broadcasting hot dice event:', error);
     });
@@ -1370,21 +1463,21 @@ function broadcastHotDice(playerId) {
 
 // Broadcast farkle alert to all players in the room
 function broadcastFarkleAlert(playerId) {
-    console.log(`💥 broadcastFarkleAlert called for ${playerId}, roomId: ${currentRoomId}, database exists: ${!!database}`);
+    // console.log(`💥 broadcastFarkleAlert called for ${playerId}, roomId: ${currentRoomId}, database exists: ${!!database}`);
     
     if (!currentRoomId || !database) {
         console.error('💥 Cannot broadcast farkle alert - missing roomId or database');
         return;
     }
     
-    console.log(`💥 Broadcasting farkle alert via Firebase for ${playerId}`);
+    // console.log(`💥 Broadcasting farkle alert via Firebase for ${playerId}`);
     
     const farkleAlertRef = database.ref(`rooms/${currentRoomId}/farkleAlerts`);
     farkleAlertRef.push({
         playerId: playerId,
         timestamp: Date.now()
     }).then(() => {
-        console.log('💥 Farkle alert broadcast successfully');
+        // console.log('💥 Farkle alert broadcast successfully');
     }).catch((error) => {
         console.error('❌ Error broadcasting farkle alert:', error);
     });
@@ -1548,6 +1641,7 @@ window.broadcastDiceResults = broadcastDiceResults;
 window.broadcastRollingStart = broadcastRollingStart;
 window.broadcastMaterialChange = broadcastMaterialChange;
 window.broadcastGameSettings = broadcastGameSettings;
+window.broadcastGameState = broadcastGameState;
 window.broadcastHotDice = broadcastHotDice;
 window.broadcastFarkleAlert = broadcastFarkleAlert;
 window.resetAllScores = resetAllScores;
@@ -1648,6 +1742,7 @@ if (typeof module !== 'undefined' && module.exports) {
         broadcastRollingStart,
         broadcastMaterialChange,
         broadcastGameSettings,
+        broadcastGameState,
         broadcastHotDice,
         broadcastFarkleAlert,
         resetAllScores,
