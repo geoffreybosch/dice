@@ -419,6 +419,7 @@ function updatePlayerListUI(players) {
         // Score badge
         const scoreBadge = document.createElement('span');
         scoreBadge.className = 'badge bg-primary rounded-pill';
+        scoreBadge.style.fontSize = '1.4em';
         scoreBadge.textContent = player.score || 0;
         
         li.appendChild(playerNameContainer);

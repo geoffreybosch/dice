@@ -97,6 +97,7 @@ function updatePlayerList(snapshot) {
 
             const scoreBadge = document.createElement('span');
             scoreBadge.className = 'badge bg-primary rounded-pill';
+            scoreBadge.style.fontSize = '1.4em';
             scoreBadge.textContent = playerData.score;
 
             listItem.appendChild(playerNameContainer);

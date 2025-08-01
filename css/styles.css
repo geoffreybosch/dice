@@ -31,13 +31,26 @@
     justify-content: center;
 }
 
-/* Enhanced Body Background */
+/* Enhanced HTML and Body Background */
+html {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
+}
+
+/* Fix for Bootstrap row negative margins that cause purple edges */
+.container-fluid .row.flex-grow-1 {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 /* Enhanced Canvas */
@@ -1056,7 +1069,7 @@ canvas {
     }
     
     #player-list .badge.bg-primary.rounded-pill {
-        font-size: 1.1rem !important;
+        font-size: 2.1rem !important;
         padding: 0.5rem 0.75rem !important;
         min-width: 50px !important;
     }
@@ -1199,7 +1212,7 @@ canvas {
 /* Large screens enhancements */
 @media (min-width: 992px) {
     .bg-dark {
-        border-radius: 15px 0 0 15px;
+        border-radius: 0 0 0 0;
     }
     
     #admin-section, #player-list {

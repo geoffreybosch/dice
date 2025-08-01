@@ -326,6 +326,7 @@ function updatePlayerListElement(listElement, players) {
         scoreBadge.className = isMobile ? 
             'badge bg-primary rounded-pill small' :
             'badge bg-primary rounded-pill';
+        scoreBadge.style.fontSize = '1.4em';
         scoreBadge.textContent = players[id].score || 0;
         
         li.appendChild(playerNameContainer);
