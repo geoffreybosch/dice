@@ -131,7 +131,14 @@ class WelcomeModal {
         // Scoring guide button listener
         const scoringGuideBtn = document.getElementById('welcome-scoring-guide-btn');
         if (scoringGuideBtn) {
-            scoringGuideBtn.addEventListener('click', () => this.showScoringGuide());
+            console.log('Setting up scoring guide button listener');
+            scoringGuideBtn.addEventListener('click', (e) => {
+                console.log('Scoring guide button clicked');
+                e.preventDefault();
+                this.showScoringGuide();
+            });
+        } else {
+            console.warn('Scoring guide button not found');
         }
         
         // Load saved values
@@ -177,21 +184,54 @@ class WelcomeModal {
     }
     
     showScoringGuide() {
-        // Show the scoring modal over the welcome modal
-        const scoringModal = new bootstrap.Modal(document.getElementById('scoringModal'));
-        if (scoringModal) {
-            // Increase z-index to appear above welcome modal
+        console.log('showScoringGuide method called');
+        
+        try {
+            // Show the scoring modal over the welcome modal
             const scoringModalElement = document.getElementById('scoringModal');
-            if (scoringModalElement) {
-                scoringModalElement.style.zIndex = '1060'; // Higher than default modal z-index (1055)
-                
-                // Listen for when the scoring modal is hidden to reset z-index
-                scoringModalElement.addEventListener('hidden.bs.modal', () => {
-                    scoringModalElement.style.zIndex = '';
-                }, { once: true });
+            if (!scoringModalElement) {
+                console.error('Scoring modal element not found');
+                return;
             }
             
+            console.log('Creating Bootstrap modal instance');
+            
+            // Check if bootstrap is available
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap is not loaded');
+                // Fallback: try to show modal without Bootstrap
+                scoringModalElement.style.display = 'block';
+                scoringModalElement.classList.add('show');
+                scoringModalElement.style.zIndex = '1060';
+                return;
+            }
+            
+            const scoringModal = new bootstrap.Modal(scoringModalElement);
+            console.log('Bootstrap modal created:', scoringModal);
+            
+            // Increase z-index to appear above welcome modal
+            scoringModalElement.style.zIndex = '1060'; // Higher than default modal z-index (1055)
+            console.log('Z-index set to 1060');
+            
+            // Listen for when the scoring modal is hidden to reset z-index
+            scoringModalElement.addEventListener('hidden.bs.modal', () => {
+                console.log('Scoring modal hidden, resetting z-index');
+                scoringModalElement.style.zIndex = '';
+            }, { once: true });
+            
+            console.log('Showing modal');
             scoringModal.show();
+            console.log('Modal show() called');
+            
+        } catch (error) {
+            console.error('Error in showScoringGuide:', error);
+            // Fallback: try basic modal display
+            const scoringModalElement = document.getElementById('scoringModal');
+            if (scoringModalElement) {
+                scoringModalElement.style.display = 'block';
+                scoringModalElement.classList.add('show');
+                scoringModalElement.style.zIndex = '1060';
+            }
         }
     }
     
