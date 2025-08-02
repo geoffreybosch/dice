@@ -128,6 +128,12 @@ class WelcomeModal {
             this.refreshRoomsBtn.addEventListener('click', () => this.loadAvailableRooms());
         }
         
+        // Scoring guide button listener
+        const scoringGuideBtn = document.getElementById('welcome-scoring-guide-btn');
+        if (scoringGuideBtn) {
+            scoringGuideBtn.addEventListener('click', () => this.showScoringGuide());
+        }
+        
         // Load saved values
         this.loadSavedValues();
     }
@@ -168,6 +174,14 @@ class WelcomeModal {
         }
         
         this.validateJoinInputs();
+    }
+    
+    showScoringGuide() {
+        // Show the scoring modal over the welcome modal
+        const scoringModal = new bootstrap.Modal(document.getElementById('scoringModal'));
+        if (scoringModal) {
+            scoringModal.show();
+        }
     }
     
     loadSavedValues() {
