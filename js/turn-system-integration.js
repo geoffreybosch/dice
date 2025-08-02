@@ -595,11 +595,14 @@ function checkWinCondition(playerId, newScore) {
             if (currentTurnPlayer === playerId) {
                 console.log(`🏆 Ending ${playerId}'s turn after reaching winning score`);
                 
-                // Use Firebase state management if available
+                // Check if this is the current client's turn (they should end their own turn)
+                const myPlayerIdValue = (typeof window.myPlayerId !== 'undefined' && window.myPlayerId) || 
+                                       (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId);
+                
+                // Use Firebase state management if available and this is the current client's turn
                 if (typeof isInMultiplayerRoom !== 'undefined' && isInMultiplayerRoom && typeof endMyTurn === 'function' && 
-                    ((typeof window.myPlayerId !== 'undefined' && window.myPlayerId === playerId) ||
-                    (typeof window.currentPlayerId !== 'undefined' && window.currentPlayerId === playerId))) {
-                    console.log(`🏆 Using Firebase to end ${playerId}'s winning turn`);
+                    myPlayerIdValue === playerId) {
+                    console.log(`🏆 Using Firebase to end ${playerId}'s winning turn (current client)`);
                     endMyTurn();
                 } else if (typeof nextTurn === 'function') {
                     // Fallback to local turn management
