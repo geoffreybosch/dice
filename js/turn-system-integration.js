@@ -95,7 +95,7 @@ function nextTurn() {
         // This prevents incorrectly marking players as finished when they haven't taken their turn
         if (finalRoundTracker.hasOwnProperty(oldPlayer)) {
             console.log(`🔄 ${oldPlayer} is in final round tracker - checking their progress`);
-            checkFinalRoundProgress(oldPlayer);
+            checkFinalRoundProgress(oldPlayer, true); // Pass true to indicate turn is ending
         } else {
             console.log(`🔄 ${oldPlayer} is not in final round tracker (probably the winning player) - skipping progress check`);
         }
@@ -611,22 +611,22 @@ function checkWinCondition(playerId, newScore) {
     }
 }
 
-function checkFinalRoundProgress(playerId) {
+function checkFinalRoundProgress(playerId, isTurnEnding = false) {
     if (gameState !== 'final_round') return;
     
-    console.log(`🏆 checkFinalRoundProgress called for: ${playerId}`);
+    console.log(`🏆 checkFinalRoundProgress called for: ${playerId} (isTurnEnding: ${isTurnEnding})`);
     console.log(`🏆 Current finalRoundTracker:`, JSON.stringify(finalRoundTracker));
     console.log(`🏆 winTriggerPlayer: ${winTriggerPlayer}`);
     
     // Mark this player as having completed their final turn
     if (finalRoundTracker.hasOwnProperty(playerId)) {
-        // IMPORTANT: Only mark as completed if this player is not the current player
-        // This prevents marking a player as "finished" when they're just starting their turn
+        // If this is called when a turn is ending, always mark as completed
+        // Otherwise, only mark as completed if this player is not the current player
         const currentTurnPlayer = (typeof getCurrentTurn === 'function') ? getCurrentTurn() : currentPlayerTurn;
         
-        if (currentTurnPlayer === playerId) {
+        if (!isTurnEnding && currentTurnPlayer === playerId) {
             console.log(`🏆 ${playerId} is the current player - NOT marking as completed (they're just starting their final turn)`);
-            return; // Don't mark as completed if they're the current player
+            return; // Don't mark as completed if they're the current player and not ending turn
         }
         
         finalRoundTracker[playerId] = true;
@@ -655,7 +655,95 @@ function checkFinalRoundProgress(playerId) {
         }
     } else {
         console.log('🏆 Still waiting for players to complete final turns:', finalRoundTracker);
+        
+        // Safeguard: Check if we might be stuck in final round due to tracking issues
+        // If someone has a winning score but the game hasn't ended, force end it
+        setTimeout(() => {
+            if (gameState === 'final_round') {
+                console.log('🏆 Safeguard check: Still in final round after timeout, checking scores...');
+                checkForStuckFinalRound();
+            }
+        }, 2000); // 2 second delay to allow for normal completion
     }
+}
+
+function checkForStuckFinalRound() {
+    if (gameState !== 'final_round') return;
+    
+    console.log('🏆 Checking for stuck final round condition...');
+    
+    // Check if any player has a winning score
+    let winningScore = 10000;
+    if (typeof getGameSettings === 'function') {
+        const gameSettings = getGameSettings();
+        if (gameSettings && typeof gameSettings.winningScore === 'number' && gameSettings.winningScore > 0) {
+            winningScore = gameSettings.winningScore;
+        }
+    }
+    
+    // Check current scores to see if someone has actually won
+    fetchCurrentScoresFromFirebase((scores) => {
+        const players = Object.keys(scores);
+        const hasWinner = players.some(player => scores[player] >= winningScore);
+        
+        if (hasWinner) {
+            console.log('🏆 Safeguard: Found winner with winning score, forcing game end');
+            console.log('🏆 Safeguard: Current scores:', scores);
+            console.log('🏆 Safeguard: Final round tracker state:', finalRoundTracker);
+            
+            // Force end the game
+            endGame();
+            
+            // Broadcast final game state
+            if (isInMultiplayerRoom && typeof broadcastGameState === 'function') {
+                broadcastGameState('ended', winTriggerPlayer, finalRoundTracker);
+            }
+        } else {
+            console.log('🏆 Safeguard: No winner found, continuing final round');
+        }
+    });
+}
+
+// Debug function to manually check and fix stuck game states
+function debugGameState() {
+    console.log('🛠️ === DEBUG GAME STATE ===');
+    console.log('🛠️ gameState:', gameState);
+    console.log('🛠️ winTriggerPlayer:', winTriggerPlayer);
+    console.log('🛠️ finalRoundTracker:', JSON.stringify(finalRoundTracker));
+    console.log('🛠️ Current player scores:', playerScores);
+    
+    if (gameState === 'final_round') {
+        console.log('🛠️ Game is in final round - checking if it should end...');
+        checkForStuckFinalRound();
+    } else if (gameState === 'ended') {
+        console.log('🛠️ Game has ended - checking if win modal should show...');
+        checkIfGameEndedAndShowModal();
+    } else {
+        console.log('🛠️ Game is in playing state');
+        
+        // Check if any player has reached winning score but game hasn't entered final round
+        let winningScore = 10000;
+        if (typeof getGameSettings === 'function') {
+            const gameSettings = getGameSettings();
+            if (gameSettings && typeof gameSettings.winningScore === 'number' && gameSettings.winningScore > 0) {
+                winningScore = gameSettings.winningScore;
+            }
+        }
+        
+        const playersAtWinningScore = Object.keys(playerScores).filter(player => playerScores[player] >= winningScore);
+        
+        if (playersAtWinningScore.length > 0) {
+            console.log('🛠️ Found players at winning score but game not in final round:', playersAtWinningScore);
+            console.log('🛠️ This may indicate a win detection bug');
+            
+            // Force trigger win condition for the first player found
+            const winningPlayer = playersAtWinningScore[0];
+            console.log('🛠️ Force triggering win condition for:', winningPlayer);
+            checkWinCondition(winningPlayer, playerScores[winningPlayer]);
+        }
+    }
+    
+    console.log('🛠️ === END DEBUG ===');
 }
 
 function endGame() {
@@ -1461,6 +1549,8 @@ if (typeof module !== 'undefined' && module.exports) {
         // Win detection functions
         checkWinCondition,
         checkFinalRoundProgress,
+        checkForStuckFinalRound,
+        debugGameState,
         endGame,
         showWinModal,
         setupWinModalHandlers,

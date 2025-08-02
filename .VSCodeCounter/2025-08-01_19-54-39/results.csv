@@ -1,0 +1,27 @@
+"filename", "language", "HTML", "Markdown", "JavaScript", "PostCSS", "JSON", "Shell Script", "comment", "blank", "total"
+"/Users/brandon/Documents/GitHub/farkle/css/styles.css", "PostCSS", 0, 0, 0, 1158, 0, 0, 85, 225, 1468
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/ROOM_CLEANUP.md", "Markdown", 0, 105, 0, 0, 0, 0, 0, 37, 142
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/deploy.sh", "Shell Script", 0, 0, 0, 0, 0, 19, 6, 7, 32
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/firebase.json", "JSON", 0, 0, 0, 0, 18, 0, 0, 1, 19
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/functions/.eslintrc.js", "JavaScript", 0, 0, 28, 0, 0, 0, 0, 1, 29
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/functions/index.js", "JavaScript", 0, 0, 156, 0, 0, 0, 46, 35, 237
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/functions/package-lock.json", "JSON", 0, 0, 0, 0, 7128, 0, 0, 1, 7129
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/functions/package.json", "JSON", 0, 0, 0, 0, 26, 0, 0, 1, 27
+"/Users/brandon/Documents/GitHub/farkle/firebase-cloud-functions/package-lock.json", "JSON", 0, 0, 0, 0, 6, 0, 0, 1, 7
+"/Users/brandon/Documents/GitHub/farkle/index.html", "HTML", 558, 0, 0, 0, 0, 0, 25, 35, 618
+"/Users/brandon/Documents/GitHub/farkle/js/dice-styling-integration.js", "JavaScript", 0, 0, 52, 0, 0, 0, 20, 14, 86
+"/Users/brandon/Documents/GitHub/farkle/js/dice-styling-manager.js", "JavaScript", 0, 0, 274, 0, 0, 0, 112, 75, 461
+"/Users/brandon/Documents/GitHub/farkle/js/farkle-scoring.js", "JavaScript", 0, 0, 175, 0, 0, 0, 37, 26, 238
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-config.js", "JavaScript", 0, 0, 218, 0, 0, 0, 66, 51, 335
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-room-manager.js", "JavaScript", 0, 0, 409, 0, 0, 0, 72, 91, 572
+"/Users/brandon/Documents/GitHub/farkle/js/firebase-state-manager.js", "JavaScript", 0, 0, 1109, 0, 0, 0, 399, 296, 1804
+"/Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-admin.js", "JavaScript", 0, 0, 142, 0, 0, 0, 39, 26, 207
+"/Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-database.js", "JavaScript", 0, 0, 12, 0, 0, 0, 12, 4, 28
+"/Users/brandon/Documents/GitHub/farkle/js/firebase/firebase-init.js", "JavaScript", 0, 0, 13, 0, 0, 0, 5, 5, 23
+"/Users/brandon/Documents/GitHub/farkle/js/game-settings.js", "JavaScript", 0, 0, 230, 0, 0, 0, 96, 58, 384
+"/Users/brandon/Documents/GitHub/farkle/js/game.js", "JavaScript", 0, 0, 1697, 0, 0, 0, 629, 469, 2795
+"/Users/brandon/Documents/GitHub/farkle/js/material-config.js", "JavaScript", 0, 0, 325, 0, 0, 0, 27, 22, 374
+"/Users/brandon/Documents/GitHub/farkle/js/turn-system-integration.js", "JavaScript", 0, 0, 979, 0, 0, 0, 273, 234, 1486
+"/Users/brandon/Documents/GitHub/farkle/js/welcome-modal.js", "JavaScript", 0, 0, 446, 0, 0, 0, 90, 122, 658
+"/Users/brandon/Documents/GitHub/farkle/todos.md", "Markdown", 0, 12, 0, 0, 0, 0, 0, 7, 19
+"Total", "-", 558, 117, 6265, 1158, 7178, 19, 2039, 1844, 19178

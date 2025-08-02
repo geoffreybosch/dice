@@ -992,7 +992,7 @@ function endMyTurn() {
     // Check final round progress if we're in final round
     if (typeof checkFinalRoundProgress === 'function' && currentPlayerId) {
         console.log('🏆 Checking final round progress for', currentPlayerId, '(from endMyTurn)');
-        checkFinalRoundProgress(currentPlayerId);
+        checkFinalRoundProgress(currentPlayerId, true); // Pass true to indicate turn is ending
     }
     
     // Check if game has ended and show win modal if needed
