@@ -262,6 +262,35 @@ function handlePlayersStateChange(players) {
     const currentTurnPlayer = getCurrentTurnPlayer(players);
     const myState = players[currentPlayerId]?.state;
     
+    // Check if current turn player has disconnected and end their turn
+    if (window.firebaseCurrentTurnPlayer && players[window.firebaseCurrentTurnPlayer]) {
+        const currentTurnPlayerData = players[window.firebaseCurrentTurnPlayer];
+        if (currentTurnPlayerData.isConnected === false && 
+            currentTurnPlayerData.state === PLAYER_STATES.ROLLING) {
+            console.log(`🚪 Player ${window.firebaseCurrentTurnPlayer} disconnected during their turn - ending their turn`);
+            
+            // Set the disconnected player's state to ended_turn
+            setPlayerState(PLAYER_STATES.ENDED_TURN, window.firebaseCurrentTurnPlayer);
+            
+            // Clear any locked dice for the disconnected player
+            if (typeof clearAllLockedDiceFromFirebase === 'function') {
+                clearAllLockedDiceFromFirebase();
+            }
+            
+            // Show notification about the disconnection
+            if (typeof showGameAlert === 'function') {
+                showGameAlert(
+                    `⚠️ Player ${window.firebaseCurrentTurnPlayer} disconnected during their turn. Turn ended automatically.`,
+                    'warning',
+                    5000
+                );
+            }
+            
+            // The turn will advance automatically via checkAndAdvanceTurn
+            return; // Exit early to let the state update propagate
+        }
+    }
+    
     // Initialize Farkle indicator states for all players
     initializeFarkleStatesForPlayers(players);
     
@@ -1012,6 +1041,24 @@ function endMyTurn() {
 function handlePlayerBanking(points, newScore) {
     // console.log('💰 Player banking points:', points, 'New score:', newScore);
     // console.log('💰 Banking for player:', currentPlayerId, 'in room:', currentRoomId);
+    
+    // Get current player score to check if they're starting from 0
+    const currentPlayerScore = (typeof getPlayerScore === 'function') ? getPlayerScore(currentPlayerId) : 0;
+    const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { minimumScore: 500 };
+    const minimumRequired = gameSettings.minimumScore || 500;
+    
+    // Check minimum score requirement for players with 0 points
+    if (currentPlayerScore === 0 && points < minimumRequired) {
+        // Show error message and prevent banking
+        if (typeof showGameAlert === 'function') {
+            showGameAlert(
+                `❌ You need at least ${minimumRequired} points to get "on the board"<br><small>You currently have ${points} pending points</small>`, 
+                'danger', 
+                4000
+            );
+        }
+        return; // Don't proceed with banking
+    }
     
     // Update score in Firebase
     if (currentRoomId && currentPlayerId) {

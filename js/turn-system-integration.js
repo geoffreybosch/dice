@@ -911,10 +911,27 @@ function leaveMultiplayerGame() {
         if (myPlayerIdValue) {
             console.log(`🚪 Removing player ${myPlayerIdValue} from Firebase room: ${firebaseRoomId}`);
             
-            // Remove this player from Firebase
-            const playerRef = database.ref(`rooms/${firebaseRoomId}/players/${myPlayerIdValue}`);
+            // Check if it's currently this player's turn and end it before leaving
+            if (typeof window.firebaseCurrentTurnPlayer !== 'undefined' && 
+                window.firebaseCurrentTurnPlayer === myPlayerIdValue &&
+                typeof endMyTurn === 'function') {
+                console.log(`🚪 Player ${myPlayerIdValue} is leaving during their turn - ending turn first`);
+                endMyTurn();
+                
+                // Wait a moment for the turn state to propagate before removing from Firebase
+                setTimeout(() => {
+                    proceedWithRemoval();
+                }, 500);
+                return;
+            }
             
-            playerRef.remove().then(() => {
+            proceedWithRemoval();
+            
+            function proceedWithRemoval() {
+                // Remove this player from Firebase
+                const playerRef = database.ref(`rooms/${firebaseRoomId}/players/${myPlayerIdValue}`);
+                
+                playerRef.remove().then(() => {
                 console.log('🚪 Player successfully removed from Firebase room');
                 
                 // Close the win modal properly
@@ -947,6 +964,7 @@ function leaveMultiplayerGame() {
                     );
                 }
             });
+            }
         } else {
             console.error('🚪 No player ID found for leaving game');
             // Fallback: just reload the page

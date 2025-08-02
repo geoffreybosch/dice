@@ -284,6 +284,11 @@ function updateGameControlsState() {
         let newDisabled = !canAct;
         const newDisplay = (canAct && hasPendingPoints) ? 'inline-block' : 'none';
         
+        // Disable bank button if player has rolled but hasn't locked any dice yet
+        if (hasRolledThisTurn) {
+            newDisabled = true;
+        }
+        
         if (hasPendingPoints) {
             const currentPending = getPendingPoints();
             
@@ -296,6 +301,11 @@ function updateGameControlsState() {
             if (currentPlayerScore === 0 && currentPending < minimumRequired) {
                 newDisabled = true;
                 bankPointsButton.textContent = `Need ${minimumRequired - currentPending} More Points (${currentPending}/${minimumRequired})`;
+                bankPointsButton.classList.add('btn-secondary');
+                bankPointsButton.classList.remove('btn-warning');
+            } else if (hasRolledThisTurn) {
+                // Player has rolled but not locked dice yet
+                bankPointsButton.textContent = 'Lock Dice First to Bank';
                 bankPointsButton.classList.add('btn-secondary');
                 bankPointsButton.classList.remove('btn-warning');
             } else {

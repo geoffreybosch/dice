@@ -372,11 +372,28 @@ function leaveRoom() {
     const roomRef = database.ref(`rooms/${roomId}`);
     const playerRef = roomRef.child(`players/${window.myPlayerId}`);
 
-    // Only update connection status, don't remove player data
-    playerRef.update({
-        isConnected: false,
-        lastConnectionUpdate: Date.now()
-    }).then(() => {
+    // Check if it's currently this player's turn and end it before leaving
+    if (typeof window.firebaseCurrentTurnPlayer !== 'undefined' && 
+        window.firebaseCurrentTurnPlayer === window.myPlayerId &&
+        typeof endMyTurn === 'function') {
+        console.log(`🚪 Player ${window.myPlayerId} is leaving during their turn - ending turn first`);
+        endMyTurn();
+        
+        // Wait a moment for the turn state to propagate before marking as disconnected
+        setTimeout(() => {
+            proceedWithLeaving();
+        }, 500);
+        return;
+    }
+    
+    proceedWithLeaving();
+    
+    function proceedWithLeaving() {
+        // Only update connection status, don't remove player data
+        playerRef.update({
+            isConnected: false,
+            lastConnectionUpdate: Date.now()
+        }).then(() => {
         // Clean up Firebase state manager
         if (typeof cleanupFirebaseStateManager === 'function') {
             cleanupFirebaseStateManager();
@@ -430,10 +447,11 @@ function leaveRoom() {
             detail: { playerId: window.myPlayerId }
         }));
         
-    }).catch((error) => {
-        console.error('Error leaving room:', error);
-        alert('Failed to leave room. Please try refreshing the page.');
-    });
+        }).catch((error) => {
+            console.error('Error leaving room:', error);
+            alert('Failed to leave room. Please try refreshing the page.');
+        });
+    }
 }
 
 function hideLeaveRoomButton() {
