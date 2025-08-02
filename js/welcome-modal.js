@@ -180,6 +180,17 @@ class WelcomeModal {
         // Show the scoring modal over the welcome modal
         const scoringModal = new bootstrap.Modal(document.getElementById('scoringModal'));
         if (scoringModal) {
+            // Increase z-index to appear above welcome modal
+            const scoringModalElement = document.getElementById('scoringModal');
+            if (scoringModalElement) {
+                scoringModalElement.style.zIndex = '1060'; // Higher than default modal z-index (1055)
+                
+                // Listen for when the scoring modal is hidden to reset z-index
+                scoringModalElement.addEventListener('hidden.bs.modal', () => {
+                    scoringModalElement.style.zIndex = '';
+                }, { once: true });
+            }
+            
             scoringModal.show();
         }
     }
