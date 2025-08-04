@@ -3,8 +3,13 @@ let database;
 let playersRef;
 
 // Load Firebase config from JSON file and initialize
-fetch('../firebase-config.json')
-  .then(response => response.json())
+fetch('./firebase-config.json')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
   .then(config => {
     firebaseConfig = config;
     // Initialize Firebase
