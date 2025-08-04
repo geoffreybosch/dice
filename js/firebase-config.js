@@ -1,21 +1,63 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyAVEq6zfCKEPJtslSz8Jg7Aw9XtTeVzf58",
-  authDomain: "fark-8fc62.firebaseapp.com",
-  databaseURL: "https://fark-8fc62-default-rtdb.firebaseio.com",
-  projectId: "fark-8fc62",
-  storageBucket: "fark-8fc62.firebasestorage.app",
-  messagingSenderId: "589413345531",
-  appId: "1:589413345531:web:89f76f6e6ec49ecc32a85e",
-  measurementId: "G-DDRBC3DVXM"
-};
+let firebaseConfig = {};
+let database;
+let playersRef;
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+// Load Firebase config from JSON file and initialize
+fetch('../firebase-config.json')
+  .then(response => response.json())
+  .then(config => {
+    firebaseConfig = config;
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    
+    // Initialize Firebase references after database is ready
+    initializeFirebaseRefs();
+  })
+  .catch(error => {
+    console.error('Error loading Firebase config:', error);
+  });
 
-// Test Firebase connection
-const testButton = document.getElementById('test-firebase');
-testButton.addEventListener('click', () => {
+// Initialize Firebase references and event listeners
+function initializeFirebaseRefs() {
+  // Reference to the players in the Firebase database
+  playersRef = database.ref('players');
+  
+  // Listen for changes in the players data
+  playersRef.on('value', updatePlayerList);
+  
+  // Initialize event listeners
+  initializeEventListeners();
+}
+
+// Initialize all event listeners
+function initializeEventListeners() {
+  // Test Firebase connection
+  const testButton = document.getElementById('test-firebase');
+  if (testButton) {
+    testButton.addEventListener('click', testFirebaseConnection);
+  }
+  
+  // Admin functions
+  const clearRoomButton = document.getElementById('clear-room');
+  const resetScoresButton = document.getElementById('reset-scores');
+  const clearDatabaseButton = document.getElementById('clear-database');
+  
+  if (clearRoomButton) {
+    clearRoomButton.addEventListener('click', handleClearRoom);
+  }
+  
+  if (resetScoresButton) {
+    resetScoresButton.addEventListener('click', handleResetScores);
+  }
+  
+  if (clearDatabaseButton) {
+    clearDatabaseButton.addEventListener('click', handleClearDatabase);
+  }
+}
+
+// Test Firebase connection function
+function testFirebaseConnection() {
     const testRef = database.ref('test');
     const statusElement = document.getElementById('test-firebase-status');
     
@@ -39,10 +81,7 @@ testButton.addEventListener('click', () => {
         console.error('Error writing to Firebase:', error);
         alert('Failed to write to Firebase. Check the console for details.');
     });
-});
-
-// Reference to the players in the Firebase database
-const playersRef = database.ref('players');
+}
 
 // Ensure the player list element exists before updating
 function updatePlayerList(snapshot) {
@@ -112,14 +151,6 @@ function updatePlayerList(snapshot) {
     }
 }
 
-// Listen for changes in the players data
-playersRef.on('value', updatePlayerList);
-
-// Admin functions
-const clearRoomButton = document.getElementById('clear-room');
-const resetScoresButton = document.getElementById('reset-scores');
-const clearDatabaseButton = document.getElementById('clear-database');
-
 // Utility function to show status messages
 function showAdminStatus(buttonId, message, isSuccess = true, duration = 3000) {
     const statusElement = document.getElementById(`${buttonId}-status`);
@@ -134,8 +165,8 @@ function showAdminStatus(buttonId, message, isSuccess = true, duration = 3000) {
     }
 }
 
-// Clear current room
-clearRoomButton.addEventListener('click', () => {
+// Clear current room function
+function handleClearRoom() {
     const roomName = document.getElementById('room-name').value.trim();
     if (!roomName) {
         showAdminStatus('clear-room', 'Please enter a room name first.', false);
@@ -159,20 +190,26 @@ clearRoomButton.addEventListener('click', () => {
         });
         
         // Remove the confirmation handler
-        clearRoomButton.removeEventListener('click', confirmHandler);
+        const clearRoomButton = document.getElementById('clear-room');
+        if (clearRoomButton) {
+            clearRoomButton.removeEventListener('click', confirmHandler);
+        }
     };
     
     // Add the confirmation handler
-    clearRoomButton.addEventListener('click', confirmHandler);
-    
-    // Remove the confirmation handler after 5 seconds
-    setTimeout(() => {
-        clearRoomButton.removeEventListener('click', confirmHandler);
-    }, 5000);
-});
+    const clearRoomButton = document.getElementById('clear-room');
+    if (clearRoomButton) {
+        clearRoomButton.addEventListener('click', confirmHandler);
+        
+        // Remove the confirmation handler after 5 seconds
+        setTimeout(() => {
+            clearRoomButton.removeEventListener('click', confirmHandler);
+        }, 5000);
+    }
+}
 
-// Reset all scores in current room
-resetScoresButton.addEventListener('click', () => {
+// Reset all scores in current room function
+function handleResetScores() {
     const roomName = document.getElementById('room-name').value.trim();
     if (!roomName) {
         showAdminStatus('reset-scores', 'Please enter a room name first.', false);
@@ -207,20 +244,26 @@ resetScoresButton.addEventListener('click', () => {
         });
         
         // Remove the confirmation handler
-        resetScoresButton.removeEventListener('click', confirmHandler);
+        const resetScoresButton = document.getElementById('reset-scores');
+        if (resetScoresButton) {
+            resetScoresButton.removeEventListener('click', confirmHandler);
+        }
     };
     
     // Add the confirmation handler
-    resetScoresButton.addEventListener('click', confirmHandler);
-    
-    // Remove the confirmation handler after 5 seconds
-    setTimeout(() => {
-        resetScoresButton.removeEventListener('click', confirmHandler);
-    }, 5000);
-});
+    const resetScoresButton = document.getElementById('reset-scores');
+    if (resetScoresButton) {
+        resetScoresButton.addEventListener('click', confirmHandler);
+        
+        // Remove the confirmation handler after 5 seconds
+        setTimeout(() => {
+            resetScoresButton.removeEventListener('click', confirmHandler);
+        }, 5000);
+    }
+}
 
-// Clear entire database
-clearDatabaseButton.addEventListener('click', () => {
+// Clear entire database function
+function handleClearDatabase() {
     // Show first confirmation message
     showAdminStatus('clear-database', 'Click again to confirm clearing ALL rooms (PERMANENT!)', false, 5000);
     
@@ -248,29 +291,40 @@ clearDatabaseButton.addEventListener('click', () => {
             });
             
             // Remove the final confirmation handler
-            clearDatabaseButton.removeEventListener('click', finalConfirmHandler);
+            const clearDatabaseButton = document.getElementById('clear-database');
+            if (clearDatabaseButton) {
+                clearDatabaseButton.removeEventListener('click', finalConfirmHandler);
+            }
         };
         
         // Add the final confirmation handler
-        clearDatabaseButton.addEventListener('click', finalConfirmHandler);
-        
-        // Remove the final confirmation handler after 5 seconds
-        setTimeout(() => {
-            clearDatabaseButton.removeEventListener('click', finalConfirmHandler);
-        }, 5000);
+        const clearDatabaseButton = document.getElementById('clear-database');
+        if (clearDatabaseButton) {
+            clearDatabaseButton.addEventListener('click', finalConfirmHandler);
+            
+            // Remove the final confirmation handler after 5 seconds
+            setTimeout(() => {
+                clearDatabaseButton.removeEventListener('click', finalConfirmHandler);
+            }, 5000);
+        }
         
         // Remove the first confirmation handler
-        clearDatabaseButton.removeEventListener('click', firstConfirmHandler);
+        if (clearDatabaseButton) {
+            clearDatabaseButton.removeEventListener('click', firstConfirmHandler);
+        }
     };
     
     // Add the first confirmation handler
-    clearDatabaseButton.addEventListener('click', firstConfirmHandler);
-    
-    // Remove the first confirmation handler after 5 seconds
-    setTimeout(() => {
-        clearDatabaseButton.removeEventListener('click', firstConfirmHandler);
-    }, 5000);
-});
+    const clearDatabaseButton = document.getElementById('clear-database');
+    if (clearDatabaseButton) {
+        clearDatabaseButton.addEventListener('click', firstConfirmHandler);
+        
+        // Remove the first confirmation handler after 5 seconds
+        setTimeout(() => {
+            clearDatabaseButton.removeEventListener('click', firstConfirmHandler);
+        }, 5000);
+    }
+}
 
 // Farkle Indicator Management Functions
 /**
