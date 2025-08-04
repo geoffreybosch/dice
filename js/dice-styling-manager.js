@@ -63,7 +63,7 @@ class DiceStylingManager {
     displayDice(containerId, diceResults, playerId = null) {
         const container = document.getElementById(containerId);
         if (!container) {
-            // console.error('🎨 Container not found:', containerId);
+            console.error('🎨 Container not found:', containerId);
             return;
         }
         

@@ -228,7 +228,7 @@ function handleRoomJoinClick() {
                 }
             }
         }).catch((error) => {
-            // console.error('Error adding player:', error);
+            console.error('Error adding player:', error);
             // Dispatch failure event for welcome modal
             document.dispatchEvent(new CustomEvent('roomJoinError', { 
                 detail: { error: error.message || 'Failed to join room' }

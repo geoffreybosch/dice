@@ -36,7 +36,7 @@ testButton.addEventListener('click', () => {
             }, 3000);
         }
     }).catch((error) => {
-        // console.error('Error writing to Firebase:', error);
+        console.error('Error writing to Firebase:', error);
         alert('Failed to write to Firebase. Check the console for details.');
     });
 });
@@ -48,13 +48,13 @@ const playersRef = database.ref('players');
 function updatePlayerList(snapshot) {
     const playerListContainer = document.getElementById('player-list');
     if (!playerListContainer) {
-        // console.error('Player list container not found.');
+        console.error('Player list container not found.');
         return;
     }
 
     const firebasePlayerList = playerListContainer.querySelector('ul');
     if (!firebasePlayerList) {
-        // console.error('Player list element not found.');
+        console.error('Player list element not found.');
         return;
     }
 
@@ -154,7 +154,7 @@ clearRoomButton.addEventListener('click', () => {
         roomRef.remove().then(() => {
             showAdminStatus('clear-room', `✅ Room "${roomName}" has been cleared.`); // Display original capitalization
         }).catch((error) => {
-            // console.error('Error clearing room:', error);
+            console.error('Error clearing room:', error);
             showAdminStatus('clear-room', 'Failed to clear the room. Check console for details.', false);
         });
         
@@ -198,7 +198,7 @@ resetScoresButton.addEventListener('click', () => {
                 roomPlayersRef.update(updates).then(() => {
                     showAdminStatus('reset-scores', `✅ All scores in room "${roomName}" have been reset to 0.`); // Display original capitalization
                 }).catch((error) => {
-                    // console.error('Error resetting scores:', error);
+                    console.error('Error resetting scores:', error);
                     showAdminStatus('reset-scores', 'Failed to reset scores. Check console for details.', false);
                 });
             } else {
@@ -243,7 +243,7 @@ clearDatabaseButton.addEventListener('click', () => {
                     }
                 }
             }).catch((error) => {
-                // console.error('Error clearing database:', error);
+                console.error('Error clearing database:', error);
                 showAdminStatus('clear-database', 'Failed to clear the database. Check console for details.', false);
             });
             

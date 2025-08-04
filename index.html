@@ -387,13 +387,13 @@
                     <div class="mb-4">
                         <label class="form-label"><strong>Three 1s Scoring:</strong></label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="threeOnesRule" id="threeOnes300" value="300">
+                            <input class="form-check-input" type="radio" name="threeOnesRule" id="threeOnes300" value="300" checked>
                             <label class="form-check-label" for="threeOnes300">
                                 <strong>300 points</strong> - Classic/Conservative rule
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="threeOnesRule" id="threeOnes1000" value="1000" checked>
+                            <input class="form-check-input" type="radio" name="threeOnesRule" id="threeOnes1000" value="1000">
                             <label class="form-check-label" for="threeOnes1000">
                                 <strong>1,000 points</strong> - Modern/Standard rule (recommended)
                             </label>
@@ -405,6 +405,7 @@
                     <div class="mb-3">
                         <label for="winningScore" class="form-label"><strong>Winning Score:</strong></label>
                         <select class="form-select" id="winningScore">
+                            <option value="100">100 points (Test limit)</option>
                             <option value="5000">5,000 points (Quick game)</option>
                             <option value="10000" selected>10,000 points (Standard)</option>
                             <option value="15000">15,000 points (Long game)</option>
@@ -414,6 +415,7 @@
                     <div class="mb-3">
                         <label for="minimumScore" class="form-label"><strong>Minimum Score to Get on Board:</strong></label>
                         <select class="form-select" id="minimumScore">
+                            <option value="50">50 points (No entry requirement)</option>
                             <option value="300">300 points</option>
                             <option value="500" selected>500 points (Standard)</option>
                             <option value="750">750 points</option>

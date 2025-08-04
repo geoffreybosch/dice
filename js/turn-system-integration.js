@@ -95,7 +95,8 @@ function nextTurn() {
         // This prevents incorrectly marking players as finished when they haven't taken their turn
         if (finalRoundTracker.hasOwnProperty(oldPlayer)) {
             console.log(`🔄 ${oldPlayer} is in final round tracker - checking their progress`);
-            checkFinalRoundProgress(oldPlayer, true); // Pass true to indicate turn is ending
+            // Note: checkFinalRoundProgress will be called from Firebase state manager (endMyTurn)
+            // so we don't need to call it here to avoid double-calling
         } else {
             console.log(`🔄 ${oldPlayer} is not in final round tracker (probably the winning player) - skipping progress check`);
         }
@@ -331,7 +332,7 @@ function bankPendingPoints(playerId = null) {
     // Check minimum score requirement for players with 0 points
     const currentPlayerScore = getPlayerScore(playerId);
     const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { minimumScore: 500 };
-    const minimumRequired = gameSettings.minimumScore || 500;
+    const minimumRequired = gameSettings.minimumScore;
     
     if (currentPlayerScore === 0 && pendingPoints < minimumRequired) {
         // Show error message and prevent banking
@@ -546,6 +547,11 @@ function checkWinCondition(playerId, newScore) {
             }
         });
         
+        console.log(`🏆 Final round tracker initialized for ${turnSystemPlayerList.length} total players:`);
+        console.log(`🏆   - Winning player: ${playerId} (excluded from tracker)`);
+        console.log(`🏆   - Players needing final turns:`, Object.keys(finalRoundTracker));
+        console.log(`🏆   - finalRoundTracker:`, JSON.stringify(finalRoundTracker));
+        
         // Show different alerts for the winning player vs other players
         if (typeof showGameAlert === 'function') {
             // Check if the current client is the player who reached the winning score
@@ -615,11 +621,20 @@ function checkWinCondition(playerId, newScore) {
 }
 
 function checkFinalRoundProgress(playerId, isTurnEnding = false) {
-    if (gameState !== 'final_round') return;
+    if (gameState !== 'final_round') {
+        console.log(`🏆 checkFinalRoundProgress called but gameState is ${gameState}, not final_round - ignoring`);
+        return;
+    }
     
     console.log(`🏆 checkFinalRoundProgress called for: ${playerId} (isTurnEnding: ${isTurnEnding})`);
     console.log(`🏆 Current finalRoundTracker:`, JSON.stringify(finalRoundTracker));
     console.log(`🏆 winTriggerPlayer: ${winTriggerPlayer}`);
+    
+    // Validate that the player ID is valid
+    if (!playerId || typeof playerId !== 'string') {
+        console.error(`🏆 Invalid playerId passed to checkFinalRoundProgress: ${playerId}`);
+        return;
+    }
     
     // Mark this player as having completed their final turn
     if (finalRoundTracker.hasOwnProperty(playerId)) {
@@ -660,13 +675,13 @@ function checkFinalRoundProgress(playerId, isTurnEnding = false) {
         console.log('🏆 Still waiting for players to complete final turns:', finalRoundTracker);
         
         // Safeguard: Check if we might be stuck in final round due to tracking issues
-        // If someone has a winning score but the game hasn't ended, force end it
+        // Only check after a reasonable delay to give players time to take their turns
         setTimeout(() => {
             if (gameState === 'final_round') {
-                console.log('🏆 Safeguard check: Still in final round after timeout, checking scores...');
+                console.log('🏆 Safeguard check: Still in final round after timeout, checking if all players finished...');
                 checkForStuckFinalRound();
             }
-        }, 2000); // 2 second delay to allow for normal completion
+        }, 10000); // 10 second delay to allow players time to take their final turns
     }
 }
 
@@ -675,36 +690,29 @@ function checkForStuckFinalRound() {
     
     console.log('🏆 Checking for stuck final round condition...');
     
-    // Check if any player has a winning score
-    let winningScore = 10000;
-    if (typeof getGameSettings === 'function') {
-        const gameSettings = getGameSettings();
-        if (gameSettings && typeof gameSettings.winningScore === 'number' && gameSettings.winningScore > 0) {
-            winningScore = gameSettings.winningScore;
-        }
-    }
+    // Check if all players have actually completed their final turns
+    const trackerValues = Object.values(finalRoundTracker);
+    const allPlayersFinished = trackerValues.length > 0 && trackerValues.every(finished => finished);
     
-    // Check current scores to see if someone has actually won
-    fetchCurrentScoresFromFirebase((scores) => {
-        const players = Object.keys(scores);
-        const hasWinner = players.some(player => scores[player] >= winningScore);
+    if (allPlayersFinished) {
+        console.log('🏆 Safeguard: All players have completed their final turns - ending game');
+        console.log('🏆 Safeguard: Final round tracker state:', finalRoundTracker);
         
-        if (hasWinner) {
-            console.log('🏆 Safeguard: Found winner with winning score, forcing game end');
-            console.log('🏆 Safeguard: Current scores:', scores);
-            console.log('🏆 Safeguard: Final round tracker state:', finalRoundTracker);
-            
-            // Force end the game
-            endGame();
-            
-            // Broadcast final game state
-            if (isInMultiplayerRoom && typeof broadcastGameState === 'function') {
-                broadcastGameState('ended', winTriggerPlayer, finalRoundTracker);
-            }
-        } else {
-            console.log('🏆 Safeguard: No winner found, continuing final round');
+        // End the game since all players have had their final turn
+        endGame();
+        
+        // Broadcast final game state
+        if (isInMultiplayerRoom && typeof broadcastGameState === 'function') {
+            broadcastGameState('ended', winTriggerPlayer, finalRoundTracker);
         }
-    });
+    } else {
+        console.log('🏆 Safeguard: Still waiting for players to complete final turns:', finalRoundTracker);
+        console.log('🏆 Safeguard: Not forcing game end - players still need their final turns');
+        
+        // Only force end if we detect a genuine stuck condition (e.g., player offline)
+        // For now, let the normal turn progression continue
+        // TODO: Add detection for truly stuck conditions (player offline, etc.)
+    }
 }
 
 // Debug function to manually check and fix stuck game states

@@ -103,7 +103,7 @@ function initializeFirebaseStateManager(roomId, playerId, playerName) {
     
     if (!database) {
         // console.error('❌ Firebase database not initialized');
-        return false;
+        // return false;
     }
     
     // Set up state listeners
@@ -794,15 +794,37 @@ function updateTurnIndicators(currentTurnPlayerId) {
             hideFarkleIndicator(currentTurnPlayerId);
         }
         
-        // ADDITIONAL: Clear any locked dice styling when a new turn starts
-        // This provides an extra safety net to ensure locked dice styling is cleared
-        // console.log(`🧹 Clearing locked dice styling for new turn (${currentTurnPlayerId})`);
+        // ADDITIONAL: Clear ALL dice states when a new turn starts
+        // This provides an extra safety net to ensure all dice styling is cleared
+        // console.log(`🧹 Clearing all dice states for new turn (${currentTurnPlayerId})`);
         
         // Temporarily disable locked dice styling to prevent re-application
         window.lockedDiceStylingDisabled = true;
         
+        // Clear old locked dice styling (legacy function)
         if (typeof window.clearAllDiceLockedStyling === 'function') {
             window.clearAllDiceLockedStyling();
+        }
+        
+        // Reset the DiceStylingManager completely for the new turn
+        if (window.diceStylingManager && typeof window.diceStylingManager.reset === 'function') {
+            window.diceStylingManager.reset();
+            // console.log(`🧹 Reset DiceStylingManager for new turn`);
+        }
+        
+        // Clear the dice results container to remove previous player's dice
+        const diceContainer = document.getElementById('dice-results-container');
+        if (diceContainer) {
+            diceContainer.innerHTML = '';
+            // console.log(`🧹 Cleared dice results container for new turn`);
+        }
+        
+        // Re-initialize the DiceStylingManager for the new current player
+        if (window.diceStylingManager && typeof window.diceStylingManager.initialize === 'function') {
+            // Re-initialize with the new current player
+            const isMultiplayer = typeof currentRoomId !== 'undefined' && currentRoomId !== null;
+            window.diceStylingManager.initialize(currentTurnPlayerId, isMultiplayer);
+            // console.log(`🧹 Re-initialized DiceStylingManager for new current player: ${currentTurnPlayerId}`);
         }
         
         // Also clear local player locked dice states
@@ -1044,8 +1066,16 @@ function handlePlayerBanking(points, newScore) {
     
     // Get current player score to check if they're starting from 0
     const currentPlayerScore = (typeof getPlayerScore === 'function') ? getPlayerScore(currentPlayerId) : 0;
-    const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : { minimumScore: 500 };
-    const minimumRequired = gameSettings.minimumScore || 500;
+    const gameSettings = (typeof getGameSettings === 'function') ? getGameSettings() : gameSettings.minimumScore;
+    const minimumRequired = (typeof gameSettings.minimumScore === 'number') ? gameSettings.minimumScore : gameSettings.minimumScore;
+    
+    console.log(`🔍 Firebase banking validation for ${currentPlayerId}:`);
+    console.log(`🔍   - currentPlayerScore: ${currentPlayerScore}`);
+    console.log(`🔍   - points: ${points}`);
+    console.log(`🔍   - gameSettings:`, gameSettings);
+    console.log(`🔍   - minimumRequired: ${minimumRequired}`);
+    console.log(`🔍   - validation check: currentPlayerScore === 0 && points < minimumRequired`);
+    console.log(`🔍   - will block banking: ${currentPlayerScore === 0 && points < minimumRequired}`);
     
     // Check minimum score requirement for players with 0 points
     if (currentPlayerScore === 0 && points < minimumRequired) {
