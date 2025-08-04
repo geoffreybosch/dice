@@ -1,4 +1,5 @@
 {
+  "_comment": "Copy this file to firebase-config.json and fill in your Firebase project details for local development",
   "apiKey": "your-api-key-here",
   "authDomain": "your-project.firebaseapp.com",
   "databaseURL": "https://your-project-default-rtdb.firebaseio.com",

@@ -2,26 +2,38 @@ let firebaseConfig = {};
 let database;
 let playersRef;
 
-// Load Firebase config from JSON file and initialize
+// Load Firebase config from dynamically generated file
 fetch('./firebase-config.json')
   .then(response => {
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Failed to load Firebase config: ${response.status}`);
     }
     return response.json();
   })
   .then(config => {
-    firebaseConfig = config;
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    database = firebase.database();
-    
-    // Initialize Firebase references after database is ready
-    initializeFirebaseRefs();
+    console.log('Firebase configuration loaded successfully');
+    initializeFirebase(config);
   })
   .catch(error => {
     console.error('Error loading Firebase config:', error);
+    // Show user-friendly error
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger m-3';
+    errorDiv.innerHTML = '<strong>Configuration Error:</strong> Unable to load Firebase configuration. Please check your setup.';
+    document.body.prepend(errorDiv);
   });
+
+// Initialize Firebase with the provided config
+function initializeFirebase(config) {
+  firebaseConfig = config;
+  
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  database = firebase.database();
+  
+  // Initialize Firebase references after database is ready
+  initializeFirebaseRefs();
+}
 
 // Initialize Firebase references and event listeners
 function initializeFirebaseRefs() {
