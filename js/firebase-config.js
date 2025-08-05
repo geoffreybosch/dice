@@ -1,38 +1,43 @@
-let firebaseConfig = {};
 let database;
 let playersRef;
 
-// Load Firebase config from dynamically generated file
-fetch('./firebase-config.json')
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`Failed to load Firebase config: ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(config => {
-    console.log('Firebase configuration loaded successfully');
-    initializeFirebase(config);
-  })
-  .catch(error => {
-    console.error('Error loading Firebase config:', error);
+// Firebase configuration - loaded from environment variables injected during build
+const firebaseConfig = {
+  apiKey: window.FIREBASE_CONFIG?.apiKey,
+  authDomain: window.FIREBASE_CONFIG?.authDomain,
+  databaseURL: window.FIREBASE_CONFIG?.databaseURL,
+  projectId: window.FIREBASE_CONFIG?.projectId,
+  storageBucket: window.FIREBASE_CONFIG?.storageBucket,
+  messagingSenderId: window.FIREBASE_CONFIG?.messagingSenderId,
+  appId: window.FIREBASE_CONFIG?.appId,
+  measurementId: window.FIREBASE_CONFIG?.measurementId
+};
+
+// Validate configuration before initializing
+if (!window.FIREBASE_CONFIG || !firebaseConfig.apiKey) {
+  console.error('Firebase configuration not found. Please check your setup.');
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'alert alert-danger m-3';
+  errorDiv.innerHTML = '<strong>Configuration Error:</strong> Firebase configuration is missing. Please check your deployment setup.';
+  document.body.prepend(errorDiv);
+} else {
+  // Initialize Firebase
+  console.log('Initializing Firebase with configuration');
+  try {
+    firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    console.log('Firebase initialized successfully');
+    
+    // Initialize Firebase references after database is ready
+    initializeFirebaseRefs();
+  } catch (error) {
+    console.error('Error initializing Firebase:', error);
     // Show user-friendly error
     const errorDiv = document.createElement('div');
     errorDiv.className = 'alert alert-danger m-3';
-    errorDiv.innerHTML = '<strong>Configuration Error:</strong> Unable to load Firebase configuration. Please check your setup.';
+    errorDiv.innerHTML = '<strong>Firebase Error:</strong> Unable to initialize Firebase. Please check your configuration.';
     document.body.prepend(errorDiv);
-  });
-
-// Initialize Firebase with the provided config
-function initializeFirebase(config) {
-  firebaseConfig = config;
-  
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  database = firebase.database();
-  
-  // Initialize Firebase references after database is ready
-  initializeFirebaseRefs();
+  }
 }
 
 // Initialize Firebase references and event listeners
