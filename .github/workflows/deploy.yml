@@ -65,6 +65,10 @@ jobs:
           if [ -f firebase-env.js ]; then
             echo "✅ firebase-env.js exists"
             echo "File size: $(wc -c < firebase-env.js) bytes"
+            echo "First line: $(head -1 firebase-env.js)"
+            echo "Number of lines: $(wc -l < firebase-env.js)"
+            echo "Checking for 'window.FIREBASE_CONFIG' in file:"
+            grep -q "window.FIREBASE_CONFIG" firebase-env.js && echo "✅ Found window.FIREBASE_CONFIG" || echo "❌ window.FIREBASE_CONFIG not found"
           else
             echo "❌ firebase-env.js does not exist"
             exit 1
