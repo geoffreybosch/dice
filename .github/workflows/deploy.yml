@@ -28,6 +28,7 @@ jobs:
         
       - name: Create Firebase Configuration
         run: |
+          echo "Creating firebase-env.js with configuration..."
           cat > firebase-env.js << EOF
           // Firebase configuration injected during build
           window.FIREBASE_CONFIG = {
@@ -41,6 +42,9 @@ jobs:
             measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
           };
           EOF
+          echo "firebase-env.js created successfully"
+          echo "File size: $(wc -c < firebase-env.js) bytes"
+          ls -la firebase-env.js
           
       - name: Create Security Headers
         run: |
@@ -54,6 +58,19 @@ jobs:
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        
+      - name: Verify files before upload
+        run: |
+          echo "Checking if firebase-env.js exists..."
+          if [ -f firebase-env.js ]; then
+            echo "✅ firebase-env.js exists"
+            echo "File size: $(wc -c < firebase-env.js) bytes"
+          else
+            echo "❌ firebase-env.js does not exist"
+            exit 1
+          fi
+          echo "All files in root directory:"
+          ls -la
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
