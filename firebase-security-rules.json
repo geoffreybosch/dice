@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomId": {
+        ".read": true,
+        ".write": "auth != null || $roomId.length > 0",
+        
+        "players": {
+          "$playerId": {
+            ".write": "$playerId == auth.uid || (auth == null && newData.child('name').val() == $playerId)",
+            ".validate": "newData.hasChildren(['name', 'score', 'isConnected'])"
+          }
+        },
+        
+        "gameState": {
+          ".write": "root.child('rooms').child($roomId).child('players').hasChild(auth.uid) || auth == null"
+        },
+        
+        "events": {
+          "$eventType": {
+            "$eventId": {
+              ".write": "newData.child('playerId').val() == auth.uid || auth == null",
+              ".validate": "newData.hasChildren(['playerId', 'timestamp'])"
+            }
+          }
+        }
+      }
+    }
+  }
+}

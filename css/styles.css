@@ -987,13 +987,13 @@ canvas {
     backdrop-filter: blur(10px);
 }
 
-#room-name-display, #player-list-title, #player-list-title-mobile {
+#room-name-display, #round-counter-display, #player-list-title, #player-list-title-mobile {
     color: #ffffff !important;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Enhanced Room Name Subtitle Styling */
-.room-subtitle {
+.room-subtitle, .round-counter {
     background: rgba(255, 255, 255, 0.1);
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
@@ -1002,12 +1002,12 @@ canvas {
     transition: all 0.3s ease;
 }
 
-.room-subtitle:hover {
+.room-subtitle:hover, .round-counter:hover {
     background: rgba(255, 255, 255, 0.15);
     transform: translateX(2px);
 }
 
-.room-label {
+.room-label, .round-label {
     font-size: 0.75rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.8);
@@ -1015,7 +1015,7 @@ canvas {
     letter-spacing: 0.5px;
 }
 
-.room-name {
+.room-name, .round-number {
     font-size: 0.9rem;
     font-weight: 600;
     color: #ffffff;

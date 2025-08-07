@@ -1,0 +1,5798 @@
+{
+  "rooms": {
+    "no cheating": {
+      "diceResults": {
+        "-OX-uI_Icwm859vdjkV1": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509425024
+        },
+        "-OX-uMjzDzWNxkYdQP4o": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509442092
+        },
+        "-OX-ucNoP8RdEvybBZn8": {
+          "diceResults": [
+            1,
+            3,
+            2,
+            1,
+            2,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509510204
+        },
+        "-OX-ueWCkiCjqP0aaVId": {
+          "diceResults": [
+            1,
+            4,
+            6,
+            1,
+            4,
+            5
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509518933
+        },
+        "-OX-ugv5DQQWOLursLXb": {
+          "diceResults": [
+            1,
+            5,
+            1,
+            1,
+            3,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509528782
+        },
+        "-OX-uivoHbu-Ylfy_uv4": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            1,
+            4,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509537020
+        },
+        "-OX-ukXNyHP8oAZ4haAg": {
+          "diceResults": [
+            4,
+            3,
+            6,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509543612
+        },
+        "-OX-umpNv6x0rmpYTJQP": {
+          "diceResults": [
+            1,
+            6,
+            4,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509553020
+        },
+        "-OX-uprBOUR6f_mq3cmF": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509565424
+        },
+        "-OX-usB2FbEUQ7U18zV9": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509574960
+        },
+        "-OX-uw_hewQbEc9oxlpW": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            2,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509592987
+        },
+        "-OX-v01RPCZgKpD-F8gu": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            5,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509611172
+        },
+        "-OX-v4ApluM_IF72Afnp": {
+          "diceResults": [
+            4,
+            2,
+            1,
+            4,
+            2,
+            1
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509628180
+        },
+        "-OX-v6X18b3dhxVyY03h": {
+          "diceResults": [
+            5,
+            6,
+            1,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509637793
+        },
+        "-OX-v8LraXLXzSIZkahB": {
+          "diceResults": [
+            5,
+            4,
+            1,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509645270
+        },
+        "-OX-vAhh9S3b55ZujLmi": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509654938
+        },
+        "-OX-vGDabKjFe5nYvqSD": {
+          "diceResults": [
+            6,
+            6,
+            4,
+            3,
+            3,
+            6
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509677524
+        },
+        "-OX-vHyeYN2E2s_v0sef": {
+          "diceResults": [
+            1,
+            4,
+            4,
+            6,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509684658
+        },
+        "-OX-vJeyKW5AMja8vmLz": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            3,
+            5,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509691590
+        },
+        "-OX-vKutxR-PzZ0H4kGn": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            4,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509696705
+        },
+        "-OX-vMEG7VKwpdQZ-rZf": {
+          "diceResults": [
+            1,
+            1,
+            1,
+            4,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509702105
+        },
+        "-OX-vP0rv9oHU8YZAa0a": {
+          "diceResults": [
+            6,
+            4,
+            4,
+            4,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509713557
+        },
+        "-OX-vRouHx40QW2X2dlx": {
+          "diceResults": [
+            6,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509725017
+        },
+        "-OX-vVsHUcT8VgWWxFQh": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            4,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509741632
+        },
+        "-OX-v_SKNB4GV2JVd9hL": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509760387
+        },
+        "-OX-vcnSpEoDuILBDd-B": {
+          "diceResults": [
+            3,
+            4,
+            3,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509774090
+        },
+        "-OX-vgOisoJTESk0YPLS": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            4,
+            2,
+            2
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509788790
+        },
+        "-OX-vitLVS-TbMbz6niy": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            5,
+            2,
+            2
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509799006
+        },
+        "-OX-vlIWAP9_2nDryx-S": {
+          "diceResults": [
+            5,
+            3,
+            4,
+            5,
+            6,
+            4
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509808896
+        },
+        "-OX-vtST-kBAX1j-n7EC": {
+          "diceResults": [
+            5,
+            6,
+            1,
+            5,
+            2,
+            6
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509842301
+        },
+        "-OX-vvh_wAyOVs0VZ9v6": {
+          "diceResults": [
+            5,
+            3,
+            1,
+            5,
+            4,
+            1
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509851524
+        },
+        "-OX-vy2d_soVkeE0jDZD": {
+          "diceResults": [
+            5,
+            6,
+            1,
+            5,
+            3,
+            1
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509861128
+        },
+        "-OX-w-qZsMbV2-f_5i9r": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            6,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509872594
+        },
+        "-OX-w2jT4o6eUs3fuv1X": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            4,
+            5,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509884428
+        },
+        "-OX-w4XrpGl0WJJpXNi3": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            5,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509891813
+        },
+        "-OX-w7-RLfjuQl5DSgHw": {
+          "diceResults": [
+            1,
+            6,
+            5,
+            5,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509901860
+        },
+        "-OX-w8MPHR_-u9UEbHf-": {
+          "diceResults": [
+            1,
+            2,
+            4,
+            2,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509907426
+        },
+        "-OX-wA0u9Oqk60GXg1Ti": {
+          "diceResults": [
+            1,
+            2,
+            1,
+            2,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509914242
+        },
+        "-OX-wBN78co55ikOozVy": {
+          "diceResults": [
+            2,
+            3,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509919760
+        },
+        "-OX-wDjey9n40EEOsNzO": {
+          "diceResults": [
+            2,
+            3,
+            1,
+            5,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754509929458
+        },
+        "-OX-wHgGkCgANlaJCkIM": {
+          "diceResults": [
+            4,
+            5,
+            5,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509945648
+        },
+        "-OX-wJj9VuwlLqEOM7WK": {
+          "diceResults": [
+            6,
+            5,
+            5,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754509954025
+        },
+        "-OX-wMQ-tGmp2RUVazPI": {
+          "diceResults": [
+            3,
+            1,
+            3,
+            1,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509965038
+        },
+        "-OX-wP_-vpqTRQ_-0Fd3": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509977966
+        },
+        "-OX-wTKR33q-PFgJYYJo": {
+          "diceResults": [
+            4,
+            5,
+            6,
+            1,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509993353
+        },
+        "-OX-wW8ToA0whQRvWsx5": {
+          "diceResults": [
+            4,
+            4,
+            6,
+            1,
+            5,
+            5
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510004876
+        },
+        "-OX-w_QHBRCO70l4c5u7": {
+          "diceResults": [
+            6,
+            5,
+            4,
+            2,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510022362
+        },
+        "-OX-wbExMMRCB9OZk2Ju": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            3,
+            1,
+            5
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510029828
+        },
+        "-OX-wd-h4GhxhK60q_zG": {
+          "diceResults": [
+            3,
+            2,
+            6,
+            3,
+            1,
+            5
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510037045
+        },
+        "-OX-wephPYZFhsZtvRjb": {
+          "diceResults": [
+            6,
+            4,
+            4,
+            3,
+            2,
+            3
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510044556
+        },
+        "-OX-whNFqJDZYpPwYGSc": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510054974
+        },
+        "-OX-wkjN-WY5RSZmmfoG": {
+          "diceResults": [
+            4,
+            1,
+            2,
+            2,
+            5,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510068742
+        },
+        "-OX-wn2TJEhLxOcV-gtx": {
+          "diceResults": [
+            3,
+            1,
+            4,
+            5,
+            6,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510078220
+        },
+        "-OX-wrwbZnpI-szbQqZI": {
+          "diceResults": [
+            5,
+            1,
+            4,
+            5,
+            6,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510098261
+        },
+        "-OX-wuyDcC5rAM0HVPNW": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            3,
+            5,
+            4
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510110614
+        },
+        "-OX-wxIx16mxhrQauV2D": {
+          "diceResults": [
+            5,
+            5,
+            2,
+            2,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510120197
+        },
+        "-OX-wyddtqcEdIhyp9L2": {
+          "diceResults": [
+            5,
+            5,
+            1,
+            2,
+            4,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510125681
+        },
+        "-OX-x-4ZmHlTxBbHgbDC": {
+          "diceResults": [
+            5,
+            5,
+            1,
+            1,
+            6,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510131564
+        },
+        "-OX-x0927OiK5E2ztu1R": {
+          "diceResults": [
+            5,
+            5,
+            1,
+            1,
+            4,
+            4
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510135947
+        },
+        "-OX-x2A491Tm-m3xZ1iZ": {
+          "diceResults": [
+            3,
+            3,
+            5,
+            1,
+            5,
+            4
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510144228
+        },
+        "-OX-x4UU5lEFP3vzQ6C5": {
+          "diceResults": [
+            4,
+            3,
+            5,
+            1,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510153726
+        },
+        "-OX-x5w2OsXC4qF_dE1B": {
+          "diceResults": [
+            5,
+            5,
+            5,
+            1,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510159650
+        },
+        "-OX-x8UKQr7mjyhg0hjf": {
+          "diceResults": [
+            1,
+            4,
+            5,
+            3,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510170100
+        },
+        "-OX-xAF72AzjTWg-bEg5": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            6,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510177319
+        },
+        "-OX-xEBQ4wXdv3yYkhPA": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            5,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510193480
+        },
+        "-OX-xGSB-j7oLh9vzmNC": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            1,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510202746
+        },
+        "-OX-xJO9aFV96wlIGNqX": {
+          "diceResults": [
+            1,
+            2,
+            1,
+            1,
+            3,
+            2
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510214776
+        },
+        "-OX-xL0QH6XeJPbw7BuE": {
+          "diceResults": [
+            1,
+            1,
+            6,
+            4,
+            5,
+            4
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510221411
+        },
+        "-OX-xMyiG2w4y_QQbExO": {
+          "diceResults": [
+            1,
+            6,
+            6,
+            3,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510229430
+        },
+        "-OX-xR_4k2OVGp2qjcfz": {
+          "diceResults": [
+            6,
+            5,
+            3,
+            5,
+            1,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510248292
+        },
+        "-OX-xTvUCchLqYzLmr8j": {
+          "diceResults": [
+            4,
+            5,
+            6,
+            5,
+            1,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510257918
+        },
+        "-OX-xVkQo1XeWLGHFphU": {
+          "diceResults": [
+            5,
+            5,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510265417
+        },
+        "-OX-xY_JIwjxCtuSUc6K": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510276994
+        },
+        "-OX-xchLhjhZ0qsiUsMp": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            1,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510297950
+        },
+        "-OX-xgMkkcVvUhDtzLGQ": {
+          "diceResults": [
+            5,
+            6,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510312951
+        },
+        "-OX-xk13QAdLKELbePbf": {
+          "diceResults": [
+            1,
+            3,
+            5,
+            1,
+            2,
+            4
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510327971
+        },
+        "-OX-xlxHZuPORWRsUj8p": {
+          "diceResults": [
+            1,
+            4,
+            5,
+            1,
+            2,
+            2
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510335857
+        },
+        "-OX-xpZZ1uG-KR-4sUx7": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754510350674
+        },
+        "-OX-xw4p0ycaQFnYoPlL": {
+          "diceResults": [
+            4,
+            3,
+            2,
+            6,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510377341
+        },
+        "-OX-xzygB4lR_9xPhB3o": {
+          "diceResults": [
+            5,
+            1,
+            4,
+            2,
+            6,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510393268
+        },
+        "-OX-y1EUA2yxOL31Kltj": {
+          "diceResults": [
+            2,
+            1,
+            5,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510402535
+        },
+        "-OX-y2QGAqu7LEZauuTx": {
+          "diceResults": [
+            2,
+            1,
+            5,
+            1,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510407385
+        },
+        "-OX-y3TiMJjQRNQVszi7": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            1,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510411702
+        },
+        "-OX-y4z4UIIRO9_TUCaS": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            3,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510417869
+        },
+        "-OX-y7K3wXubaiLYDSSL": {
+          "diceResults": [
+            4,
+            6,
+            6,
+            4,
+            1,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510427468
+        },
+        "-OX-y9MowPUxEYvi7ZGo": {
+          "diceResults": [
+            6,
+            1,
+            2,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510435836
+        },
+        "-OX-yBn0v0SI6fY5DSTT": {
+          "diceResults": [
+            1,
+            4,
+            2,
+            4,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510445769
+        },
+        "-OX-yEzOdVz5PYPMAgYy": {
+          "diceResults": [
+            1,
+            5,
+            2,
+            6,
+            2,
+            4
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510458872
+        },
+        "-OX-yHvwQNcAq3x-AOkb": {
+          "diceResults": [
+            1,
+            5,
+            6,
+            2,
+            3,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510470939
+        },
+        "-OX-yJbmPTPESt8IzbGs": {
+          "diceResults": [
+            1,
+            5,
+            6,
+            2,
+            3,
+            5
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510477841
+        },
+        "-OX-yTJP6l3DpI09ONWG": {
+          "diceResults": [
+            1,
+            5,
+            3,
+            2,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510517537
+        },
+        "-OX-yUxbL0sRPj1QhPPT": {
+          "diceResults": [
+            1,
+            5,
+            6,
+            1,
+            5,
+            2
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510524270
+        },
+        "-OX-yWXOs4qo4MGqAAjw": {
+          "diceResults": [
+            1,
+            3,
+            4,
+            1,
+            6,
+            4
+          ],
+          "playerId": "Brandon",
+          "timestamp": 1754510530721
+        },
+        "-OX-yY0lajHCP5GvSS6e": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510536848
+        },
+        "-OX-yfiJ1rNX7JyGcZYx": {
+          "diceResults": [
+            1,
+            5,
+            1,
+            4,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510572467
+        },
+        "-OX-yhSB8388GHkVOMzY": {
+          "diceResults": [
+            1,
+            5,
+            1,
+            6,
+            5,
+            3
+          ],
+          "playerId": "Norah",
+          "timestamp": 1754510579563
+        }
+      },
+      "diceSelections": {
+        "-OX-uJ97Jx6dqkJGx_Ay": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509427382
+        },
+        "-OX-uJgUZuPY425LpXRi": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            0
+          ],
+          "timestamp": 1754509429580
+        },
+        "-OX-uJwyPAePVtgdGYeA": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            0,
+            5
+          ],
+          "timestamp": 1754509430636
+        },
+        "-OX-uK3Rg5oAw93kwEqC": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            0,
+            5,
+            1
+          ],
+          "timestamp": 1754509431114
+        },
+        "-OX-uK8ft3a49VEPq_IM": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            0,
+            5,
+            1,
+            4
+          ],
+          "timestamp": 1754509431449
+        },
+        "-OX-uKFeGq5KPFqLb5_Q": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            0,
+            5,
+            1,
+            4,
+            2
+          ],
+          "timestamp": 1754509431896
+        },
+        "-OX-uNN3v710IMGWLhlF": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509444658
+        },
+        "-OX-uNQk264w00lfmKdk": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4
+          ],
+          "timestamp": 1754509444894
+        },
+        "-OX-uNeFhTgO--7zbAGH": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            1
+          ],
+          "timestamp": 1754509445822
+        },
+        "-OX-uNw4slngAf3G0zUa": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            1,
+            0
+          ],
+          "timestamp": 1754509446963
+        },
+        "-OX-uO78FwCOdC4xrQpk": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            1,
+            0,
+            5
+          ],
+          "timestamp": 1754509447735
+        },
+        "-OX-uQdRQ-YQtgf6f8P5": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            1,
+            0,
+            5,
+            2
+          ],
+          "timestamp": 1754509458058
+        },
+        "-OX-uRR0DmrQtZAO6RuJ": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            1,
+            0,
+            5
+          ],
+          "timestamp": 1754509461295
+        },
+        "-OX-uRylP2SqhhZJ4Uhl": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            1,
+            0
+          ],
+          "timestamp": 1754509463519
+        },
+        "-OX-uS2rZEHe8ILIMWXB": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            1,
+            0
+          ],
+          "timestamp": 1754509463844
+        },
+        "-OX-uS9e4aCHlv72dnsP": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            0
+          ],
+          "timestamp": 1754509464280
+        },
+        "-OX-uSSu-tKX54hSR5lh": {
+          "diceResults": [
+            6,
+            5,
+            2,
+            4,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754509465512
+        },
+        "-OX-ucyCBeJ69Z2ubVFJ": {
+          "diceResults": [
+            1,
+            3,
+            2,
+            1,
+            2,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509512597
+        },
+        "-OX-uf2kz-83jPmiVZhJ": {
+          "diceResults": [
+            1,
+            4,
+            6,
+            1,
+            4,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509521144
+        },
+        "-OX-uhBVwA2K-tithTdE": {
+          "diceResults": [
+            1,
+            5,
+            1,
+            1,
+            3,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754509529896
+        },
+        "-OX-uhNzFE243fFGJH2n": {
+          "diceResults": [
+            1,
+            5,
+            1,
+            1,
+            3,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            2,
+            5
+          ],
+          "timestamp": 1754509530695
+        },
+        "-OX-ul5Of-iq-aZgkXGf": {
+          "diceResults": [
+            4,
+            3,
+            6,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509545917
+        },
+        "-OX-ulWs3o6FzV743d7w": {
+          "diceResults": [
+            4,
+            3,
+            6,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3,
+            4
+          ],
+          "timestamp": 1754509547675
+        },
+        "-OX-ulkudlfc14vyQXjC": {
+          "diceResults": [
+            4,
+            3,
+            6,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3,
+            4,
+            5
+          ],
+          "timestamp": 1754509548638
+        },
+        "-OX-unbfcIpAxbHN-51d": {
+          "diceResults": [
+            1,
+            6,
+            4,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509556239
+        },
+        "-OX-uqYqyh-8MC5TJ0o5": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            5,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754509568282
+        },
+        "-OX-uszjVaRdSI4gRTsO": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754509578269
+        },
+        "-OX-ut4MxHnlCG-GV2dv": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            2
+          ],
+          "timestamp": 1754509578629
+        },
+        "-OX-utBDdZrizVKFI2EH": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4
+          ],
+          "timestamp": 1754509579068
+        },
+        "-OX-utvs7nGi_x5UvpzC": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4,
+            3
+          ],
+          "timestamp": 1754509582118
+        },
+        "-OX-uuJ3QjOrgZP_zaSv": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4
+          ],
+          "timestamp": 1754509583666
+        },
+        "-OX-uuPrreIR8XVUkMyE": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4,
+            5
+          ],
+          "timestamp": 1754509584101
+        },
+        "-OX-uuXGpu_s87mU771A": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            6,
+            2,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4,
+            5,
+            0
+          ],
+          "timestamp": 1754509584575
+        },
+        "-OX-v0OUGTTqLvy9uZy9": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            5,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509612647
+        },
+        "-OX-v0WITWLkRSSZFd1V": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            5,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            1
+          ],
+          "timestamp": 1754509613147
+        },
+        "-OX-v0znNdxtAuPznzMl": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            5,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            1,
+            4
+          ],
+          "timestamp": 1754509615099
+        },
+        "-OX-v152_r1Kbb7b2Kpr": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            5,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            1,
+            4,
+            5
+          ],
+          "timestamp": 1754509615499
+        },
+        "-OX-v1DtPpm6at6xb4wT": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            5,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            1,
+            4,
+            5,
+            3
+          ],
+          "timestamp": 1754509616065
+        },
+        "-OX-v5JgqVrHmqeLIMkm": {
+          "diceResults": [
+            4,
+            2,
+            1,
+            4,
+            2,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754509632843
+        },
+        "-OX-v5R2fqernEuv_9GY": {
+          "diceResults": [
+            4,
+            2,
+            1,
+            4,
+            2,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            5,
+            2
+          ],
+          "timestamp": 1754509633314
+        },
+        "-OX-v7ELs71s3DhBM_OU": {
+          "diceResults": [
+            5,
+            6,
+            1,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509640693
+        },
+        "-OX-v7N2Fjokbqq4bYSd": {
+          "diceResults": [
+            5,
+            6,
+            1,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3,
+            4
+          ],
+          "timestamp": 1754509641250
+        },
+        "-OX-v7_alIkP5A3tj3kD": {
+          "diceResults": [
+            5,
+            6,
+            1,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3,
+            4,
+            0
+          ],
+          "timestamp": 1754509642117
+        },
+        "-OX-vBkx7a7ELtc6Twsa": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509659242
+        },
+        "-OX-vBqQD9HuuMis6OKp": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1
+          ],
+          "timestamp": 1754509659593
+        },
+        "-OX-vC0bWIKfKLwixKs1": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5
+          ],
+          "timestamp": 1754509660309
+        },
+        "-OX-vCC5-2IEU42_Iiuq": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5,
+            3
+          ],
+          "timestamp": 1754509661044
+        },
+        "-OX-vCHPOTYFddGngHkV": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5,
+            3,
+            2
+          ],
+          "timestamp": 1754509661384
+        },
+        "-OX-vCYYirXzJ2qB1y3-": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5,
+            3
+          ],
+          "timestamp": 1754509662481
+        },
+        "-OX-vCbNFw6lxlrlXMlj": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5
+          ],
+          "timestamp": 1754509662726
+        },
+        "-OX-vDURbnqlo_wVsM7X": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5,
+            3
+          ],
+          "timestamp": 1754509666314
+        },
+        "-OX-vDZeaCgu8izMpwKA": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5
+          ],
+          "timestamp": 1754509666648
+        },
+        "-OX-vDvgi4VBgtAuGczy": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5,
+            2
+          ],
+          "timestamp": 1754509668121
+        },
+        "-OX-vDzeNrcbuzrbI_bd": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5
+          ],
+          "timestamp": 1754509668376
+        },
+        "-OX-vEMiwpeP6C844v9D": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5,
+            4
+          ],
+          "timestamp": 1754509669916
+        },
+        "-OX-vEQKaHB9V7vcIDqB": {
+          "diceResults": [
+            6,
+            6,
+            3,
+            3,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            5
+          ],
+          "timestamp": 1754509670147
+        },
+        "-OX-vIpUMBwoTODcQkvb": {
+          "diceResults": [
+            1,
+            4,
+            4,
+            6,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509688167
+        },
+        "-OX-vK0mGUFIlFm5jyw6": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            3,
+            5,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754509693050
+        },
+        "-OX-vLDLvocJqKowiInZ": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            4,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4
+          ],
+          "timestamp": 1754509697950
+        },
+        "-OX-vMTo7L5z-0A-OABE": {
+          "diceResults": [
+            1,
+            1,
+            1,
+            4,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754509703100
+        },
+        "-OX-vQkGmxNV6kyNdHyd": {
+          "diceResults": [
+            6,
+            4,
+            4,
+            4,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754509720624
+        },
+        "-OX-vQqpXuDFCSJ6-VV1": {
+          "diceResults": [
+            6,
+            4,
+            4,
+            4,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            2
+          ],
+          "timestamp": 1754509721044
+        },
+        "-OX-vQyz2R74IlcJIeXc": {
+          "diceResults": [
+            6,
+            4,
+            4,
+            4,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            2,
+            3
+          ],
+          "timestamp": 1754509721566
+        },
+        "-OX-vR5jTYOXnEl8QwZ3": {
+          "diceResults": [
+            6,
+            4,
+            4,
+            4,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "timestamp": 1754509722062
+        },
+        "-OX-vXWewxB3Xv8wmoQ8": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            4,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509748376
+        },
+        "-OX-vXi-Uq877yf33Szi": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            4,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1
+          ],
+          "timestamp": 1754509749166
+        },
+        "-OX-vXnBj6v5omulMnXn": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            4,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            2
+          ],
+          "timestamp": 1754509749498
+        },
+        "-OX-vY0kBXUJIK6xJR8X": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            4,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            2,
+            4
+          ],
+          "timestamp": 1754509750430
+        },
+        "-OX-vYMuVqXwuA7ooW2P": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            4,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            2,
+            4,
+            5
+          ],
+          "timestamp": 1754509751848
+        },
+        "-OX-vYTo0fcOAHfskLLS": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            4,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1,
+            2,
+            4,
+            5,
+            3
+          ],
+          "timestamp": 1754509752290
+        },
+        "-OX-v_usiVZCEiTeyrSp": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509762278
+        },
+        "-OX-va-USktGCQi1l41l": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4
+          ],
+          "timestamp": 1754509762637
+        },
+        "-OX-vaOw_22_w2jiBzjA": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            2
+          ],
+          "timestamp": 1754509764266
+        },
+        "-OX-vaTWmgHLcfBl8LLB": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            2,
+            1
+          ],
+          "timestamp": 1754509764559
+        },
+        "-OX-vaqJ2zt6zPaKIezB": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4,
+            1
+          ],
+          "timestamp": 1754509766082
+        },
+        "-OX-vatvsfn8H3_Q6sZg": {
+          "diceResults": [
+            3,
+            6,
+            6,
+            1,
+            1,
+            2
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            4
+          ],
+          "timestamp": 1754509766313
+        },
+        "-OX-vglLpmcw-9oAZFON": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            4,
+            2,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4
+          ],
+          "timestamp": 1754509790302
+        },
+        "-OX-vgs4P8uJdQm1MfDw": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            4,
+            2,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5
+          ],
+          "timestamp": 1754509790733
+        },
+        "-OX-vh5QARx1u-fnzSAR": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            4,
+            2,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5,
+            1
+          ],
+          "timestamp": 1754509791651
+        },
+        "-OX-vhCjjYJgAp2PmBXA": {
+          "diceResults": [
+            5,
+            2,
+            4,
+            4,
+            2,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5,
+            1,
+            0
+          ],
+          "timestamp": 1754509792119
+        },
+        "-OX-vj6ZMRE7-0YgIL85": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            5,
+            2,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509799916
+        },
+        "-OX-vmy3S9lU9E72VCgX": {
+          "diceResults": [
+            5,
+            3,
+            4,
+            5,
+            6,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509815715
+        },
+        "-OX-vnWhQMXtR80wIIve": {
+          "diceResults": [
+            5,
+            3,
+            4,
+            5,
+            6,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            3,
+            0
+          ],
+          "timestamp": 1754509817996
+        },
+        "-OX-vtz7dDyMmtaZL_SR": {
+          "diceResults": [
+            5,
+            6,
+            1,
+            5,
+            2,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754509844455
+        },
+        "-OX-vwUtpQTL9fyNwu3B": {
+          "diceResults": [
+            5,
+            3,
+            1,
+            5,
+            4,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754509854744
+        },
+        "-OX-w11Mx_sEh13llQWz": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            6,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509877445
+        },
+        "-OX-w15mPauGeAaA9rRV": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            6,
+            3,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            1
+          ],
+          "timestamp": 1754509877728
+        },
+        "-OX-w3FXoF4BlJuGTMAM": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            4,
+            5,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754509886543
+        },
+        "-OX-w566diZD9sAeoMWA": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            5,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509894133
+        },
+        "-OX-w5OgzAWu5bGe4j-b": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            5,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "timestamp": 1754509895322
+        },
+        "-OX-w5UwHapDJbqE1W7L": {
+          "diceResults": [
+            1,
+            1,
+            2,
+            5,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509895722
+        },
+        "-OX-w7T1JW5g14_qfB1c": {
+          "diceResults": [
+            1,
+            6,
+            5,
+            5,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754509903754
+        },
+        "-OX-w8esWVKALdGYYDh7": {
+          "diceResults": [
+            1,
+            2,
+            4,
+            2,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4
+          ],
+          "timestamp": 1754509908672
+        },
+        "-OX-w8qItMa9NoY16tEW": {
+          "diceResults": [
+            1,
+            2,
+            4,
+            2,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            3
+          ],
+          "timestamp": 1754509909403
+        },
+        "-OX-w90-I7Gf65BdyzGp": {
+          "diceResults": [
+            1,
+            2,
+            4,
+            2,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            3,
+            1
+          ],
+          "timestamp": 1754509910088
+        },
+        "-OX-w9D0rtILQKr35olI": {
+          "diceResults": [
+            1,
+            2,
+            4,
+            2,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            3,
+            1,
+            5
+          ],
+          "timestamp": 1754509910921
+        },
+        "-OX-wAD_Nui1oTsaW1AP": {
+          "diceResults": [
+            1,
+            2,
+            1,
+            2,
+            1,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754509915053
+        },
+        "-OX-wC6yreua3lpgH7hK": {
+          "diceResults": [
+            2,
+            3,
+            4,
+            5,
+            4,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509922822
+        },
+        "-OX-wE767pjOs26rmF3H": {
+          "diceResults": [
+            2,
+            3,
+            1,
+            5,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754509931023
+        },
+        "-OX-wEDLyaX2L4y72MXj": {
+          "diceResults": [
+            2,
+            3,
+            1,
+            5,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            2
+          ],
+          "timestamp": 1754509931422
+        },
+        "-OX-wEP24WmhCNEbeg1m": {
+          "diceResults": [
+            2,
+            3,
+            1,
+            5,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4
+          ],
+          "timestamp": 1754509932171
+        },
+        "-OX-wEYR3m4W86dbdL67": {
+          "diceResults": [
+            2,
+            3,
+            1,
+            5,
+            3,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4,
+            5
+          ],
+          "timestamp": 1754509932771
+        },
+        "-OX-wIF7gJm5oqvD-p4H": {
+          "diceResults": [
+            4,
+            5,
+            5,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754509947943
+        },
+        "-OX-wIRny6G1bY2raKcX": {
+          "diceResults": [
+            4,
+            5,
+            5,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2,
+            3
+          ],
+          "timestamp": 1754509948754
+        },
+        "-OX-wIbV2FIMIgT98BU0": {
+          "diceResults": [
+            4,
+            5,
+            5,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2,
+            3,
+            1
+          ],
+          "timestamp": 1754509949439
+        },
+        "-OX-wIlfRp7YFlxNH_vY": {
+          "diceResults": [
+            4,
+            5,
+            5,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2,
+            3,
+            1,
+            4
+          ],
+          "timestamp": 1754509950089
+        },
+        "-OX-wIs2QZuyL-HTfejj": {
+          "diceResults": [
+            4,
+            5,
+            5,
+            5,
+            1,
+            1
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2,
+            3,
+            1,
+            4,
+            5
+          ],
+          "timestamp": 1754509950498
+        },
+        "-OX-wMt3ZbR0WYIMq-tL": {
+          "diceResults": [
+            3,
+            1,
+            3,
+            1,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754509966962
+        },
+        "-OX-wN1UwYafaNbCWXS7": {
+          "diceResults": [
+            3,
+            1,
+            3,
+            1,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            3
+          ],
+          "timestamp": 1754509967565
+        },
+        "-OX-wN8f1OPVT2iCbhKp": {
+          "diceResults": [
+            3,
+            1,
+            3,
+            1,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            3,
+            4
+          ],
+          "timestamp": 1754509968025
+        },
+        "-OX-wNDURHf64iICigYv": {
+          "diceResults": [
+            3,
+            1,
+            3,
+            1,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            3,
+            4,
+            5
+          ],
+          "timestamp": 1754509968333
+        },
+        "-OX-wNXjHTVBnPIxi2cH": {
+          "diceResults": [
+            3,
+            1,
+            3,
+            1,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            3,
+            4,
+            5,
+            2
+          ],
+          "timestamp": 1754509969629
+        },
+        "-OX-wNf1lmE5GDjq52ut": {
+          "diceResults": [
+            3,
+            1,
+            3,
+            1,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            3,
+            4,
+            5,
+            2,
+            0
+          ],
+          "timestamp": 1754509970160
+        },
+        "-OX-wQ8bay2S3iQL3z3h": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754509980309
+        },
+        "-OX-wQDmx5GQoNRCq_GR": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4
+          ],
+          "timestamp": 1754509980640
+        },
+        "-OX-wQIJxAjTT3tQbKLE": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4,
+            2
+          ],
+          "timestamp": 1754509980930
+        },
+        "-OX-wQVpfY2ePEEE_s3z": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4,
+            2,
+            1
+          ],
+          "timestamp": 1754509981795
+        },
+        "-OX-wQdIvGnM6C05_G52": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4,
+            2,
+            1,
+            3
+          ],
+          "timestamp": 1754509982337
+        },
+        "-OX-wQl7YjEC9ladoQIm": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4,
+            2,
+            1,
+            3,
+            0
+          ],
+          "timestamp": 1754509982838
+        },
+        "-OX-wQzW2B1TlDweWzPJ": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4,
+            2,
+            1,
+            3
+          ],
+          "timestamp": 1754509983759
+        },
+        "-OX-wR7pIPZwXSDuYH2Z": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4,
+            2,
+            3
+          ],
+          "timestamp": 1754509984355
+        },
+        "-OX-wRQ1PCUrxyL65wOm": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4,
+            2
+          ],
+          "timestamp": 1754509985520
+        },
+        "-OX-wRr9vPjkGfsWcUYN": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            4
+          ],
+          "timestamp": 1754509987320
+        },
+        "-OX-wRyVLWrqxasEHzAo": {
+          "diceResults": [
+            2,
+            4,
+            3,
+            2,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            4
+          ],
+          "timestamp": 1754509987790
+        },
+        "-OX-wU2CZTRKbcHP3U6H": {
+          "diceResults": [
+            4,
+            5,
+            6,
+            1,
+            5,
+            3
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754509996283
+        },
+        "-OX-wWvIWxtyW1t7I4rE": {
+          "diceResults": [
+            4,
+            4,
+            6,
+            1,
+            5,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510008065
+        },
+        "-OX-waHRkhofYf45y3cF": {
+          "diceResults": [
+            6,
+            5,
+            4,
+            2,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4
+          ],
+          "timestamp": 1754510025891
+        },
+        "-OX-wbp6n6-VZ-Rhh7ru": {
+          "diceResults": [
+            5,
+            2,
+            2,
+            3,
+            1,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510032207
+        },
+        "-OX-whlEaIOifNjZXlfq": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510056573
+        },
+        "-OX-wiEQFYaAZJ5-Sx9U": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            2
+          ],
+          "timestamp": 1754510058505
+        },
+        "-OX-wiKXUPPtPNuulVJx": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            2,
+            0
+          ],
+          "timestamp": 1754510058896
+        },
+        "-OX-wiS64Mzn5nXfdQnu": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            2,
+            0,
+            3
+          ],
+          "timestamp": 1754510059381
+        },
+        "-OX-wiVyI3aYhLqVcgVg": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            2,
+            0,
+            3,
+            4
+          ],
+          "timestamp": 1754510059628
+        },
+        "-OX-wihyjShx9CKMhAWI": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            2,
+            0,
+            3
+          ],
+          "timestamp": 1754510060460
+        },
+        "-OX-wimbJnZ9-PIbDtFX": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            2,
+            0
+          ],
+          "timestamp": 1754510060757
+        },
+        "-OX-wiwI8lN8uuD0YZR0": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5,
+            0
+          ],
+          "timestamp": 1754510061377
+        },
+        "-OX-wj560cJfWRMPZNYd": {
+          "diceResults": [
+            2,
+            4,
+            2,
+            3,
+            3,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510062005
+        },
+        "-OX-wlNHepbZ7ipoBSa0": {
+          "diceResults": [
+            4,
+            1,
+            2,
+            2,
+            5,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510071360
+        },
+        "-OX-wqHWpJa-yNPh_KoN": {
+          "diceResults": [
+            3,
+            1,
+            4,
+            5,
+            6,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510091471
+        },
+        "-OX-wslhhIQ3NdoqMWYS": {
+          "diceResults": [
+            5,
+            1,
+            4,
+            5,
+            6,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510101659
+        },
+        "-OX-ww75m5TnFO1ISv0V": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            3,
+            5,
+            4
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510115342
+        },
+        "-OX-wxg5bUSEk1vSj3TP": {
+          "diceResults": [
+            5,
+            5,
+            2,
+            2,
+            6,
+            5
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510121742
+        },
+        "-OX-wyvXW1CAguVHezne": {
+          "diceResults": [
+            5,
+            5,
+            1,
+            2,
+            4,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754510126826
+        },
+        "-OX-x-HlhZw8TORLLRCz": {
+          "diceResults": [
+            5,
+            5,
+            1,
+            1,
+            6,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510132409
+        },
+        "-OX-x31Jb-KvB86GXoF6": {
+          "diceResults": [
+            3,
+            3,
+            5,
+            1,
+            5,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754510147763
+        },
+        "-OX-x3ASPzRTitsEI5re": {
+          "diceResults": [
+            3,
+            3,
+            5,
+            1,
+            5,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2,
+            3
+          ],
+          "timestamp": 1754510148348
+        },
+        "-OX-x3Jxcuomo2HKXoWV": {
+          "diceResults": [
+            3,
+            3,
+            5,
+            1,
+            5,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            2,
+            3,
+            4
+          ],
+          "timestamp": 1754510148956
+        },
+        "-OX-x4sqziRGIq5wiL73": {
+          "diceResults": [
+            4,
+            3,
+            5,
+            1,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510155349
+        },
+        "-OX-x6nwaJQ4T5bK0AnX": {
+          "diceResults": [
+            5,
+            5,
+            5,
+            1,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510163227
+        },
+        "-OX-x6vspiLC512Tx1Vx": {
+          "diceResults": [
+            5,
+            5,
+            5,
+            1,
+            5,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            0
+          ],
+          "timestamp": 1754510163735
+        },
+        "-OX-x8uCyUBZGsHYvk-n": {
+          "diceResults": [
+            1,
+            4,
+            5,
+            3,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510171820
+        },
+        "-OX-x90Hl4MnVtukjg2A": {
+          "diceResults": [
+            1,
+            4,
+            5,
+            3,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            2
+          ],
+          "timestamp": 1754510172273
+        },
+        "-OX-xB94WrRCUzuu2DnH": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            6,
+            4,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510181028
+        },
+        "-OX-xEr49-D9kzoNBnxz": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            5,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510196211
+        },
+        "-OX-xEx_gAZgsQTdk97b": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            5,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            0,
+            2
+          ],
+          "timestamp": 1754510196627
+        },
+        "-OX-xGqHOwfSGqg9xlsE": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            1,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510204352
+        },
+        "-OX-xHfNciQCd0Wmekit": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            1,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            1
+          ],
+          "timestamp": 1754510207750
+        },
+        "-OX-xHnqWdr9p4RnsarT": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            1,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            1,
+            5
+          ],
+          "timestamp": 1754510208292
+        },
+        "-OX-xHzHJsdGhJXLLO49": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            1,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            5
+          ],
+          "timestamp": 1754510209024
+        },
+        "-OX-xI5gOspPcRv2_VhK": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            1,
+            6,
+            4
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510209498
+        },
+        "-OX-xLgvC82gMIaKyWAj": {
+          "diceResults": [
+            1,
+            1,
+            6,
+            4,
+            5,
+            4
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510224195
+        },
+        "-OX-xNjsrTjMVauNpBxv": {
+          "diceResults": [
+            1,
+            6,
+            6,
+            3,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510232576
+        },
+        "-OX-xNqQIoRO0TrGZJut": {
+          "diceResults": [
+            1,
+            6,
+            6,
+            3,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            2
+          ],
+          "timestamp": 1754510232994
+        },
+        "-OX-xO17K6wv5x3ZmTCe": {
+          "diceResults": [
+            1,
+            6,
+            6,
+            3,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4
+          ],
+          "timestamp": 1754510233744
+        },
+        "-OX-xO89eL-oo5jn-Jc0": {
+          "diceResults": [
+            1,
+            6,
+            6,
+            3,
+            1,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            2,
+            4,
+            5
+          ],
+          "timestamp": 1754510234194
+        },
+        "-OX-xS_T1XcjP6rcyVml": {
+          "diceResults": [
+            6,
+            5,
+            3,
+            5,
+            1,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510252413
+        },
+        "-OX-xSoPDUMm_K5q71A0": {
+          "diceResults": [
+            6,
+            5,
+            3,
+            5,
+            1,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            4
+          ],
+          "timestamp": 1754510253369
+        },
+        "-OX-xSx8k1HWj9UUxqSX": {
+          "diceResults": [
+            6,
+            5,
+            3,
+            5,
+            1,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            4,
+            3
+          ],
+          "timestamp": 1754510253927
+        },
+        "-OX-xTA8P55AabSI_nC5": {
+          "diceResults": [
+            6,
+            5,
+            3,
+            5,
+            1,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            4,
+            3,
+            5
+          ],
+          "timestamp": 1754510254824
+        },
+        "-OX-xWpBAPsPvrASTxWV": {
+          "diceResults": [
+            5,
+            5,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510269818
+        },
+        "-OX-xWx3wCtk-jxis5fz": {
+          "diceResults": [
+            5,
+            5,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            1,
+            0
+          ],
+          "timestamp": 1754510270322
+        },
+        "-OX-xZP_JTvnKZa_8Zgc": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510280403
+        },
+        "-OX-xZV2AWMVVmW4tDk6": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            2
+          ],
+          "timestamp": 1754510280753
+        },
+        "-OX-xZd7ElEgxG89xf4C": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            2,
+            4
+          ],
+          "timestamp": 1754510281334
+        },
+        "-OX-xZnwtOqD0y6aq6t9": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            2
+          ],
+          "timestamp": 1754510282026
+        },
+        "-OX-xZvE5T5XyLiU5WB8": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            2,
+            5
+          ],
+          "timestamp": 1754510282493
+        },
+        "-OX-x_5I-enPEZCMBq7w": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            2,
+            5,
+            4
+          ],
+          "timestamp": 1754510283201
+        },
+        "-OX-x_nT4abJn8WIjOdt": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            5,
+            4
+          ],
+          "timestamp": 1754510286092
+        },
+        "-OX-xa7gjWc7Lo56tsIX": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            3,
+            5
+          ],
+          "timestamp": 1754510287450
+        },
+        "-OX-xaHBS092E181pbyc": {
+          "diceResults": [
+            5,
+            5,
+            3,
+            3,
+            4,
+            5
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510288058
+        },
+        "-OX-xdsZkI8d8W7pJrHT": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            1,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510302764
+        },
+        "-OX-xe2CKYkN4_BCs7h8": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            1,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3,
+            1
+          ],
+          "timestamp": 1754510303445
+        },
+        "-OX-xe9WlguHCQ3J4EcD": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            1,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3,
+            1,
+            2
+          ],
+          "timestamp": 1754510303913
+        },
+        "-OX-xeI5qJQHbS9BAm1T": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            1,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3,
+            1,
+            2,
+            4
+          ],
+          "timestamp": 1754510304462
+        },
+        "-OX-xeTZfSkuGeF7hs4p": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            1,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3,
+            1,
+            2,
+            4,
+            0
+          ],
+          "timestamp": 1754510305196
+        },
+        "-OX-xefK09GfJkm7F8g0": {
+          "diceResults": [
+            5,
+            2,
+            3,
+            1,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3,
+            1,
+            2,
+            4,
+            0,
+            5
+          ],
+          "timestamp": 1754510306013
+        },
+        "-OX-xghGlQzdyV_AXE_B": {
+          "diceResults": [
+            5,
+            6,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510314329
+        },
+        "-OX-xgqPwbjpUPfmzIoU": {
+          "diceResults": [
+            5,
+            6,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5,
+            3
+          ],
+          "timestamp": 1754510314914
+        },
+        "-OX-xgzmOLtQMs4ksIsZ": {
+          "diceResults": [
+            5,
+            6,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5,
+            3,
+            1
+          ],
+          "timestamp": 1754510315514
+        },
+        "-OX-xh5XSh6dlozD_wx5": {
+          "diceResults": [
+            5,
+            6,
+            4,
+            6,
+            4,
+            6
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5,
+            3,
+            1,
+            0
+          ],
+          "timestamp": 1754510315946
+        },
+        "-OX-xkXBt7yeQFDcNIvb": {
+          "diceResults": [
+            1,
+            3,
+            5,
+            1,
+            2,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510330027
+        },
+        "-OX-xkeJtC6JGqCs4zuo": {
+          "diceResults": [
+            1,
+            3,
+            5,
+            1,
+            2,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            2
+          ],
+          "timestamp": 1754510330547
+        },
+        "-OX-xksMNB1GyP2MwNR0": {
+          "diceResults": [
+            1,
+            3,
+            5,
+            1,
+            2,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            2,
+            3
+          ],
+          "timestamp": 1754510331446
+        },
+        "-OX-xqNuAswp7LlHaIaI": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754510354024
+        },
+        "-OX-xqUeIZXKUlLnrtx0": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4
+          ],
+          "timestamp": 1754510354456
+        },
+        "-OX-xqZA_ohOR1XxAOae": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5
+          ],
+          "timestamp": 1754510354745
+        },
+        "-OX-xrzx2LLwislLXtgA": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5,
+            1
+          ],
+          "timestamp": 1754510360619
+        },
+        "-OX-xs8R_rRYdMHbEwWT": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5
+          ],
+          "timestamp": 1754510361226
+        },
+        "-OX-xtOLbeLms38M1y2x": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5,
+            3
+          ],
+          "timestamp": 1754510366340
+        },
+        "-OX-xta1Vpa_TnsbW1x2": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5,
+            3,
+            1
+          ],
+          "timestamp": 1754510367152
+        },
+        "-OX-xtexOoOsVV25SUZ2": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5,
+            3,
+            1,
+            0
+          ],
+          "timestamp": 1754510367467
+        },
+        "-OX-xtvh0i-JLBUx15zT": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5,
+            3,
+            1
+          ],
+          "timestamp": 1754510368539
+        },
+        "-OX-xu4ExEB6l5K7T4Mv": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5,
+            1
+          ],
+          "timestamp": 1754510369149
+        },
+        "-OX-xuJhKHTw0LeTiYZ1": {
+          "diceResults": [
+            3,
+            5,
+            1,
+            2,
+            1,
+            1
+          ],
+          "playerId": "PME",
+          "selectedDiceIndices": [
+            2,
+            4,
+            5
+          ],
+          "timestamp": 1754510370138
+        },
+        "-OX-xyg4rq1mFXCPykk5": {
+          "diceResults": [
+            4,
+            3,
+            2,
+            6,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510387981
+        },
+        "-OX-xyn694cDXXRskr2B": {
+          "diceResults": [
+            4,
+            3,
+            2,
+            6,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5,
+            4
+          ],
+          "timestamp": 1754510388431
+        },
+        "-OX-xz-PJ75Nq2Gc_D6N": {
+          "diceResults": [
+            4,
+            3,
+            2,
+            6,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510389282
+        },
+        "-OX-y-Gt1uWRO6sc4vZV": {
+          "diceResults": [
+            5,
+            1,
+            4,
+            2,
+            6,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510394497
+        },
+        "-OX-y1bsp_WJxwmclOVP": {
+          "diceResults": [
+            2,
+            1,
+            5,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            2
+          ],
+          "timestamp": 1754510404096
+        },
+        "-OX-y2aPyPOcB-baTeVA": {
+          "diceResults": [
+            2,
+            1,
+            5,
+            1,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510408098
+        },
+        "-OX-y3i0tq1Q9tJl3OOq": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            1,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510412681
+        },
+        "-OX-y3sh-KemtAtqXCIS": {
+          "diceResults": [
+            1,
+            1,
+            5,
+            1,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            4
+          ],
+          "timestamp": 1754510413365
+        },
+        "-OX-y5Jt-f76kQy2zrI1": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            3,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510419265
+        },
+        "-OX-y5_n5lbrZPxYEYuU": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            3,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            2
+          ],
+          "timestamp": 1754510420347
+        },
+        "-OX-y5jCKaVznRRzFY3r": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            3,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            2,
+            1
+          ],
+          "timestamp": 1754510420949
+        },
+        "-OX-y5t325wyyXI4SeUS": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            3,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "timestamp": 1754510421580
+        },
+        "-OX-y5zMYtci6a-RHr5r": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            3,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "timestamp": 1754510421983
+        },
+        "-OX-y64aScAjPBjIZWzk": {
+          "diceResults": [
+            1,
+            3,
+            1,
+            3,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            2,
+            1,
+            3,
+            4,
+            5
+          ],
+          "timestamp": 1754510422382
+        },
+        "-OX-y7eNRc76xoGSoZQk": {
+          "diceResults": [
+            4,
+            6,
+            6,
+            4,
+            1,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4
+          ],
+          "timestamp": 1754510428832
+        },
+        "-OX-y7oFfsaqElkgOXcN": {
+          "diceResults": [
+            4,
+            6,
+            6,
+            4,
+            1,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5
+          ],
+          "timestamp": 1754510429464
+        },
+        "-OX-y7yw3EK75d9BKLG-": {
+          "diceResults": [
+            4,
+            6,
+            6,
+            4,
+            1,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5,
+            3
+          ],
+          "timestamp": 1754510430148
+        },
+        "-OX-y84iwlS82F56UZXD": {
+          "diceResults": [
+            4,
+            6,
+            6,
+            4,
+            1,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5,
+            3,
+            2
+          ],
+          "timestamp": 1754510430582
+        },
+        "-OX-y8CF2FRPT-40oy7n": {
+          "diceResults": [
+            4,
+            6,
+            6,
+            4,
+            1,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5,
+            3,
+            2,
+            1
+          ],
+          "timestamp": 1754510431064
+        },
+        "-OX-y8K4ybmNOXJ1Oq5S": {
+          "diceResults": [
+            4,
+            6,
+            6,
+            4,
+            1,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            4,
+            5,
+            3,
+            2,
+            1,
+            0
+          ],
+          "timestamp": 1754510431565
+        },
+        "-OX-y9spPxj86NhE-TFq": {
+          "diceResults": [
+            6,
+            1,
+            2,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510437949
+        },
+        "-OX-yA092gLhaemsjENb": {
+          "diceResults": [
+            6,
+            1,
+            2,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            0
+          ],
+          "timestamp": 1754510438482
+        },
+        "-OX-yAESC5YnM41GlTrE": {
+          "diceResults": [
+            6,
+            1,
+            2,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            0,
+            2
+          ],
+          "timestamp": 1754510439397
+        },
+        "-OX-yAN_q1yErLNfmlSj": {
+          "diceResults": [
+            6,
+            1,
+            2,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            0,
+            2,
+            3
+          ],
+          "timestamp": 1754510439981
+        },
+        "-OX-yAVeC8vht-GqkhUh": {
+          "diceResults": [
+            6,
+            1,
+            2,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            0,
+            2,
+            3,
+            4
+          ],
+          "timestamp": 1754510440498
+        },
+        "-OX-yAbgP_7fUjOtbfdo": {
+          "diceResults": [
+            6,
+            1,
+            2,
+            6,
+            2,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            1,
+            0,
+            2,
+            3,
+            4,
+            5
+          ],
+          "timestamp": 1754510440948
+        },
+        "-OX-yCHTA-JwSzEwPREP": {
+          "diceResults": [
+            1,
+            4,
+            2,
+            4,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510447782
+        },
+        "-OX-yChpX7dhMXVpa0eG": {
+          "diceResults": [
+            1,
+            4,
+            2,
+            4,
+            5,
+            3
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            4
+          ],
+          "timestamp": 1754510449533
+        },
+        "-OX-yFuPRZZRrKwGX7fa": {
+          "diceResults": [
+            1,
+            5,
+            2,
+            6,
+            2,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510462649
+        },
+        "-OX-yGd9o8pfdKlgVYh6": {
+          "diceResults": [
+            1,
+            5,
+            2,
+            6,
+            2,
+            4
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            1
+          ],
+          "timestamp": 1754510465641
+        },
+        "-OX-yIi9Sm1w4Eqv4f05": {
+          "diceResults": [
+            1,
+            5,
+            6,
+            2,
+            3,
+            5
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            5
+          ],
+          "timestamp": 1754510474153
+        },
+        "-OX-yTfW_5L9GxMj7cds": {
+          "diceResults": [
+            1,
+            5,
+            3,
+            2,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510519017
+        },
+        "-OX-yTu5xDXhzOS94Kgf": {
+          "diceResults": [
+            1,
+            5,
+            3,
+            2,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0,
+            1
+          ],
+          "timestamp": 1754510519950
+        },
+        "-OX-yU1AD4sQw2DS4qbf": {
+          "diceResults": [
+            1,
+            5,
+            3,
+            2,
+            5,
+            1
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510520467
+        },
+        "-OX-yVF1UncloImr67uf": {
+          "diceResults": [
+            1,
+            5,
+            6,
+            1,
+            5,
+            2
+          ],
+          "playerId": "Brandon",
+          "selectedDiceIndices": [
+            3
+          ],
+          "timestamp": 1754510525450
+        },
+        "-OX-yZw-HPw2sznxnVge": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510544671
+        },
+        "-OX-y_WGbUmCF7o-pV9e": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1,
+            0
+          ],
+          "timestamp": 1754510547056
+        },
+        "-OX-y_myVZkEegk6pI5X": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510548189
+        },
+        "-OX-ya_55fsjSwriHK5a": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            4
+          ],
+          "timestamp": 1754510551397
+        },
+        "-OX-yaq-IsCJfQTuVgvV": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            4,
+            5
+          ],
+          "timestamp": 1754510552479
+        },
+        "-OX-ybO8G1LlU284ez43": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            5
+          ],
+          "timestamp": 1754510554728
+        },
+        "-OX-ybW8y6rWV3YUpTeG": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0
+          ],
+          "timestamp": 1754510555240
+        },
+        "-OX-yehECl1DH13TqGGS": {
+          "diceResults": [
+            1,
+            4,
+            1,
+            3,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            0,
+            2
+          ],
+          "timestamp": 1754510568302
+        },
+        "-OX-ygQFJ5Ikk2kY1VkV": {
+          "diceResults": [
+            1,
+            5,
+            1,
+            4,
+            6,
+            6
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            1
+          ],
+          "timestamp": 1754510575343
+        },
+        "-OX-yiG8JGZvuSVCC8Nd": {
+          "diceResults": [
+            1,
+            5,
+            1,
+            6,
+            5,
+            3
+          ],
+          "playerId": "Norah",
+          "selectedDiceIndices": [
+            4
+          ],
+          "timestamp": 1754510582888
+        }
+      },
+      "farkleAlerts": {
+        "-OX-uj2djXBdRBXzhq03": {
+          "playerId": "Brandon",
+          "timestamp": 1754509537521
+        },
+        "-OX-uwhrtbZcpzDKn89c": {
+          "playerId": "PME",
+          "timestamp": 1754509593509
+        },
+        "-OX-v8Twf-ca4LpRvMs1": {
+          "playerId": "Norah",
+          "timestamp": 1754509645787
+        },
+        "-OX-vGLYVIzQ-rQ-fgyO": {
+          "playerId": "PME",
+          "timestamp": 1754509678033
+        },
+        "-OX-vRwjt36IpKzXLHXx": {
+          "playerId": "Norah",
+          "timestamp": 1754509725518
+        },
+        "-OX-vcvPLlokMVoXUscQ": {
+          "playerId": "PME",
+          "timestamp": 1754509774600
+        },
+        "-OX-vyATsvo7dLjzo5R-": {
+          "playerId": "Norah",
+          "timestamp": 1754509861629
+        },
+        "-OX-wJr-0-c4eK20-trf": {
+          "playerId": "Norah",
+          "timestamp": 1754509954527
+        },
+        "-OX-wd7Xr1p6d49KUvrs": {
+          "playerId": "Brandon",
+          "timestamp": 1754510037546
+        },
+        "-OX-wexX5W4ryrQJzg3y": {
+          "playerId": "Norah",
+          "timestamp": 1754510045057
+        },
+        "-OX-x0Gsd7njVS-ED3rf": {
+          "playerId": "Brandon",
+          "timestamp": 1754510136448
+        },
+        "-OX-xJW7CL8LdPOrX2jy": {
+          "playerId": "PME",
+          "timestamp": 1754510215286
+        },
+        "-OX-xU2JJqc3gsm2DP0Y": {
+          "playerId": "Norah",
+          "timestamp": 1754510258419
+        },
+        "-OX-xm48BzVjmHUM4mof": {
+          "playerId": "Norah",
+          "timestamp": 1754510336360
+        },
+        "-OX-yJjb2BcGRcgNEMSo": {
+          "playerId": "Norah",
+          "timestamp": 1754510478342
+        },
+        "-OX-yWeDGJjVfqpPL5kb": {
+          "playerId": "Brandon",
+          "timestamp": 1754510531221
+        }
+      },
+      "gameState": {
+        "currentTurn": "Brandon",
+        "turnStartTime": 1754510599830
+      },
+      "hostId": "PME",
+      "hotDiceEvents": {
+        "-OX-uKg_louqtQxdFuo-": {
+          "playerId": "PME",
+          "timestamp": 1754509433683
+        },
+        "-OX-vYt6zoxlpc7AZbsK": {
+          "playerId": "PME",
+          "timestamp": 1754509753973
+        },
+        "-OX-wAPcLzYrawJUYGz6": {
+          "playerId": "Brandon",
+          "timestamp": 1754509915824
+        },
+        "-OX-wO4goYhLhEeqsAUZ": {
+          "playerId": "PME",
+          "timestamp": 1754509971865
+        },
+        "-OX-x74a3DNR-wlwz-uu": {
+          "playerId": "Norah",
+          "timestamp": 1754510164357
+        },
+        "-OX-xf_NLPsMit7nJ3kv": {
+          "playerId": "Brandon",
+          "timestamp": 1754510309728
+        },
+        "-OX-y45U7xArF3keXLRm": {
+          "playerId": "Brandon",
+          "timestamp": 1754510414247
+        },
+        "-OX-y6MqavC9Xn06FBzu": {
+          "playerId": "Brandon",
+          "timestamp": 1754510423550
+        },
+        "-OX-y8bb1PPuMKIv63C7": {
+          "playerId": "Brandon",
+          "timestamp": 1754510432751
+        },
+        "-OX-yAs6HO04uJulv4CO": {
+          "playerId": "Brandon",
+          "timestamp": 1754510441999
+        }
+      },
+      "players": {
+        "Brandon": {
+          "isConnected": true,
+          "isHost": false,
+          "joinedAt": 1754509410213,
+          "lastBankTime": 1754510453617,
+          "lastConnectionUpdate": 1754510334833,
+          "name": "Brandon",
+          "score": 9500,
+          "state": "rolling",
+          "stateTimestamp": 1754510599831
+        },
+        "Norah": {
+          "isConnected": true,
+          "isHost": false,
+          "joinedAt": 1754509502813,
+          "lastBankTime": 1754510586642,
+          "lastConnectionUpdate": 1754509588799,
+          "name": "Norah",
+          "score": 1600,
+          "state": "ended_turn",
+          "stateTimestamp": 1754510586644
+        },
+        "PME": {
+          "isConnected": false,
+          "isHost": true,
+          "joinedAt": 1754509403141,
+          "lastBankTime": 1754510292047,
+          "lastConnectionUpdate": 1754510599796,
+          "name": "PME",
+          "score": 4050,
+          "state": "ended_turn",
+          "stateTimestamp": 1754510599828
+        }
+      },
+      "rollingStart": {
+        "-OX-uHinggaTXBTAQk25": {
+          "playerId": "PME",
+          "timestamp": 1754509421537
+        },
+        "-OX-uLrQa0F4MPz1ZcSr": {
+          "playerId": "PME",
+          "timestamp": 1754509438473
+        },
+        "-OX-ubxOcN73zFP0M__n": {
+          "playerId": "Brandon",
+          "timestamp": 1754509508448
+        },
+        "-OX-ue-JXo4gtnCph3vZ": {
+          "playerId": "Brandon",
+          "timestamp": 1754509516828
+        },
+        "-OX-ugX2JlCSTVVNHvEB": {
+          "playerId": "Brandon",
+          "timestamp": 1754509527179
+        },
+        "-OX-uiM3IdKS4BRX76QC": {
+          "playerId": "Brandon",
+          "timestamp": 1754509534668
+        },
+        "-OX-uk34G1ii80X7ktfC": {
+          "playerId": "Norah",
+          "timestamp": 1754509541673
+        },
+        "-OX-umLSxZBVFoBa2aaC": {
+          "playerId": "Norah",
+          "timestamp": 1754509551041
+        },
+        "-OX-upEa6Pu1c9hb9Tdn": {
+          "playerId": "Norah",
+          "timestamp": 1754509562890
+        },
+        "-OX-urRNeKyo6qKATrLY": {
+          "playerId": "PME",
+          "timestamp": 1754509571910
+        },
+        "-OX-uvk88KuWxwf1E169": {
+          "playerId": "PME",
+          "timestamp": 1754509589559
+        },
+        "-OX-v-ZyMp65CR4hyVp2": {
+          "playerId": "Brandon",
+          "timestamp": 1754509609286
+        },
+        "-OX-v3hZmOHbVjVrA6iw": {
+          "playerId": "Norah",
+          "timestamp": 1754509626242
+        },
+        "-OX-v5x-Qs4_VYjTLK69": {
+          "playerId": "Norah",
+          "timestamp": 1754509635423
+        },
+        "-OX-v82i7xXkSnRhtVWi": {
+          "playerId": "Norah",
+          "timestamp": 1754509644045
+        },
+        "-OX-v9bQs6ir3jAGvL5t": {
+          "playerId": "PME",
+          "timestamp": 1754509650441
+        },
+        "-OX-vFPg0JGmSoZzk5tf": {
+          "playerId": "PME",
+          "timestamp": 1754509674202
+        },
+        "-OX-vHOrxxTtjbYlykDO": {
+          "playerId": "Brandon",
+          "timestamp": 1754509682303
+        },
+        "-OX-vJCvoJZUI0KjD2Qm": {
+          "playerId": "Brandon",
+          "timestamp": 1754509689731
+        },
+        "-OX-vKTQF8HFoYWN81kj": {
+          "playerId": "Brandon",
+          "timestamp": 1754509694883
+        },
+        "-OX-vL_XS-Ac5Hn7V-Kr": {
+          "playerId": "Brandon",
+          "timestamp": 1754509699433
+        },
+        "-OX-vOT1ysFHoh13J4-d": {
+          "playerId": "Norah",
+          "timestamp": 1754509711265
+        },
+        "-OX-vRO7J8bbHAylrudo": {
+          "playerId": "Norah",
+          "timestamp": 1754509723239
+        },
+        "-OX-vUdFJYihwXLj5CFV": {
+          "playerId": "PME",
+          "timestamp": 1754509736574
+        },
+        "-OX-vZE4E3mPkC5d_DE0": {
+          "playerId": "PME",
+          "timestamp": 1754509755379
+        },
+        "-OX-vbkbyLgjaD579k_Z": {
+          "playerId": "PME",
+          "timestamp": 1754509769813
+        },
+        "-OX-vfz56OEzgEYUQGnk": {
+          "playerId": "Brandon",
+          "timestamp": 1754509787086
+        },
+        "-OX-viYgBsYvnzGscG6b": {
+          "playerId": "Brandon",
+          "timestamp": 1754509797620
+        },
+        "-OX-vklSPgqn3oW2cvm1": {
+          "playerId": "Norah",
+          "timestamp": 1754509806716
+        },
+        "-OX-vt0fkqDTOchlvtnq": {
+          "playerId": "Norah",
+          "timestamp": 1754509840522
+        },
+        "-OX-vv1ukRK8uRYdg-p9": {
+          "playerId": "Norah",
+          "timestamp": 1754509848793
+        },
+        "-OX-vxbya-SUuCvDwf9D": {
+          "playerId": "Norah",
+          "timestamp": 1754509859357
+        },
+        "-OX-vzkvRqYMvzt0ZGwZ": {
+          "playerId": "PME",
+          "timestamp": 1754509868136
+        },
+        "-OX-w1szIg2jfXDE6xzT": {
+          "playerId": "PME",
+          "timestamp": 1754509880941
+        },
+        "-OX-w3iXrTk-vQF0vkf8": {
+          "playerId": "PME",
+          "timestamp": 1754509888464
+        },
+        "-OX-w6W5rQFDLw_ZQm1E": {
+          "playerId": "Brandon",
+          "timestamp": 1754509899854
+        },
+        "-OX-w7y33rOq7Uv4ZXxs": {
+          "playerId": "Brandon",
+          "timestamp": 1754509905804
+        },
+        "-OX-w9fBCMeNat-pRZfF": {
+          "playerId": "Brandon",
+          "timestamp": 1754509912788
+        },
+        "-OX-wAmo38wqzxr0hn9c": {
+          "playerId": "Brandon",
+          "timestamp": 1754509917372
+        },
+        "-OX-wDAg4rbeYmkNcaLV": {
+          "playerId": "Brandon",
+          "timestamp": 1754509927156
+        },
+        "-OX-wH1uvViM350HYRkl": {
+          "playerId": "Norah",
+          "timestamp": 1754509943001
+        },
+        "-OX-wJXouiBfMTNwfcpD": {
+          "playerId": "Norah",
+          "timestamp": 1754509953235
+        },
+        "-OX-wLMU_lVjUlw_kUO8": {
+          "playerId": "PME",
+          "timestamp": 1754509960717
+        },
+        "-OX-wON0QXjonkNRCPA5": {
+          "playerId": "PME",
+          "timestamp": 1754509973039
+        },
+        "-OX-wSZGKdVgUK4j7e7j": {
+          "playerId": "PME",
+          "timestamp": 1754509990207
+        },
+        "-OX-wUuywIlS1faUO4JZ": {
+          "playerId": "PME",
+          "timestamp": 1754509999852
+        },
+        "-OX-wZtuIwPhRfEh3fyB": {
+          "playerId": "Brandon",
+          "timestamp": 1754510020226
+        },
+        "-OX-wad4j9D5tFZIjALH": {
+          "playerId": "Brandon",
+          "timestamp": 1754510027341
+        },
+        "-OX-wcZWkzQyIrDMAOkw": {
+          "playerId": "Brandon",
+          "timestamp": 1754510035241
+        },
+        "-OX-weR8VjTJ5yJOwc7a": {
+          "playerId": "Norah",
+          "timestamp": 1754510042920
+        },
+        "-OX-wgOSqapOlby4jChp": {
+          "playerId": "PME",
+          "timestamp": 1754510050955
+        },
+        "-OX-wjhj3IbVkfrFfKMY": {
+          "playerId": "PME",
+          "timestamp": 1754510064541
+        },
+        "-OX-wlq2sVsqD7HRklHB": {
+          "playerId": "PME",
+          "timestamp": 1754510073264
+        },
+        "-OX-wqdL8mxDURMeakjS": {
+          "playerId": "PME",
+          "timestamp": 1754510092932
+        },
+        "-OX-wuZ7mKmfu6l_B79_": {
+          "playerId": "Brandon",
+          "timestamp": 1754510108944
+        },
+        "-OX-wwmZz1mXrxoME9dG": {
+          "playerId": "Brandon",
+          "timestamp": 1754510118060
+        },
+        "-OX-wy0yGnvtwe6MH9YZ": {
+          "playerId": "Brandon",
+          "timestamp": 1754510123142
+        },
+        "-OX-wzfhHf7AZp1StG_G": {
+          "playerId": "Brandon",
+          "timestamp": 1754510129909
+        },
+        "-OX-x-mHaVcax8S7xDYI": {
+          "playerId": "Brandon",
+          "timestamp": 1754510134426
+        },
+        "-OX-x1iN4-QaBXF4G2kp": {
+          "playerId": "Norah",
+          "timestamp": 1754510142391
+        },
+        "-OX-x3scBgis6EgQH5jZ": {
+          "playerId": "Norah",
+          "timestamp": 1754510151239
+        },
+        "-OX-x5VBmCzoLzoAUQpp": {
+          "playerId": "Norah",
+          "timestamp": 1754510157867
+        },
+        "-OX-x7yPCs1eCxMhkxjj": {
+          "playerId": "Norah",
+          "timestamp": 1754510167993
+        },
+        "-OX-x9gKY_RHOkIUQVxZ": {
+          "playerId": "Norah",
+          "timestamp": 1754510175028
+        },
+        "-OX-xD-6jJw151KQPxEq": {
+          "playerId": "PME",
+          "timestamp": 1754510188597
+        },
+        "-OX-xFW4J7qUI5UEBupi": {
+          "playerId": "PME",
+          "timestamp": 1754510198899
+        },
+        "-OX-xIlTzPKiOJLU4oGq": {
+          "playerId": "PME",
+          "timestamp": 1754510212236
+        },
+        "-OX-xKRlGp872-5ZcS0y": {
+          "playerId": "Brandon",
+          "timestamp": 1754510219065
+        },
+        "-OX-xMY_11KwaeZ7T2cc": {
+          "playerId": "Brandon",
+          "timestamp": 1754510227693
+        },
+        "-OX-xR9jl01UJVG3adr_": {
+          "playerId": "Norah",
+          "timestamp": 1754510246606
+        },
+        "-OX-xT_gGAsAHXydhPZX": {
+          "playerId": "Norah",
+          "timestamp": 1754510256523
+        },
+        "-OX-xUyju5rzLpUShJC-": {
+          "playerId": "PME",
+          "timestamp": 1754510262237
+        },
+        "-OX-xXSHBMn6z9QLQ9Ux": {
+          "playerId": "PME",
+          "timestamp": 1754510272384
+        },
+        "-OX-xcHDBVDU6pHVDQVy": {
+          "playerId": "Brandon",
+          "timestamp": 1754510296214
+        },
+        "-OX-xfpG-tLB6NFWyrmr": {
+          "playerId": "Brandon",
+          "timestamp": 1754510310745
+        },
+        "-OX-xjSiWcEEqapYpNIl": {
+          "playerId": "Norah",
+          "timestamp": 1754510325644
+        },
+        "-OX-xlXWfOaE1de9ZDiJ": {
+          "playerId": "Norah",
+          "timestamp": 1754510334144
+        },
+        "-OX-xoVc1bqCZZPHNgCC": {
+          "playerId": "PME",
+          "timestamp": 1754510346325
+        },
+        "-OX-xujDM2UHoP3Woy_4": {
+          "playerId": "PME",
+          "timestamp": 1754510371836
+        },
+        "-OX-xvafHXu3sQBmW7U0": {
+          "playerId": "Brandon",
+          "timestamp": 1754510375347
+        },
+        "-OX-xzPQMEGgxmwDWQ0-": {
+          "playerId": "Brandon",
+          "timestamp": 1754510390947
+        },
+        "-OX-y0rETrLDCY84gB90": {
+          "playerId": "Brandon",
+          "timestamp": 1754510400983
+        },
+        "-OX-y2-Mm82ifnW0rhSy": {
+          "playerId": "Brandon",
+          "timestamp": 1754510405663
+        },
+        "-OX-y39bz8VAm8XobOaj": {
+          "playerId": "Brandon",
+          "timestamp": 1754510410415
+        },
+        "-OX-y4Q2gYVW5eDDIujO": {
+          "playerId": "Brandon",
+          "timestamp": 1754510415563
+        },
+        "-OX-y6eY1NIKtNBY4gQY": {
+          "playerId": "Brandon",
+          "timestamp": 1754510424747
+        },
+        "-OX-y8tWX568Zy5gDTQx": {
+          "playerId": "Brandon",
+          "timestamp": 1754510433897
+        },
+        "-OX-yBAsX0VE_sIRSmun": {
+          "playerId": "Brandon",
+          "timestamp": 1754510443264
+        },
+        "-OX-yEZCFHCuURhW4JA7": {
+          "playerId": "Norah",
+          "timestamp": 1754510457132
+        },
+        "-OX-yHV6mz7lAMlb-4zA": {
+          "playerId": "Norah",
+          "timestamp": 1754510469158
+        },
+        "-OX-yJ5X3KmKkh5KegFA": {
+          "playerId": "Norah",
+          "timestamp": 1754510475713
+        },
+        "-OX-ySptnLFbXeeqKkIU": {
+          "playerId": "Brandon",
+          "timestamp": 1754510515584
+        },
+        "-OX-yURTOAM6xEtX08za": {
+          "playerId": "Brandon",
+          "timestamp": 1754510522149
+        },
+        "-OX-yW3uY_8HIPbr8t1A": {
+          "playerId": "Brandon",
+          "timestamp": 1754510528834
+        },
+        "-OX-yXTYi-A-MfnlKDPF": {
+          "playerId": "Norah",
+          "timestamp": 1754510534594
+        },
+        "-OX-yfJvrEZH6f_hfXnf": {
+          "playerId": "Norah",
+          "timestamp": 1754510570842
+        },
+        "-OX-ygsqLQMa-KrGfcyp": {
+          "playerId": "Norah",
+          "timestamp": 1754510577237
+        }
+      }
+    }
+  },
+  "test": {
+    "message": "Firebase is working!"
+  }
+}

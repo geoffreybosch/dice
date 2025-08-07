@@ -6,6 +6,7 @@ let currentPlayerTurn = null;
 let turnSystemPlayerList = [];
 let currentPlayerIndex = 0;
 let isMultiplayerMode = false;
+let currentRound = 1; // Track the current game round
 
 // Player material preferences storage
 const playerMaterialPreferences = {};
@@ -59,6 +60,7 @@ function initializeTurnSystem(players, isMultiplayer = false, preserveCurrentTur
     
     updateTurnDisplay();
     updatePendingPointsDisplay();
+    updateRoundDisplay(); // Show round counter when game starts
 }
 
 function getCurrentPlayer() {
@@ -1082,6 +1084,8 @@ function resetGameState() {
     gameState = 'playing';
     winTriggerPlayer = null;
     finalRoundTracker = {};
+    currentRound = 1; // Reset round counter to 1
+    updateRoundDisplay(); // Update the display
 }
 
 // Update game state from external source (e.g., multiplayer sync)
@@ -1259,6 +1263,30 @@ function updatePendingPointsDisplay() {
     } else {
         pendingDisplay.style.display = 'none';
     }
+}
+
+// Round Counter Functions
+function updateRoundDisplay() {
+    const roundDisplay = document.getElementById('round-counter-display');
+    const roundNumber = document.getElementById('round-number');
+    
+    if (roundDisplay && roundNumber) {
+        roundNumber.textContent = currentRound;
+        
+        // Show the round counter when there are multiple players
+        if (turnSystemPlayerList.length > 1) {
+            roundDisplay.style.display = 'block';
+        } else {
+            roundDisplay.style.display = 'none';
+        }
+    }
+}
+
+function incrementRound() {
+    console.log('🎯 incrementRound() called! Current round:', currentRound);
+    currentRound++;
+    console.log(`🎯 Round advanced to: ${currentRound}`);
+    updateRoundDisplay();
 }
 
 function updateScoreDisplayUI() {
@@ -1557,6 +1585,8 @@ if (typeof module !== 'undefined' && module.exports) {
         updatePendingPointsDisplay,
         updateScoreDisplay,
         updateScoreDisplayUI,
+        updateRoundDisplay,
+        incrementRound,
         // Win detection functions
         checkWinCondition,
         checkFinalRoundProgress,
@@ -1583,4 +1613,10 @@ if (typeof module !== 'undefined' && module.exports) {
         broadcastDiceResults,
         onDiceResultsReceived
     };
+}
+
+// Browser global assignments
+if (typeof window !== 'undefined') {
+    window.updateRoundDisplay = updateRoundDisplay;
+    window.incrementRound = incrementRound;
 }

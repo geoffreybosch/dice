@@ -581,6 +581,7 @@ function checkAndAdvanceTurn(players) {
     // Special case: If all connected players have ended their turn, start a new round
     if (allConnectedPlayersEnded && hasMultipleConnectedPlayers) {
         // console.log('🔄 All connected players have ended their turns - starting new round');
+        console.log('🔄 All connected players have ended their turns - starting new round');
         
         // Clear any existing timeout
         if (window.autoTurnTimeout) {
@@ -614,13 +615,21 @@ function checkAndAdvanceTurn(players) {
                 const currentIndex = connectedPlayerIds.indexOf(window.firebaseCurrentTurnPlayer);
                 const nextIndex = (currentIndex + 1) % connectedPlayerIds.length;
                 firstPlayer = connectedPlayerIds[nextIndex];
+                
+                // Check if we've completed a round (went back to first player)
+                if (nextIndex === 0 && typeof incrementRound === 'function') {
+                    // We've completed a full round through all players
+                    incrementRound();
+                }
             } else {
                 // Fallback: use host or first player
                 const connectedHostPlayer = connectedPlayerIds.find(playerId => connectedPlayers[playerId].isHost);
                 firstPlayer = connectedHostPlayer || connectedPlayerIds[0];
             }
             
-            // console.log('🎮 Starting new round - next player in rotation:', firstPlayer);
+            console.log('🎮 Starting new round - next player in rotation:', firstPlayer);
+            console.log('🎯 Round check: window.firebaseCurrentTurnPlayer=', window.firebaseCurrentTurnPlayer);
+            console.log('🎯 Round check: connectedPlayerIds=', connectedPlayerIds);
             
             // Set all connected players to waiting state
             const updates = {};
@@ -725,7 +734,47 @@ function checkAndAdvanceTurn(players) {
         
         // If the current turn player is different from what's in game state, update it
         if (currentTurnPlayer && currentTurnPlayer !== currentGameTurn) {
-            // console.log('🔄 Advancing turn from', currentGameTurn, 'to', currentTurnPlayer);
+            console.log('🔄 Advancing turn from', currentGameTurn, 'to', currentTurnPlayer);
+            
+            // Check for round completion before advancing turn
+            if (currentGameTurn && typeof incrementRound === 'function') {
+                // Get the list of connected player IDs to check for round completion
+                const connectedPlayerIds = Object.keys(players).filter(playerId => {
+                    const player = players[playerId];
+                    return player.isConnected !== false;
+                }).sort((a, b) => {
+                    const playerA = players[a];
+                    const playerB = players[b];
+                    
+                    // Use joinedAt timestamp if both players have it
+                    if (playerA.joinedAt && playerB.joinedAt) {
+                        return playerA.joinedAt - playerB.joinedAt;
+                    }
+                    
+                    // If only one has joinedAt, prioritize the one with timestamp
+                    if (playerA.joinedAt && !playerB.joinedAt) return -1;
+                    if (!playerA.joinedAt && playerB.joinedAt) return 1;
+                    
+                    // Fallback to alphabetical if neither has joinedAt
+                    return a.localeCompare(b);
+                });
+                
+                if (connectedPlayerIds.length > 1) {
+                    const currentIndex = connectedPlayerIds.indexOf(currentGameTurn);
+                    const nextIndex = connectedPlayerIds.indexOf(currentTurnPlayer);
+                    
+                    console.log('🎯 Turn advancement check: currentIndex=', currentIndex, 'nextIndex=', nextIndex, 'playerCount=', connectedPlayerIds.length);
+                    console.log('🎯 Players order:', connectedPlayerIds);
+                    
+                    // Check if we've wrapped around to the first player (completed a round)
+                    if (currentIndex !== -1 && nextIndex === 0 && currentIndex === connectedPlayerIds.length - 1) {
+                        console.log('🎯 Round completed! Incrementing round counter.');
+                        incrementRound();
+                    } else {
+                        console.log('🎯 Round not completed yet.');
+                    }
+                }
+            }
             
             // Update game state
             const updates = {
