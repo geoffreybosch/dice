@@ -37,11 +37,11 @@ function loadGameSettings() {
         if (saved) {
             const savedSettings = JSON.parse(saved);
             currentGameSettings = { ...DEFAULT_GAME_SETTINGS, ...savedSettings };
-            console.log('📁 Loaded saved settings from localStorage:', currentGameSettings);
+            // console.log('📁 Loaded saved settings from localStorage:', currentGameSettings);
         } else {
             // If no saved settings, read current form values as defaults
             currentGameSettings = readCurrentFormSettings();
-            console.log('📄 No saved settings found, using form defaults:', currentGameSettings);
+            // console.log('📄 No saved settings found, using form defaults:', currentGameSettings);
         }
         
         // Apply settings to UI
@@ -54,7 +54,7 @@ function loadGameSettings() {
     } catch (error) {
         console.error('❌ Error loading game settings:', error);
         currentGameSettings = { ...DEFAULT_GAME_SETTINGS };
-        console.log('📄 Using DEFAULT_GAME_SETTINGS as fallback:', currentGameSettings);
+        // console.log('📄 Using DEFAULT_GAME_SETTINGS as fallback:', currentGameSettings);
     }
 }
 
@@ -86,7 +86,7 @@ function readCurrentFormSettings() {
         minimumScore
     };
     
-    console.log('📝 Read form settings:', formSettings);
+    // console.log('📝 Read form settings:', formSettings);
     return formSettings;
 }
 
@@ -314,9 +314,9 @@ function getGameSettings() {
             formSettings.minimumScore !== currentGameSettings.minimumScore ||
             formSettings.threeOnesRule !== currentGameSettings.threeOnesRule) {
             
-            console.log('🔧 Form settings differ from saved settings, using form values');
-            console.log('🔧 Form settings:', formSettings);
-            console.log('🔧 Saved settings:', currentGameSettings);
+            // console.log('🔧 Form settings differ from saved settings, using form values');
+            // console.log('🔧 Form settings:', formSettings);
+            // console.log('🔧 Saved settings:', currentGameSettings);
             return formSettings;
         }
     }
@@ -367,7 +367,7 @@ function updateScoringGuide() {
         const pointsCell = threeOnesRow.cells[1]; // Second cell contains the points
         if (pointsCell) {
             pointsCell.innerHTML = `<span class="text-success">${currentGameSettings.threeOnesRule.toLocaleString()} pts</span>`;
-            console.log(`📊 Scoring guide updated: Three 1s now worth ${currentGameSettings.threeOnesRule} points`);
+            // console.log(`📊 Scoring guide updated: Three 1s now worth ${currentGameSettings.threeOnesRule} points`);
         } else {
             console.warn('📊 Could not find points cell in three 1s row');
         }
@@ -381,14 +381,14 @@ function updateScoringGuide() {
     
     if (goalElement) {
         goalElement.innerHTML = `<strong>🎯 Goal:</strong> First to ${currentGameSettings.winningScore.toLocaleString()} points wins`;
-        console.log(`📊 Goal updated: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`);
+        // console.log(`📊 Goal updated: First to ${currentGameSettings.winningScore.toLocaleString()} points wins`);
     } else {
         console.warn('📊 Could not find game-goal-text element');
     }
     
     if (entryElement) {
         entryElement.innerHTML = `<strong>🚀 Entry:</strong> Need ${currentGameSettings.minimumScore}+ points to get "on the board"`;
-        console.log(`📊 Entry updated: Need ${currentGameSettings.minimumScore}+ points to get on the board`);
+        // console.log(`📊 Entry updated: Need ${currentGameSettings.minimumScore}+ points to get on the board`);
     } else {
         console.warn('📊 Could not find game-entry-text element');
     }
@@ -436,11 +436,11 @@ window.isGameHost = isGameHost;
 window.updateCustomizeButtonVisibility = updateCustomizeButtonVisibility;
 window.updateScoringGuide = updateScoringGuide;
 window.debugCurrentSettings = () => {
-    console.log('🔍 Current game settings:', currentGameSettings);
-    console.log('🔍 Form values:');
-    console.log('  - Three 1s 300 checked:', document.getElementById('threeOnes300')?.checked);
-    console.log('  - Three 1s 1000 checked:', document.getElementById('threeOnes1000')?.checked);
-    console.log('  - Winning score:', document.getElementById('winningScore')?.value);
-    console.log('  - Minimum score:', document.getElementById('minimumScore')?.value);
+    // console.log('🔍 Current game settings:', currentGameSettings);
+    // console.log('🔍 Form values:');
+    // console.log('  - Three 1s 300 checked:', document.getElementById('threeOnes300')?.checked);
+    // console.log('  - Three 1s 1000 checked:', document.getElementById('threeOnes1000')?.checked);
+    // console.log('  - Winning score:', document.getElementById('winningScore')?.value);
+    // console.log('  - Minimum score:', document.getElementById('minimumScore')?.value);
     return currentGameSettings;
 };

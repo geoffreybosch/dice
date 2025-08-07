@@ -376,7 +376,7 @@ function leaveRoom() {
     if (typeof window.firebaseCurrentTurnPlayer !== 'undefined' && 
         window.firebaseCurrentTurnPlayer === window.myPlayerId &&
         typeof endMyTurn === 'function') {
-        console.log(`🚪 Player ${window.myPlayerId} is leaving during their turn - ending turn first`);
+        console.warn(`🚪 Player ${window.myPlayerId} is leaving during their turn - ending turn first`);
         endMyTurn();
         
         // Wait a moment for the turn state to propagate before marking as disconnected

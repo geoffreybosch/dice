@@ -131,9 +131,9 @@ class WelcomeModal {
         // Scoring guide button listener
         const scoringGuideBtn = document.getElementById('welcome-scoring-guide-btn');
         if (scoringGuideBtn) {
-            console.log('Setting up scoring guide button listener');
+            // console.log('Setting up scoring guide button listener');
             scoringGuideBtn.addEventListener('click', (e) => {
-                console.log('Scoring guide button clicked');
+                // console.log('Scoring guide button clicked');
                 e.preventDefault();
                 this.showScoringGuide();
             });
@@ -184,7 +184,7 @@ class WelcomeModal {
     }
     
     showScoringGuide() {
-        console.log('showScoringGuide method called');
+        // console.log('showScoringGuide method called');
         
         try {
             // Show the scoring modal over the welcome modal
@@ -194,7 +194,7 @@ class WelcomeModal {
                 return;
             }
             
-            console.log('Creating Bootstrap modal instance');
+            // console.log('Creating Bootstrap modal instance');
             
             // Check if bootstrap is available
             if (typeof bootstrap === 'undefined') {
@@ -207,21 +207,21 @@ class WelcomeModal {
             }
             
             const scoringModal = new bootstrap.Modal(scoringModalElement);
-            console.log('Bootstrap modal created:', scoringModal);
+            // console.log('Bootstrap modal created:', scoringModal);
             
             // Increase z-index to appear above welcome modal
             scoringModalElement.style.zIndex = '1060'; // Higher than default modal z-index (1055)
-            console.log('Z-index set to 1060');
+            // console.log('Z-index set to 1060');
             
             // Listen for when the scoring modal is hidden to reset z-index
             scoringModalElement.addEventListener('hidden.bs.modal', () => {
-                console.log('Scoring modal hidden, resetting z-index');
+                // console.log('Scoring modal hidden, resetting z-index');
                 scoringModalElement.style.zIndex = '';
             }, { once: true });
             
-            console.log('Showing modal');
+            // console.log('Showing modal');
             scoringModal.show();
-            console.log('Modal show() called');
+            // console.log('Modal show() called');
             
         } catch (error) {
             console.error('Error in showScoringGuide:', error);

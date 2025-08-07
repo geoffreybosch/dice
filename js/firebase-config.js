@@ -22,11 +22,11 @@ if (!window.FIREBASE_CONFIG || !firebaseConfig.apiKey) {
   document.body.prepend(errorDiv);
 } else {
   // Initialize Firebase
-  console.log('Initializing Firebase with configuration');
+//   console.log('Initializing Firebase with configuration');
   try {
     firebase.initializeApp(firebaseConfig);
     database = firebase.database();
-    console.log('Firebase initialized successfully');
+    // console.log('Firebase initialized successfully');
     
     // Initialize Firebase references after database is ready
     initializeFirebaseRefs();
@@ -366,10 +366,10 @@ function showFarkleIndicator(playerNameOrId) {
             farkleIndicator.style.display = 'inline';
             // console.log(`⚠️ Farkle indicator shown for ${playerNameOrId}`);
         } else {
-            // console.warn(`⚠️ Farkle indicator element not found for ${playerNameOrId}`);
+            console.warn(`⚠️ Farkle indicator element not found for ${playerNameOrId}`);
         }
     } else {
-        // console.warn(`⚠️ Player list item not found for ${playerNameOrId}`);
+        console.warn(`⚠️ Player list item not found for ${playerNameOrId}`);
     }
 }
 

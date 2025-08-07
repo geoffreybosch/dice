@@ -86,7 +86,7 @@ function migratePlayerStructure(roomId) {
         });
         
         if (Object.keys(migrations).length > 0) {
-            console.log(`🔄 Migrating player structure for ${Object.keys(migrations).length} fields`);
+            // console.log(`🔄 Migrating player structure for ${Object.keys(migrations).length} fields`);
             return database.ref(`rooms/${roomId}`).update(migrations);
         }
     });
