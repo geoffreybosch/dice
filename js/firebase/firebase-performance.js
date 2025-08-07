@@ -105,7 +105,8 @@ function getGameTimeline(roomId, fromTimestamp = 0, toTimestamp = Date.now()) {
         'rollingStart',
         'farkleAlerts',
         'hotDiceEvents',
-        'materialChanges'
+        'materialChanges',
+        'lockedDice'  // Include locked dice events
     ];
     
     const promises = eventTypes.map(eventType => 
@@ -146,8 +147,10 @@ function getPlayerGameStats(roomId, playerId) {
             totalRolls: 0,
             totalFarkles: 0,
             totalHotDice: 0,
+            totalLockedDice: 0,
             rollHistory: [],
-            scoreHistory: []
+            scoreHistory: [],
+            lockedDiceHistory: []
         };
         
         playerEvents.forEach(event => {
@@ -156,7 +159,8 @@ function getPlayerGameStats(roomId, playerId) {
                     stats.totalRolls++;
                     stats.rollHistory.push({
                         timestamp: event.timestamp,
-                        dice: event.diceResults
+                        dice: event.diceResults,
+                        roundNumber: event.roundNumber
                     });
                     break;
                 case 'farkleAlerts':
@@ -165,11 +169,48 @@ function getPlayerGameStats(roomId, playerId) {
                 case 'hotDiceEvents':
                     stats.totalHotDice++;
                     break;
+                case 'lockedDice':
+                    stats.totalLockedDice++;
+                    stats.lockedDiceHistory.push({
+                        timestamp: event.timestamp,
+                        lockedIndices: event.lockedDiceIndices,
+                        diceResults: event.diceResults,
+                        roundNumber: event.roundNumber
+                    });
+                    break;
             }
         });
         
         return stats;
     });
+}
+
+/**
+ * Get locked dice for a specific player and round (for spectator mode)
+ * @param {string} roomId - Room ID
+ * @param {string} playerId - Player ID to get locked dice for
+ * @param {number} roundNumber - Round number to filter by
+ */
+function getPlayerLockedDiceForRound(roomId, playerId, roundNumber) {
+    if (!database || !roomId || !playerId) return Promise.resolve([]);
+    
+    return database.ref(`rooms/${roomId}/lockedDice`)
+        .orderByChild('timestamp')
+        .once('value')
+        .then(snapshot => {
+            const lockedDiceEvents = snapshot.val() || {};
+            
+            // Filter by player and round
+            const playerRoundEvents = Object.keys(lockedDiceEvents)
+                .map(key => ({ ...lockedDiceEvents[key], eventKey: key }))
+                .filter(event => 
+                    event.playerId === playerId && 
+                    event.roundNumber === roundNumber
+                )
+                .sort((a, b) => a.timestamp - b.timestamp);
+            
+            return playerRoundEvents;
+        });
 }
 
 /**
@@ -225,4 +266,5 @@ window.subscribeToEssentialUpdates = subscribeToEssentialUpdates;
 window.broadcastGameEvent = broadcastGameEvent;
 window.getGameTimeline = getGameTimeline;
 window.getPlayerGameStats = getPlayerGameStats;
+window.getPlayerLockedDiceForRound = getPlayerLockedDiceForRound;
 window.FirebaseConnectionManager = FirebaseConnectionManager;

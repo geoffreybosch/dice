@@ -254,6 +254,169 @@ Potential improvements for the round counter system:
 4. **Persistence**: Save round data to Firebase for cross-session tracking
 5. **Admin Controls**: Add manual round adjustment capabilities
 
+## Recent Updates: Locked Dice Integration
+
+### Overview
+
+The round counter system has been enhanced to integrate with the locked dice functionality, enabling round-based filtering of locked dice data for improved spectator mode and game history features.
+
+### Changes Made
+
+#### 1. Global Round Access
+**File**: `js/turn-system-integration.js`
+**Changes**: Made `currentRound` globally accessible via `window.currentRound`
+
+```javascript
+// Browser global assignments
+if (typeof window !== 'undefined') {
+    window.updateRoundDisplay = updateRoundDisplay;
+    window.incrementRound = incrementRound;
+    window.currentRound = currentRound; // NEW: Make current round globally accessible
+}
+
+function incrementRound() {
+    console.log('🎯 incrementRound() called! Current round:', currentRound);
+    currentRound++;
+    console.log(`🎯 Round advanced to: ${currentRound}`);
+    // Update global window reference
+    if (typeof window !== 'undefined') {
+        window.currentRound = currentRound;
+    }
+    updateRoundDisplay();
+}
+```
+
+#### 2. Round-Aware Locked Dice Storage
+**File**: `js/firebase-state-manager.js`
+**Function**: `broadcastLockedDice()`
+**Changes**: Added round number to locked dice data
+
+```javascript
+function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
+    if (!currentRoomId || !database) return;
+    
+    // Get current round number for filtering
+    const currentRoundNumber = (typeof window.currentRound !== 'undefined') ? window.currentRound : 1;
+    
+    const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
+    lockedDiceRef.push({
+        playerId: playerId,
+        lockedDiceIndices: lockedDiceIndices,
+        diceResults: diceResults,
+        roundNumber: currentRoundNumber, // NEW: Add round number for filtering
+        timestamp: Date.now()
+    });
+}
+```
+
+#### 3. Round-Filtered Locked Dice Display
+**File**: `js/firebase-state-manager.js`
+**Function**: `setupLockedDiceListener()`
+**Changes**: Filter locked dice events by current round
+
+```javascript
+function setupLockedDiceListener() {
+    // ... existing code ...
+    
+    lockedDiceListener = lockedDiceRef.on('child_added', (snapshot) => {
+        const lockedData = snapshot.val();
+        
+        if (lockedData && lockedData.playerId !== currentPlayerId) {
+            // Get current round number for filtering
+            const currentRoundNumber = (typeof window.currentRound !== 'undefined') ? window.currentRound : 1;
+            
+            // Only process locked dice from the current round
+            if (lockedData.roundNumber === currentRoundNumber) {
+                // Process locked dice display...
+            } else {
+                console.log('🔒 Ignoring locked dice from different round');
+            }
+        }
+    });
+}
+```
+
+#### 4. Data Preservation
+**File**: `js/firebase-state-manager.js`
+**Changes**: Commented out `clearAllLockedDiceFromFirebase()` calls to preserve historical data
+
+```javascript
+// COMMENTED OUT: Preserve locked dice data for game history
+// if (typeof clearAllLockedDiceFromFirebase === 'function') {
+//     clearAllLockedDiceFromFirebase();
+// }
+```
+
+#### 5. Enhanced Performance Utilities
+**File**: `js/firebase/firebase-performance.js`
+**New Functions**: Round-aware game history and statistics
+
+```javascript
+function getPlayerLockedDiceForRound(roomId, playerId, roundNumber) {
+    return database.ref(`rooms/${roomId}/lockedDice`)
+        .orderByChild('timestamp')
+        .once('value')
+        .then(snapshot => {
+            const lockedDiceEvents = snapshot.val() || {};
+            
+            // Filter by player and round
+            return Object.keys(lockedDiceEvents)
+                .map(key => ({ ...lockedDiceEvents[key], eventKey: key }))
+                .filter(event => 
+                    event.playerId === playerId && 
+                    event.roundNumber === roundNumber
+                )
+                .sort((a, b) => a.timestamp - b.timestamp);
+        });
+}
+```
+
+### New Firebase Data Structure
+
+The locked dice data now includes round information:
+
+```json
+{
+  "rooms": {
+    "roomId": {
+      "lockedDice": {
+        "-FirebaseKey1": {
+          "playerId": "Brandon",
+          "lockedDiceIndices": [0, 2],
+          "diceResults": [1, 3, 4, 2, 5, 6],
+          "roundNumber": 1,
+          "timestamp": 1754589576656
+        },
+        "-FirebaseKey2": {
+          "playerId": "Brandon", 
+          "lockedDiceIndices": [1, 3, 5],
+          "diceResults": [2, 5, 4, 5, 3, 1],
+          "roundNumber": 2,
+          "timestamp": 1754589580123
+        }
+      }
+    }
+  }
+}
+```
+
+### Benefits
+
+1. **Historical Preservation**: All locked dice events are preserved across rounds
+2. **Spectator Mode**: Viewers only see locked dice from the current round
+3. **Game History**: Complete timeline of player actions with round context
+4. **Performance**: Efficient filtering prevents old data from interfering with current gameplay
+5. **Analytics**: Enables round-based statistics and analysis
+
+### Integration Points
+
+The enhanced system integrates with:
+
+- **Game History Views**: Round-filtered data for replay functionality
+- **Spectator Mode**: Clean display of current round locked dice only
+- **Statistics**: Player performance tracking across rounds
+- **Firebase Performance**: Optimized queries for historical data
+
 ## Code Quality Notes
 
 The implementation follows established patterns in the codebase:

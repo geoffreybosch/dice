@@ -85,6 +85,49 @@ window.clearAllDiceLockedStyling = function() {
     // console.log('🧹 Cleared locked styling from all dice images (early definition)');
 };
 
+// Clear locked dice styling for a specific player
+window.clearPlayerLockedDiceStyling = function(playerId) {
+    console.log(`🧹 [PLAYER CLEAR DEBUG] Clearing locked dice styling for player: ${playerId}`);
+    
+    const diceResultsContainer = document.getElementById('dice-results-container');
+    if (!diceResultsContainer) {
+        console.log(`🧹 [PLAYER CLEAR DEBUG] No dice results container found`);
+        return;
+    }
+    
+    // Find dice images for the specific player and remove locked classes/styling
+    const playerDiceImages = diceResultsContainer.querySelectorAll(`img[alt*="${playerId}"]`);
+    console.log(`🧹 [PLAYER CLEAR DEBUG] Found ${playerDiceImages.length} dice images for ${playerId}`);
+    
+    playerDiceImages.forEach((diceImage, index) => {
+        // Remove CSS classes
+        diceImage.classList.remove('locked');
+        diceImage.classList.remove('selected-by-other');
+        diceImage.classList.remove('selected');
+        
+        // Force remove CSS properties that might be applied by the locked class
+        diceImage.style.removeProperty('opacity');
+        diceImage.style.removeProperty('filter');
+        diceImage.style.removeProperty('cursor');
+        diceImage.style.removeProperty('background-color');
+        diceImage.style.removeProperty('animation');
+        
+        // Reset border and box-shadow to default dice styling
+        diceImage.style.border = '2px solid #ddd';
+        diceImage.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        
+        // Reset any locked-specific styling in title
+        if (diceImage.title && diceImage.title.includes('LOCKED')) {
+            const value = diceImage.dataset.diceValue || diceImage.alt.match(/\d+/)?.[0];
+            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${value})`;
+        }
+        
+        console.log(`🧹 [PLAYER CLEAR DEBUG] Cleared locked styling for ${playerId}'s dice ${index}`);
+    });
+    
+    console.log(`🧹 [PLAYER CLEAR DEBUG] Completed clearing locked dice styling for ${playerId}`);
+};
+
 // Initialize Three.js scene
 const scene = new THREE.Scene();
 // The following perspectiveCamera uses the following properties: fov, aspect, near, far
@@ -583,20 +626,41 @@ window.lockedDiceStylingDisabled = false;
 
 // Function to display other players' locked dice (updates existing dice with locked indicators)
 function displayOtherPlayerLockedDice(data) {
+    console.log('🔒 [DISPLAY DEBUG] displayOtherPlayerLockedDice called with data:', {
+        fullData: data,
+        playerId: data?.playerId,
+        lockedDiceIndices: data?.lockedDiceIndices,
+        diceResults: data?.diceResults,
+        timestamp: new Date().toISOString()
+    });
+    
     // Check if locked dice styling is temporarily disabled
     if (window.lockedDiceStylingDisabled) {
-        // console.log('🔒 [displayOtherPlayerLockedDice] Locked dice styling is temporarily disabled, skipping');
+        console.log('🔒 [DISPLAY DEBUG] Locked dice styling is temporarily disabled, skipping');
         return;
     }
     
     const { playerId, lockedDiceIndices, diceResults } = data;
     
+    console.log('🔒 [DISPLAY DEBUG] Processing locked dice for player:', {
+        playerId: playerId,
+        rawLockedDiceIndices: lockedDiceIndices,
+        isArray: Array.isArray(lockedDiceIndices),
+        diceResults: diceResults,
+        diceResultsIsArray: Array.isArray(diceResults),
+        diceResultsLength: diceResults?.length
+    });
+    
     // Ensure arrays are properly initialized and validate incoming data
     ensureArraysInitialized();
     const validLockedDiceIndices = Array.isArray(lockedDiceIndices) ? lockedDiceIndices : [];
     
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Called for ${playerId}:`, validLockedDiceIndices);
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Current stored states:`, JSON.stringify(playerLockedDiceStates));
+    console.log('🔒 [DISPLAY DEBUG] State before processing:', {
+        validLockedDiceIndices: validLockedDiceIndices,
+        currentPlayerLockedDiceStates: JSON.stringify(playerLockedDiceStates),
+        windowPlayerLockedDiceStates: JSON.stringify(window.playerLockedDiceStates),
+        playerLockedDiceValues: JSON.stringify(playerLockedDiceValues)
+    });
     
     // Store the locked dice state for this player
     playerLockedDiceStates[playerId] = validLockedDiceIndices;
@@ -613,45 +677,91 @@ function displayOtherPlayerLockedDice(data) {
             }
         });
         window.playerLockedDiceValues = playerLockedDiceValues;
-        // console.log(`🔒 [displayOtherPlayerLockedDice] Stored dice values for ${playerId}:`, playerLockedDiceValues[playerId]);
+        console.log('🔒 [DISPLAY DEBUG] Stored dice values for player:', {
+            playerId: playerId,
+            storedValues: playerLockedDiceValues[playerId],
+            validIndices: validLockedDiceIndices
+        });
     }
     
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Stored locked dice state for ${playerId}:`, playerLockedDiceStates[playerId]);
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Updated stored states:`, JSON.stringify(playerLockedDiceStates));
+    console.log('🔒 [DISPLAY DEBUG] State after storing:', {
+        playerLockedDiceStates: JSON.stringify(playerLockedDiceStates),
+        windowPlayerLockedDiceStates: JSON.stringify(window.playerLockedDiceStates),
+        playerLockedDiceValues: JSON.stringify(playerLockedDiceValues)
+    });
     
     // Only show locked indicators if the dice results are currently displayed for this player
     const diceResultsContainer = document.getElementById('dice-results-container');
     if (!diceResultsContainer) {
-        // console.log(`🔒 [displayOtherPlayerLockedDice] No dice results container found`);
+        console.log('🔒 [DISPLAY DEBUG] No dice results container found');
         return;
     }
     
     // Check if we're currently showing this player's results
     const header = diceResultsContainer.querySelector('div strong');
+    console.log('🔒 [DISPLAY DEBUG] Checking if currently showing player results:', {
+        headerExists: !!header,
+        headerText: header?.textContent,
+        targetPlayerId: playerId,
+        headerIncludesPlayer: header?.textContent?.includes(playerId)
+    });
+    
     if (!header || !header.textContent.includes(playerId)) {
-        // console.log(`🔒 [displayOtherPlayerLockedDice] Not currently showing ${playerId}'s results, but stored state for future display`);
-        // console.log(`🔒 [displayOtherPlayerLockedDice] Header text:`, header?.textContent);
+        console.log('🔒 [DISPLAY DEBUG] Not currently showing player results, storing state for future:', {
+            playerId: playerId,
+            headerText: header?.textContent,
+            reason: !header ? 'No header found' : 'Header does not include player ID'
+        });
         return;
     }
     
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Currently showing ${playerId}'s results, applying locked styling now`);
+    console.log('🔒 [DISPLAY DEBUG] Currently showing player results, applying locked styling:', {
+        playerId: playerId,
+        headerText: header.textContent
+    });
     
     // Find all dice images and update their locked indicators
     const diceImages = diceResultsContainer.querySelectorAll('img[alt*="' + playerId + '"]');
-    // console.log(`🔒 [displayOtherPlayerLockedDice] Found ${diceImages.length} dice images for ${playerId}`);
+    console.log('🔒 [DISPLAY DEBUG] Found dice images for styling:', {
+        playerId: playerId,
+        diceImagesCount: diceImages.length,
+        selector: 'img[alt*="' + playerId + '"]'
+    });
     
     diceImages.forEach((diceImage, index) => {
         // Remove any existing locked indicators first
         diceImage.classList.remove('locked');
         
+        const isLocked = safeIncludes(validLockedDiceIndices, index);
+        const diceValue = diceResults?.[index];
+        
+        console.log('🔒 [DISPLAY DEBUG] Processing dice image:', {
+            playerId: playerId,
+            diceIndex: index,
+            isLocked: isLocked,
+            diceValue: diceValue,
+            validLockedDiceIndices: validLockedDiceIndices
+        });
+        
         // Add locked indicator if this dice is locked
-        if (safeIncludes(validLockedDiceIndices, index)) {
+        if (isLocked) {
             diceImage.classList.add('locked');
-            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]}) - LOCKED`;
-            // console.log(`🔒 [displayOtherPlayerLockedDice] Applied locked class to dice ${index} for ${playerId}`);
+            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceValue}) - LOCKED`;
+            console.log('🔒 [DISPLAY DEBUG] Applied locked styling to dice:', {
+                playerId: playerId,
+                diceIndex: index,
+                diceValue: diceValue,
+                title: diceImage.title
+            });
         } else {
-            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceResults[index]})`;
+            diceImage.title = `${playerId}'s dice ${index + 1} (value: ${diceValue})`;
         }
+    });
+    
+    console.log('🔒 [DISPLAY DEBUG] Completed locked dice display processing for:', {
+        playerId: playerId,
+        processedDiceCount: diceImages.length,
+        finalPlayerStates: JSON.stringify(playerLockedDiceStates)
     });
 }
 

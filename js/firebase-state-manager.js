@@ -227,9 +227,30 @@ function handleGameStateChange(gameState) {
         console.warn('🎮 typeof updateWinGameState:', typeof updateWinGameState);
     }
     
+    // Capture the previous turn player before updating
+    const previousTurnPlayer = window.firebaseCurrentTurnPlayer;
+    
     // Set the Firebase current turn player for the isPlayerTurn function
     window.firebaseCurrentTurnPlayer = currentTurn;
-    // console.log('🔥 Set Firebase current turn player to:', currentTurn);
+    console.log('🔥 [TURN DEBUG] Turn changed from:', previousTurnPlayer, 'to:', currentTurn);
+    
+    // Clear locked dice state for the previous player when their turn ends
+    if (previousTurnPlayer && previousTurnPlayer !== currentTurn && window.playerLockedDiceStates) {
+        console.log(`🧹 [TURN DEBUG] Clearing locked dice state for previous player: ${previousTurnPlayer}`);
+        delete window.playerLockedDiceStates[previousTurnPlayer];
+        
+        // Also clear locked dice values for the previous player
+        if (window.playerLockedDiceValues && window.playerLockedDiceValues[previousTurnPlayer]) {
+            delete window.playerLockedDiceValues[previousTurnPlayer];
+        }
+        
+        // Clear visual styling for the previous player's locked dice
+        if (typeof window.clearPlayerLockedDiceStyling === 'function') {
+            window.clearPlayerLockedDiceStyling(previousTurnPlayer);
+        }
+        
+        console.log(`🧹 [TURN DEBUG] Remaining player states:`, Object.keys(window.playerLockedDiceStates));
+    }
     
     // Update turn indicators in the UI
     updateTurnIndicators(currentTurn);
@@ -273,9 +294,10 @@ function handlePlayersStateChange(players) {
             setPlayerState(PLAYER_STATES.ENDED_TURN, window.firebaseCurrentTurnPlayer);
             
             // Clear any locked dice for the disconnected player
-            if (typeof clearAllLockedDiceFromFirebase === 'function') {
-                clearAllLockedDiceFromFirebase();
-            }
+            // COMMENTED OUT: Preserve locked dice data for game history
+            // if (typeof clearAllLockedDiceFromFirebase === 'function') {
+            //     clearAllLockedDiceFromFirebase();
+            // }
             
             // Show notification about the disconnection
             if (typeof showGameAlert === 'function') {
@@ -645,8 +667,9 @@ function checkAndAdvanceTurn(players) {
             updates[`gameState/currentTurn`] = firstPlayer;
             updates[`gameState/turnStartTime`] = Date.now();
             
+            // COMMENTED OUT: Preserve locked dice data for game history
             // Clear all locked dice data for the new round
-            clearAllLockedDiceFromFirebase();
+            // clearAllLockedDiceFromFirebase();
             
             // Apply all updates to Firebase
             database.ref(`rooms/${currentRoomId}`).update(updates).then(() => {
@@ -701,8 +724,9 @@ function checkAndAdvanceTurn(players) {
             
             // console.log('🎮 Auto-starting turn for next player in rotation:', nextPlayer);
             
+            // COMMENTED OUT: Preserve locked dice data for game history
             // Clear all locked dice data for the new turn
-            clearAllLockedDiceFromFirebase();
+            // clearAllLockedDiceFromFirebase();
             
             // Update game state to set the connected host as current turn
             const gameStateRef = database.ref(`rooms/${currentRoomId}/gameState`);
@@ -785,8 +809,9 @@ function checkAndAdvanceTurn(players) {
             database.ref(`rooms/${currentRoomId}/gameState`).update(updates).then(() => {
                 // console.log('🔄 Turn advanced in Firebase, triggering UI update');
                 
+                // COMMENTED OUT: Preserve locked dice data for game history
                 // Clear all locked dice data for the new turn
-                clearAllLockedDiceFromFirebase();
+                // clearAllLockedDiceFromFirebase();
                 
                 // Set the Firebase current turn player
                 window.firebaseCurrentTurnPlayer = currentTurnPlayer;
@@ -876,10 +901,17 @@ function updateTurnIndicators(currentTurnPlayerId) {
             // console.log(`🧹 Re-initialized DiceStylingManager for new current player: ${currentTurnPlayerId}`);
         }
         
-        // Also clear local player locked dice states
+        // Also clear local player locked dice states for the previous player only
+        // Note: This is handled earlier in the main game state listener when turns change
+        // This is a backup in case the turn change wasn't detected properly
         if (window.playerLockedDiceStates) {
+            // Clear all locked dice states as a fallback, but this should rarely be needed
+            console.log(`🧹 [TURN DEBUG] Fallback: Clearing all locked dice states for new turn`);
             window.playerLockedDiceStates = {};
-            // console.log(`🧹 Cleared local playerLockedDiceStates for new turn`);
+            
+            if (window.playerLockedDiceValues) {
+                window.playerLockedDiceValues = {};
+            }
         }
         
         // Re-enable locked dice styling after a short delay
@@ -1273,35 +1305,91 @@ function setupLockedDiceListener() {
     lockedDiceListener = lockedDiceRef.on('child_added', (snapshot) => {
         try {
             const lockedData = snapshot.val();
-            // console.log('🔒 Locked dice received:', lockedData);
-            // console.log('🔒 Current player:', currentPlayerId, 'Broadcaster:', lockedData?.playerId);
+            console.log('🔒 [SPECTATOR DEBUG] Raw locked dice received:', {
+                snapshotKey: snapshot.key,
+                fullData: lockedData,
+                timestamp: new Date().toISOString()
+            });
+            console.log('🔒 [SPECTATOR DEBUG] Current player context:', {
+                currentPlayerId: currentPlayerId,
+                currentPlayerName: currentPlayerName,
+                broadcasterPlayerId: lockedData?.playerId,
+                isSpectating: lockedData && lockedData.playerId !== currentPlayerId
+            });
             
             if (lockedData && lockedData.playerId !== currentPlayerId) {
-                // console.log('🔒 Processing locked dice from other player:', lockedData.playerId);
-                // console.log('🔒 Locked dice indices:', lockedData.lockedDiceIndices);
-                // console.log('🔒 playerLockedDiceStates before:', JSON.stringify(window.playerLockedDiceStates));
+                // Get current round number for filtering
+                const currentRoundNumber = (typeof window.currentRound !== 'undefined') ? window.currentRound : 1;
                 
-                // Call function to display other players' locked dice
-                if (typeof displayOtherPlayerLockedDice === 'function') {
-                    // console.log('🔒 Calling displayOtherPlayerLockedDice...');
-                    displayOtherPlayerLockedDice({
+                console.log('🔒 [SPECTATOR DEBUG] Round filtering check:', {
+                    dataRoundNumber: lockedData.roundNumber,
+                    currentRoundNumber: currentRoundNumber,
+                    roundsMatch: lockedData.roundNumber === currentRoundNumber,
+                    windowCurrentRound: window.currentRound,
+                    windowCurrentRoundType: typeof window.currentRound
+                });
+                
+                // Only process locked dice from the current round
+                if (lockedData.roundNumber === currentRoundNumber) {
+                    console.log('🔒 [SPECTATOR DEBUG] Processing locked dice data:', {
                         playerId: lockedData.playerId,
+                        roundNumber: lockedData.roundNumber,
                         lockedDiceIndices: lockedData.lockedDiceIndices,
-                        diceResults: lockedData.diceResults
+                        diceResults: lockedData.diceResults,
+                        timestamp: lockedData.timestamp,
+                        formattedTime: new Date(lockedData.timestamp).toLocaleTimeString()
                     });
-                    // console.log('🔒 displayOtherPlayerLockedDice call completed');
+                    console.log('🔒 [SPECTATOR DEBUG] Current state before processing:', {
+                        playerLockedDiceStates: window.playerLockedDiceStates ? JSON.stringify(window.playerLockedDiceStates) : 'undefined',
+                        displayFunctionExists: typeof displayOtherPlayerLockedDice === 'function'
+                    });
+                    
+                    // Call function to display other players' locked dice
+                    if (typeof displayOtherPlayerLockedDice === 'function') {
+                        console.log('🔒 [SPECTATOR DEBUG] Calling displayOtherPlayerLockedDice with data:', {
+                            playerId: lockedData.playerId,
+                            lockedDiceIndices: lockedData.lockedDiceIndices,
+                            diceResults: lockedData.diceResults
+                        });
+                        displayOtherPlayerLockedDice({
+                            playerId: lockedData.playerId,
+                            lockedDiceIndices: lockedData.lockedDiceIndices,
+                            diceResults: lockedData.diceResults
+                        });
+                        console.log('🔒 [SPECTATOR DEBUG] displayOtherPlayerLockedDice call completed');
+                    } else {
+                        console.error('🔒 [SPECTATOR DEBUG] displayOtherPlayerLockedDice function not found!', {
+                            functionType: typeof displayOtherPlayerLockedDice,
+                            availableDisplayFunctions: Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('display'))
+                        });
+                    }
+                    
+                    console.log('🔒 [SPECTATOR DEBUG] State after processing:', {
+                        playerLockedDiceStates: window.playerLockedDiceStates ? JSON.stringify(window.playerLockedDiceStates) : 'undefined'
+                    });
                 } else {
-                    // console.error('🔒 displayOtherPlayerLockedDice function not found! Type:', typeof displayOtherPlayerLockedDice);
-                    // console.error('🔒 Available functions in window:', Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('display')));
+                    console.log('🔒 [SPECTATOR DEBUG] Ignoring locked dice from different round:', {
+                        dataRound: lockedData.roundNumber,
+                        currentRound: currentRoundNumber,
+                        playerId: lockedData.playerId,
+                        reason: 'Round mismatch'
+                    });
                 }
-                
-                // console.log('🔒 playerLockedDiceStates after:', JSON.stringify(window.playerLockedDiceStates));
             } else {
-                // console.log('🔒 Ignoring locked dice from self or invalid data');
+                console.log('🔒 [SPECTATOR DEBUG] Ignoring locked dice event:', {
+                    reason: lockedData ? 'From self' : 'Invalid data',
+                    lockedData: lockedData,
+                    currentPlayerId: currentPlayerId,
+                    dataPlayerId: lockedData?.playerId
+                });
             }
         } catch (error) {
-            // console.error('🔒 Error in locked dice listener:', error);
-            // console.error('🔒 Error stack:', error.stack);
+            console.error('🔒 [SPECTATOR DEBUG] Error in locked dice listener:', {
+                error: error.message,
+                stack: error.stack,
+                snapshotKey: snapshot?.key,
+                timestamp: new Date().toISOString()
+            });
         }
     });
 }
@@ -1487,18 +1575,42 @@ function broadcastDiceSelection(playerId, selectedDiceIndices, diceResults) {
 function broadcastLockedDice(playerId, lockedDiceIndices, diceResults) {
     if (!currentRoomId || !database) return;
     
-    // console.log(`🔒 Broadcasting locked dice via Firebase for ${playerId}:`, lockedDiceIndices);
+    // Get current round number for filtering
+    const currentRoundNumber = (typeof window.currentRound !== 'undefined') ? window.currentRound : 1;
     
-    const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
-    lockedDiceRef.push({
+    const dataToSend = {
         playerId: playerId,
         lockedDiceIndices: lockedDiceIndices,
         diceResults: diceResults, // Include current dice results for context
+        roundNumber: currentRoundNumber, // Add round number for filtering
         timestamp: Date.now()
-    }).then(() => {
-        // console.log('🔒 Locked dice broadcast successfully');
+    };
+    
+    console.log('🔒 [BROADCAST DEBUG] Sending locked dice data:', {
+        roomId: currentRoomId,
+        sendingPlayer: playerId,
+        currentRoundNumber: currentRoundNumber,
+        lockedDiceIndices: lockedDiceIndices,
+        diceResults: diceResults,
+        timestamp: dataToSend.timestamp,
+        formattedTime: new Date(dataToSend.timestamp).toLocaleTimeString(),
+        fullPayload: dataToSend
+    });
+    
+    const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
+    lockedDiceRef.push(dataToSend).then(() => {
+        console.log('🔒 [BROADCAST DEBUG] Locked dice broadcast successful:', {
+            playerId: playerId,
+            indices: lockedDiceIndices,
+            round: currentRoundNumber
+        });
     }).catch((error) => {
-        console.error('❌ Error broadcasting locked dice:', error);
+        console.error('❌ [BROADCAST DEBUG] Error broadcasting locked dice:', {
+            error: error.message,
+            playerId: playerId,
+            room: currentRoomId,
+            timestamp: new Date().toISOString()
+        });
     });
 }
 
@@ -1834,12 +1946,12 @@ if (typeof isPlayerTurn === 'function' && !window.originalIsPlayerTurn) {
 function clearAllLockedDiceFromFirebase() {
     if (!currentRoomId) return;
     
-    // console.log('🧹 Clearing all locked dice data from Firebase');
+    console.log('🧹 Clearing all locked dice data from Firebase');
     
     // Clear the lockedDice node in Firebase
     const lockedDiceRef = database.ref(`rooms/${currentRoomId}/lockedDice`);
     lockedDiceRef.remove().then(() => {
-        // console.log('🧹 Successfully cleared all locked dice data from Firebase');
+        console.log('🧹 Successfully cleared all locked dice data from Firebase');
         
         // Also clear local stored states
         if (typeof window.clearAllDiceLockedStyling === 'function') {

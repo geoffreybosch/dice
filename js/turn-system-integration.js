@@ -1085,6 +1085,10 @@ function resetGameState() {
     winTriggerPlayer = null;
     finalRoundTracker = {};
     currentRound = 1; // Reset round counter to 1
+    // Update global window reference
+    if (typeof window !== 'undefined') {
+        window.currentRound = currentRound;
+    }
     updateRoundDisplay(); // Update the display
 }
 
@@ -1286,6 +1290,10 @@ function incrementRound() {
     console.log('🎯 incrementRound() called! Current round:', currentRound);
     currentRound++;
     console.log(`🎯 Round advanced to: ${currentRound}`);
+    // Update global window reference
+    if (typeof window !== 'undefined') {
+        window.currentRound = currentRound;
+    }
     updateRoundDisplay();
 }
 
@@ -1619,4 +1627,5 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof window !== 'undefined') {
     window.updateRoundDisplay = updateRoundDisplay;
     window.incrementRound = incrementRound;
+    window.currentRound = currentRound; // Make current round globally accessible
 }
