@@ -1040,6 +1040,9 @@ function initializeMultiplayerMode(roomId, playerId, playerList) {
     window.myPlayerId = playerId; // Keep window variable in sync
     isInMultiplayerRoom = true;
     
+    // Only hide alerts if we're joining a completely new game (not mid-game)
+    // This prevents clearing congratulatory messages during final rounds
+    
     // Initialize turn system with all players - preserve current turn and pending points
     initializeTurnSystem(playerList, true, true);
     
@@ -1234,6 +1237,40 @@ function showGameAlert(message, type = 'warning', duration = 3000) {
         }
     }
 }
+
+// Function to hide/clear game alerts
+function hideGameAlert() {
+    // Don't hide alerts during final round if this is the winning player's congratulatory message
+    if (typeof gameState !== 'undefined' && gameState === 'final_round') {
+        const gameAlert = document.getElementById('game-alert');
+        if (gameAlert && gameAlert.style.display !== 'none') {
+            // Check if this is a congratulatory alert (success type)
+            if (gameAlert.classList.contains('alert-success')) {
+                console.log('🏆 Preserving congratulatory alert during final round');
+                return; // Don't hide the congratulatory alert
+            }
+        }
+    }
+    
+    const gameAlert = document.getElementById('game-alert');
+    if (gameAlert) {
+        gameAlert.style.display = 'none';
+        console.log('🧹 Game alert hidden');
+    }
+}
+
+// Function to hide alerts only when starting a completely new game
+function hideGameAlertsForNewGame() {
+    const gameAlert = document.getElementById('game-alert');
+    if (gameAlert) {
+        gameAlert.style.display = 'none';
+        console.log('🧹 Game alerts cleared for new game');
+    }
+}
+
+// Make both functions globally accessible
+window.hideGameAlert = hideGameAlert;
+window.hideGameAlertsForNewGame = hideGameAlertsForNewGame;
 
 // Function to handle farkle turn ending
 function handleFarkleEndTurn() {
@@ -2623,6 +2660,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize selection controls
     updateSelectionControls();
+    
+    // Hide any game alerts from previous sessions
+    if (typeof hideGameAlertsForNewGame === 'function') {
+        hideGameAlertsForNewGame();
+    }
     
     // Initialize turn system (single player by default)
     myPlayerId = 'Player1'; // This would be set by the multiplayer system

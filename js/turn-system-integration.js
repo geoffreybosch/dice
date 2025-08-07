@@ -20,6 +20,7 @@ let currentTurnPoints = []; // Array of point awards this turn for display
 let gameState = 'playing'; // 'playing', 'final_round', 'ended'
 let winTriggerPlayer = null; // Player who first reached winning score
 let finalRoundTracker = {}; // Tracks which players have had their final turn
+let isWinModalShown = false; // Flag to prevent multiple win modals from being shown
 
 // Core Turn System Functions
 function initializeTurnSystem(players, isMultiplayer = false, preserveCurrentTurn = false) {
@@ -541,6 +542,11 @@ function checkWinCondition(playerId, newScore) {
         gameState = 'final_round';
         winTriggerPlayer = playerId;
         
+        // Update global window reference
+        if (typeof window !== 'undefined') {
+            window.gameState = gameState;
+        }
+        
         // Initialize final round tracker - all players except the winning player need their final turn
         finalRoundTracker = {};
         turnSystemPlayerList.forEach(player => {
@@ -762,6 +768,11 @@ function debugGameState() {
 function endGame() {
     gameState = 'ended';
     
+    // Update global window reference
+    if (typeof window !== 'undefined') {
+        window.gameState = gameState;
+    }
+    
     // Fetch current scores from Firebase before determining winner
     fetchCurrentScoresFromFirebase((scores) => {
         const players = Object.keys(scores);
@@ -785,11 +796,28 @@ function endGame() {
 }
 
 function showWinModal(winner, winnerScore, sortedPlayers, scores) {
+    // Prevent multiple win modals from being shown
+    if (isWinModalShown) {
+        console.log('🏆 Win modal already shown, skipping duplicate call');
+        return;
+    }
+    
     const winModal = document.getElementById('winModal');
     if (!winModal) {
         console.error('🏆 Win modal not found!');
         return;
     }
+    
+    console.log('🏆 Showing win modal for winner:', winner);
+    isWinModalShown = true; // Set flag to prevent duplicate calls
+    
+    // Hide any game alerts (final turn, congratulations, etc.) when win modal is shown
+    if (typeof hideGameAlertsForNewGame === 'function') {
+        hideGameAlertsForNewGame();
+    }
+    
+    // Clean up any existing modal state before showing new one
+    cleanupAllModalBackdrops();
     
     // Update winner announcement
     const winnerAnnouncement = document.getElementById('winner-announcement');
@@ -837,7 +865,15 @@ function showWinModal(winner, winnerScore, sortedPlayers, scores) {
     // Set up modal event handlers
     setupWinModalHandlers();
     
-    // Show the modal
+    // Check if modal instance already exists and dispose it first
+    let existingModal = bootstrap.Modal.getInstance(winModal);
+    if (existingModal) {
+        console.log('🧹 Disposing existing modal instance before creating new one');
+        existingModal.dispose();
+        cleanupAllModalBackdrops();
+    }
+    
+    // Show the modal with a fresh instance
     const modal = new bootstrap.Modal(winModal);
     modal.show();
 }
@@ -853,6 +889,23 @@ function setupWinModalHandlers() {
     }
 }
 
+function cleanupAllModalBackdrops() {
+    console.log('🧹 Cleaning up all modal backdrops');
+    
+    // Remove ALL modal backdrops (there might be multiple)
+    const allBackdrops = document.querySelectorAll('.modal-backdrop');
+    allBackdrops.forEach((backdrop, index) => {
+        backdrop.remove();
+        console.log(`🧹 Removed modal backdrop ${index + 1}/${allBackdrops.length}`);
+    });
+    
+    // Restore body state
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    console.log('🧹 Restored body state');
+}
+
 function cleanupWinModal() {
     console.log('🧹 Cleaning up win modal and backdrop');
     
@@ -862,17 +915,11 @@ function cleanupWinModal() {
         
         // Ensure backdrop is fully removed after modal is hidden
         document.getElementById('winModal').addEventListener('hidden.bs.modal', function (event) {
-            // Remove any lingering backdrop
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-                console.log('🧹 Removed modal backdrop');
-            }
-            // Restore body scroll
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-            console.log('🧹 Restored body state');
+            // Remove any lingering backdrops (all of them)
+            cleanupAllModalBackdrops();
+            // Reset the flag so modal can be shown again
+            isWinModalShown = false;
+            console.log('🧹 Completed modal cleanup after hidden event and reset flag');
         }, { once: true });
     } else {
         // Fallback: force remove modal backdrop and restore body state
@@ -885,18 +932,11 @@ function cleanupWinModal() {
             modalElement.setAttribute('aria-hidden', 'true');
         }
         
-        // Remove any lingering backdrop
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-            console.log('🧹 Removed modal backdrop (fallback)');
-        }
-        
-        // Restore body scroll
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        console.log('🧹 Restored body state (fallback)');
+        // Remove all lingering backdrops
+        cleanupAllModalBackdrops();
+        // Reset the flag so modal can be shown again
+        isWinModalShown = false;
+        console.log('🧹 Completed fallback modal cleanup and reset flag');
     }
 }
 
@@ -1002,6 +1042,15 @@ function restartMultiplayerGame() {
 function leaveMultiplayerGame() {
     console.log('🚪 === leaveMultiplayerGame() START ===');
     
+    // Clean up any modal backdrops immediately and reset flag
+    cleanupAllModalBackdrops();
+    isWinModalShown = false;
+    
+    // Hide game alerts since we're leaving to start a new game
+    if (typeof hideGameAlertsForNewGame === 'function') {
+        hideGameAlertsForNewGame();
+    }
+    
     // Check if we're in a multiplayer room
     if (typeof roomId !== 'undefined' && roomId && typeof database !== 'undefined') {
         const firebaseRoomId = (typeof currentRoomId !== 'undefined' && currentRoomId) ? currentRoomId : roomId;
@@ -1081,13 +1130,18 @@ function leaveMultiplayerGame() {
 }
 
 function resetGameState() {
+    // Clean up any modal backdrops before resetting game state
+    cleanupAllModalBackdrops();
+    
     gameState = 'playing';
     winTriggerPlayer = null;
     finalRoundTracker = {};
+    isWinModalShown = false; // Reset the win modal flag
     currentRound = 1; // Reset round counter to 1
     // Update global window reference
     if (typeof window !== 'undefined') {
         window.currentRound = currentRound;
+        window.gameState = gameState;
     }
     updateRoundDisplay(); // Update the display
 }
@@ -1101,6 +1155,11 @@ function updateWinGameState(newGameState, newWinTriggerPlayer, newFinalRoundTrac
     gameState = newGameState || 'playing';
     winTriggerPlayer = newWinTriggerPlayer || null;
     finalRoundTracker = newFinalRoundTracker || {};
+    
+    // Update global window reference
+    if (typeof window !== 'undefined') {
+        window.gameState = gameState;
+    }
     
     console.log(`🏆 updateGameState debug: oldGameState="${oldGameState}", newGameState="${gameState}", winTriggerPlayer="${winTriggerPlayer}"`);
     
@@ -1208,7 +1267,13 @@ function updateWinGameState(newGameState, newWinTriggerPlayer, newFinalRoundTrac
 }
 
 function checkIfGameEndedAndShowModal() {
-    console.log('🏆 checkIfGameEndedAndShowModal called - gameState:', gameState);
+    console.log('🏆 checkIfGameEndedAndShowModal called - gameState:', gameState, 'isWinModalShown:', isWinModalShown);
+    
+    // Prevent duplicate modal calls
+    if (isWinModalShown) {
+        console.log('🏆 Win modal already shown, skipping checkIfGameEndedAndShowModal');
+        return;
+    }
     
     if (gameState === 'ended') {
         console.log('🏆 Game has ended - showing win modal from checkIfGameEndedAndShowModal');
@@ -1604,6 +1669,7 @@ if (typeof module !== 'undefined' && module.exports) {
         showWinModal,
         setupWinModalHandlers,
         cleanupWinModal,
+        cleanupAllModalBackdrops,
         restartMultiplayerGame,
         leaveMultiplayerGame,
         resetGameState,
@@ -1628,4 +1694,13 @@ if (typeof window !== 'undefined') {
     window.updateRoundDisplay = updateRoundDisplay;
     window.incrementRound = incrementRound;
     window.currentRound = currentRound; // Make current round globally accessible
+    window.gameState = gameState; // Make game state globally accessible
+    window.cleanupAllModalBackdrops = cleanupAllModalBackdrops; // Make cleanup function globally accessible
+    
+    // Clean up modal backdrops on page unload/reload
+    window.addEventListener('beforeunload', () => {
+        if (typeof cleanupAllModalBackdrops === 'function') {
+            cleanupAllModalBackdrops();
+        }
+    });
 }

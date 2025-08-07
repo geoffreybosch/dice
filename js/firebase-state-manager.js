@@ -197,6 +197,16 @@ function setupGameSettingsListener() {
 function handleGameStateChange(gameState) {
     const { currentTurn, turnStartTime, gamePhase, state: winState, winTriggerPlayer, finalRoundTracker } = gameState;
     
+    // Cache the game state for turn rotation logic
+    window.firebaseGameState = {
+        currentTurn,
+        turnStartTime,
+        gamePhase,
+        winState,
+        winTriggerPlayer,
+        finalRoundTracker
+    };
+    
     console.log('🎮 Firebase game state change received:', {
         currentTurn,
         turnStartTime,
@@ -513,9 +523,26 @@ function getCurrentTurnPlayer(players) {
         }
     });
     
-    // First, check if anyone is currently rolling
-    for (const playerId in connectedPlayers) {
-        if (connectedPlayers[playerId].state === PLAYER_STATES.ROLLING) {
+    // Check if we're in final round mode and exclude the winning player from turn rotation
+    let eligiblePlayers = { ...connectedPlayers };
+    
+    // Get current game state from Firebase to check for final round
+    if (currentRoomId && database) {
+        // Use cached game state if available
+        if (window.firebaseGameState && window.firebaseGameState.winState === 'final_round' && window.firebaseGameState.winTriggerPlayer) {
+            const winningPlayer = window.firebaseGameState.winTriggerPlayer;
+            console.log(`🏆 Final round detected - excluding winning player ${winningPlayer} from turn rotation`);
+            
+            // Remove the winning player from eligible players
+            delete eligiblePlayers[winningPlayer];
+            
+            console.log(`🏆 Eligible players for turns in final round:`, Object.keys(eligiblePlayers));
+        }
+    }
+    
+    // First, check if anyone is currently rolling (among eligible players)
+    for (const playerId in eligiblePlayers) {
+        if (eligiblePlayers[playerId].state === PLAYER_STATES.ROLLING) {
             return playerId;
         }
     }
@@ -523,9 +550,9 @@ function getCurrentTurnPlayer(players) {
     // If no one is rolling, find the next player who should go
     // FIXED: Use join order instead of alphabetical sorting for more predictable turn rotation
     // Sort by joinedAt timestamp if available, otherwise fall back to alphabetical
-    const playerIds = Object.keys(connectedPlayers).sort((a, b) => {
-        const playerA = connectedPlayers[a];
-        const playerB = connectedPlayers[b];
+    const playerIds = Object.keys(eligiblePlayers).sort((a, b) => {
+        const playerA = eligiblePlayers[a];
+        const playerB = eligiblePlayers[b];
         
         // Use joinedAt timestamp if both players have it
         if (playerA.joinedAt && playerB.joinedAt) {
@@ -550,7 +577,7 @@ function getCurrentTurnPlayer(players) {
             const nextIndex = (currentIndex + i) % playerIds.length;
             const nextPlayer = playerIds[nextIndex];
             
-            if (connectedPlayers[nextPlayer] && connectedPlayers[nextPlayer].state === PLAYER_STATES.WAITING) {
+            if (eligiblePlayers[nextPlayer] && eligiblePlayers[nextPlayer].state === PLAYER_STATES.WAITING) {
                 return nextPlayer;
             }
         }
@@ -558,13 +585,13 @@ function getCurrentTurnPlayer(players) {
     
     // Fallback: find first player in waiting state (in join order)
     for (const playerId of playerIds) {
-        if (connectedPlayers[playerId].state === PLAYER_STATES.WAITING) {
+        if (eligiblePlayers[playerId].state === PLAYER_STATES.WAITING) {
             return playerId;
         }
     }
     
-    // If all connected players are in ended_turn state, let checkAndAdvanceTurn handle it
-    if (playerIds.every(id => connectedPlayers[id].state === PLAYER_STATES.ENDED_TURN)) {
+    // If all eligible players are in ended_turn state, let checkAndAdvanceTurn handle it
+    if (playerIds.every(id => eligiblePlayers[id].state === PLAYER_STATES.ENDED_TURN)) {
         return null; // checkAndAdvanceTurn will handle the new round logic
     }
     
@@ -582,28 +609,39 @@ function checkAndAdvanceTurn(players) {
         }
     });
     
+    // Check if we're in final round mode and exclude the winning player
+    let eligiblePlayers = { ...connectedPlayers };
+    
+    if (window.firebaseGameState && window.firebaseGameState.winState === 'final_round' && window.firebaseGameState.winTriggerPlayer) {
+        const winningPlayer = window.firebaseGameState.winTriggerPlayer;
+        console.log(`🏆 checkAndAdvanceTurn: Final round detected - excluding winning player ${winningPlayer}`);
+        
+        // Remove the winning player from eligible players for turn advancement checks
+        delete eligiblePlayers[winningPlayer];
+    }
+    
     const currentTurnPlayer = getCurrentTurnPlayer(players);
     
-    // Check if all connected players are waiting (ready for next turn)
-    const connectedPlayerStates = Object.values(connectedPlayers).map(p => p.state);
-    const allConnectedPlayersWaiting = connectedPlayerStates.every(state => state === PLAYER_STATES.WAITING);
-    const allConnectedPlayersEnded = connectedPlayerStates.every(state => state === PLAYER_STATES.ENDED_TURN);
-    const hasMultipleConnectedPlayers = Object.keys(connectedPlayers).length > 1;
+    // Check if all eligible players are waiting (ready for next turn)
+    const eligiblePlayerStates = Object.values(eligiblePlayers).map(p => p.state);
+    const allEligiblePlayersWaiting = eligiblePlayerStates.every(state => state === PLAYER_STATES.WAITING);
+    const allEligiblePlayersEnded = eligiblePlayerStates.every(state => state === PLAYER_STATES.ENDED_TURN);
+    const hasMultipleEligiblePlayers = Object.keys(eligiblePlayers).length > 1;
     
     // console.log('🔄 Turn advancement check:', {
     //     totalPlayers: Object.keys(players).length,
-    //     connectedPlayers: Object.keys(connectedPlayers).length,
-    //     allConnectedPlayersWaiting,
-    //     allConnectedPlayersEnded,
-    //     hasMultipleConnectedPlayers,
+    //     eligiblePlayers: Object.keys(eligiblePlayers).length,
+    //     allEligiblePlayersWaiting,
+    //     allEligiblePlayersEnded,
+    //     hasMultipleEligiblePlayers,
     //     currentTurnPlayer,
-    //     connectedPlayerStates
+    //     eligiblePlayerStates
     // });
     
-    // Special case: If all connected players have ended their turn, start a new round
-    if (allConnectedPlayersEnded && hasMultipleConnectedPlayers) {
-        // console.log('🔄 All connected players have ended their turns - starting new round');
-        console.log('🔄 All connected players have ended their turns - starting new round');
+    // Special case: If all eligible players have ended their turn, start a new round (or end the game in final round)
+    if (allEligiblePlayersEnded && hasMultipleEligiblePlayers) {
+        // console.log('🔄 All eligible players have ended their turns - starting new round');
+        console.log('🔄 All eligible players have ended their turns - starting new round');
         
         // Clear any existing timeout
         if (window.autoTurnTimeout) {
@@ -613,9 +651,9 @@ function checkAndAdvanceTurn(players) {
         // Set timeout to start new round after 2 seconds
         window.autoTurnTimeout = setTimeout(() => {
             // FIXED: Use consistent player ordering (join order, not alphabetical)
-            const connectedPlayerIds = Object.keys(connectedPlayers).sort((a, b) => {
-                const playerA = connectedPlayers[a];
-                const playerB = connectedPlayers[b];
+            const eligiblePlayerIds = Object.keys(eligiblePlayers).sort((a, b) => {
+                const playerA = eligiblePlayers[a];
+                const playerB = eligiblePlayers[b];
                 
                 // Use joinedAt timestamp if both players have it
                 if (playerA.joinedAt && playerB.joinedAt) {
@@ -633,37 +671,37 @@ function checkAndAdvanceTurn(players) {
             let firstPlayer;
             
             // For new rounds, advance to next player in rotation from last round
-            if (window.firebaseCurrentTurnPlayer && connectedPlayerIds.includes(window.firebaseCurrentTurnPlayer)) {
-                const currentIndex = connectedPlayerIds.indexOf(window.firebaseCurrentTurnPlayer);
-                const nextIndex = (currentIndex + 1) % connectedPlayerIds.length;
-                firstPlayer = connectedPlayerIds[nextIndex];
+            if (window.firebaseCurrentTurnPlayer && eligiblePlayerIds.includes(window.firebaseCurrentTurnPlayer)) {
+                const currentIndex = eligiblePlayerIds.indexOf(window.firebaseCurrentTurnPlayer);
+                const nextIndex = (currentIndex + 1) % eligiblePlayerIds.length;
+                firstPlayer = eligiblePlayerIds[nextIndex];
                 
                 // Check if we've completed a round (went back to first player)
                 if (nextIndex === 0 && typeof incrementRound === 'function') {
-                    // We've completed a full round through all players
+                    // We've completed a full round through all eligible players
                     incrementRound();
                 }
             } else {
-                // Fallback: use host or first player
-                const connectedHostPlayer = connectedPlayerIds.find(playerId => connectedPlayers[playerId].isHost);
-                firstPlayer = connectedHostPlayer || connectedPlayerIds[0];
+                // Fallback: use host or first eligible player
+                const eligibleHostPlayer = eligiblePlayerIds.find(playerId => eligiblePlayers[playerId].isHost);
+                firstPlayer = eligibleHostPlayer || eligiblePlayerIds[0];
             }
             
-            console.log('🎮 Starting new round - next player in rotation:', firstPlayer);
+            console.log('🎮 Starting new round - next eligible player in rotation:', firstPlayer);
             console.log('🎯 Round check: window.firebaseCurrentTurnPlayer=', window.firebaseCurrentTurnPlayer);
-            console.log('🎯 Round check: connectedPlayerIds=', connectedPlayerIds);
+            console.log('🎯 Round check: eligiblePlayerIds=', eligiblePlayerIds);
             
-            // Set all connected players to waiting state
+            // Set all eligible players to waiting state
             const updates = {};
-            connectedPlayerIds.forEach(playerId => {
+            eligiblePlayerIds.forEach(playerId => {
                 updates[`players/${playerId}/state`] = PLAYER_STATES.WAITING;
                 updates[`players/${playerId}/stateTimestamp`] = Date.now();
             });
             
-            // Set first connected player to rolling state
+            // Set first eligible player to rolling state
             updates[`players/${firstPlayer}/state`] = PLAYER_STATES.ROLLING;
             
-            // Update game state to set first connected player as current turn
+            // Update game state to set first eligible player as current turn
             updates[`gameState/currentTurn`] = firstPlayer;
             updates[`gameState/turnStartTime`] = Date.now();
             
@@ -673,16 +711,16 @@ function checkAndAdvanceTurn(players) {
             
             // Apply all updates to Firebase
             database.ref(`rooms/${currentRoomId}`).update(updates).then(() => {
-                // console.log('🎮 New round started - first connected player:', firstPlayer);
+                // console.log('🎮 New round started - first eligible player:', firstPlayer);
             });
         }, 2000);
         
         return; // Don't do normal turn advancement
     }
     
-    // If all connected players are waiting and we have multiple connected players, auto-start next turn
-    if (allConnectedPlayersWaiting && hasMultipleConnectedPlayers) {
-        // console.log('🕐 All connected players waiting - auto-starting next turn in 2 seconds');
+    // If all eligible players are waiting and we have multiple eligible players, auto-start next turn
+    if (allEligiblePlayersWaiting && hasMultipleEligiblePlayers) {
+        // console.log('🕐 All eligible players waiting - auto-starting next turn in 2 seconds');
         
         // Clear any existing timeout
         if (window.autoTurnTimeout) {
@@ -692,9 +730,9 @@ function checkAndAdvanceTurn(players) {
         // Set timeout to start next turn after 2 seconds
         window.autoTurnTimeout = setTimeout(() => {
             // FIXED: Use consistent player ordering (join order, not alphabetical)
-            const connectedPlayerIds = Object.keys(connectedPlayers).sort((a, b) => {
-                const playerA = connectedPlayers[a];
-                const playerB = connectedPlayers[b];
+            const eligiblePlayerIds = Object.keys(eligiblePlayers).sort((a, b) => {
+                const playerA = eligiblePlayers[a];
+                const playerB = eligiblePlayers[b];
                 
                 // Use joinedAt timestamp if both players have it
                 if (playerA.joinedAt && playerB.joinedAt) {
@@ -712,14 +750,14 @@ function checkAndAdvanceTurn(players) {
             let nextPlayer;
             
             // If we have a previous turn player, advance to next in rotation
-            if (window.firebaseCurrentTurnPlayer && connectedPlayerIds.includes(window.firebaseCurrentTurnPlayer)) {
-                const currentIndex = connectedPlayerIds.indexOf(window.firebaseCurrentTurnPlayer);
-                const nextIndex = (currentIndex + 1) % connectedPlayerIds.length;
-                nextPlayer = connectedPlayerIds[nextIndex];
+            if (window.firebaseCurrentTurnPlayer && eligiblePlayerIds.includes(window.firebaseCurrentTurnPlayer)) {
+                const currentIndex = eligiblePlayerIds.indexOf(window.firebaseCurrentTurnPlayer);
+                const nextIndex = (currentIndex + 1) % eligiblePlayerIds.length;
+                nextPlayer = eligiblePlayerIds[nextIndex];
             } else {
-                // Fallback: use host or first player
-                const connectedHostPlayer = connectedPlayerIds.find(playerId => connectedPlayers[playerId].isHost);
-                nextPlayer = connectedHostPlayer || connectedPlayerIds[0];
+                // Fallback: use host or first eligible player
+                const eligibleHostPlayer = eligiblePlayerIds.find(playerId => eligiblePlayers[playerId].isHost);
+                nextPlayer = eligibleHostPlayer || eligiblePlayerIds[0];
             }
             
             // console.log('🎮 Auto-starting turn for next player in rotation:', nextPlayer);
